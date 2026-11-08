@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "repository": "https://github.com/zh1414319052-lgtm/liquid-wars-android-haoke",
+  "branch": "main",
+  "commit": "50d888ee70d652c285edccb5597e9fd02b4d6882",
+  "tag": "v1.79",
+  "release": "https://github.com/zh1414319052-lgtm/liquid-wars-android-haoke/releases/tag/v1.79",
+  "assets": [
+    {
+      "apiUrl": "https://api.github.com/repos/zh1414319052-lgtm/liquid-wars-android-haoke/releases/assets/723061434",
+      "contentType": "application/zip",
+      "createdAt": "2026-11-08T06:02:06Z",
+      "digest": "sha256:8ce52ef3c338871d6e4c0ae6509984e02bab3cfc45b5b6f8365f7c54ab89ef57",
+      "downloadCount": 0,
+      "id": "RA_kwDOVm2D5c4rGQq6",
+      "label": "",
+      "name": "liquidwars-1.79-art-source.zip",
+      "size": 1011507989,
+      "state": "uploaded",
+      "updatedAt": "2026-11-08T06:07:13Z",
+      "url": "https://github.com/zh1414319052-lgtm/liquid-wars-android-haoke/releases/download/v1.79/liquidwars-1.79-art-source.zip"
+    },
+    {
+      "apiUrl": "https://api.github.com/repos/zh1414319052-lgtm/liquid-wars-android-haoke/releases/assets/723061417",
+      "contentType": "application/zip",
+      "createdAt": "2026-11-08T06:02:05Z",
+      "digest": "sha256:6763e7bea79b858ddf8833236a98be82d5a8d6530ad2b3b0a020dd403c61703e",
+      "downloadCount": 0,
+      "id": "RA_kwDOVm2D5c4rGQqp",
+      "label": "",
+      "name": "liquidwars-1.79-verification.zip",
+      "size": 66735588,
+      "state": "uploaded",
+      "updatedAt": "2026-11-08T06:02:45Z",
+      "url": "https://github.com/zh1414319052-lgtm/liquid-wars-android-haoke/releases/download/v1.79/liquidwars-1.79-verification.zip"
+    },
+    {
+      "apiUrl": "https://api.github.com/repos/zh1414319052-lgtm/liquid-wars-android-haoke/releases/assets/723061435",
+      "contentType": "text/plain; charset=utf-8",
+      "createdAt": "2026-11-08T06:02:06Z",
+      "digest": "sha256:200c20a7531c153d5757e75c1ea0d48f5bf1aa906838866da7fafdde1108eba2",
+      "downloadCount": 0,
+      "id": "RA_kwDOVm2D5c4rGQq7",
+      "label": "",
+      "name": "SHA256SUMS.txt",
+      "size": 198,
+      "state": "uploaded",
+      "updatedAt": "2026-11-08T06:02:06Z",
+      "url": "https://github.com/zh1414319052-lgtm/liquid-wars-android-haoke/releases/download/v1.79/SHA256SUMS.txt"
+    }
+  ],
+  "source_readback": true,
+  "about_readback": true,
+  "homepage": "https://www.haoke.org/software/f2a585b84fbf5b85",
+  "readonly_source_rebuild": "public-rebuild.json",
+  "apk_uploaded": false,
+  "client_update_notifications_sent": false
+}

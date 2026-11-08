@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "id": "f2a585b84fbf5b85",
+  "revision": 12,
+  "url": "https://www.haoke.org/software/f2a585b84fbf5b85",
+  "source": "https://github.com/zh1414319052-lgtm/liquid-wars-android-haoke",
+  "version": "1.79",
+  "apkSha256": "1c26ef3bc728fa90c29f2b8eec1f436074fc87383a138e8b448ee828e042d7da",
+  "download_destinations_preserved": true,
+  "remote_apk_verified": false,
+  "notifications_sent": false
+}

@@ -18,3 +18,7 @@
 - full-v2 and pilot-v1/v2 use a fixed execution-step cap; a rewind can reset game elapsed time. Their new_win field is capped-run score leadership, not necessarily a completed timed-match win. Keep these diagnostics; final benchmark will use the actual match clock and explicit termination.
 
 - First package-check adapter incorrectly assumed four .so files instead of four ABIs. Actual baseline/current both contain12 libraries (nativeinterface, ODE, libc++ per ABI). Corrected assertion to the baseline library path set; also verify unchanged ODE/libc++ hashes and ELF64 alignment. This was a check-script error, not an APK omission.
+
+## 发布清理检查口径
+
+测试辅助包卸载后，首次回查脚本把Android `pm path` 在包不存在时返回1当作错误。58个本轮文件已经删除；修正验证为退出码0/1且stdout为空，随后验证helper不存在、两个主包仍在、正式包SHA不变。未重试删除、未清数据。网站素材上传prepare使用local模式；首次直接上传缺少既有User-Agent/Accept得到403，加入正式读取器同样的请求头后成功；403的服务端原因未确认。
