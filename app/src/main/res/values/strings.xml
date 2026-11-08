@@ -1,64 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string translatable="false"  name="game_services_ads_id">ca-app-pub-5042729416879007~6841214599</string>
-    <string translatable="false"  name="game_services_project_id">320065550513</string>
-
     <string-array name="teams_array">
         <item>Green</item>
         <item>Blue</item>
         <item>Red</item>
-        <item>Cyan</item>
+        <item>White</item>
         <item>Yellow</item>
-        <item>Magenta</item>
+        <item>Purple</item>
     </string-array>
     <string-array name="maps_array">
-        <item>Random</item>
-        <item>Pine</item>
-        <item>White Ovals</item>
-        <item>Pine 2</item>
-        <item>Backing Pine</item>
-        <item>Empty</item>
-        <item>Arch Linux</item>
-        <item>Red Line Bits</item>
-        <item>Oval</item>
-        <item>Inverted Oval</item>
-        <item>Liquid Wars</item>
-        <item>Symmetry</item>
-        <item>Small Maze</item>
-        <item>Green Silhouettes</item>
-        <item>Red Triangles</item>
-        <item>Liquid Wars Soup</item>
-        <item>Green Rectangles</item>
-        <item>Green</item>
-        <item>Eye</item>
-        <item>Dots</item>
-        <item>Big Dots</item>
-        <item>Diamonds</item>
-        <item>Purple Curves</item>
-        <item>Sharp Squiggle</item>
-        <item>Dividers</item>
-        <item>Back and Forth</item>
-        <item>Jagged Boxes</item>
-        <item>Wavy</item>
-        <item>Nests</item>
-        <item>Red</item>
-        <item>Gaps</item>
-        <item>Medium Maze</item>
-        <item>Big Maze</item>
-        <item>Medium Maze 2</item>
-        <item>Medium Maze 3</item>
-        <item>Team Colours</item>
-        <item>Stars</item>
-        <item>Skull</item>
-        <item>ABC</item>
-        <item>Eyes</item>
-        <item>Mandelbrot</item>
-        <item>Crossword</item>
-        <item>Safari</item>
-        <item>Smilies</item>
-        <item>Stained Glass</item>
-        <item>Circles</item>
-        <item>Shapes</item>
+        <item>Random map</item>
+        <item>01 · Wind-carved Sandstone</item>
+        <item>02 · Glacial Fjord</item>
+        <item>03 · Basalt Lava Field</item>
+        <item>04 · Rainforest Roots</item>
+        <item>05 · Salt Crystal Flats</item>
+        <item>06 · Red Clay Badlands</item>
+        <item>07 · Mangrove Estuary</item>
+        <item>08 · Karst Pavement</item>
+        <item>09 · Alpine Scree</item>
+        <item>10 · Taiga Windfall</item>
+        <item>11 · Tidal Rock Pools</item>
+        <item>12 · Fungal Cavern</item>
+        <item>13 · Meteor Badlands</item>
+        <item>14 · Coral Atoll</item>
+        <item>15 · Obsidian Fault</item>
+        <item>16 · Petrified Woodland</item>
+        <item>17 · Terrace Embankments</item>
+        <item>18 · Braided Dry River</item>
+        <item>19 · Chalk Headland</item>
+        <item>20 · Autumn Woodland</item>
+        <item>21 · Bamboo Groves</item>
+        <item>22 · Reed Marsh</item>
+        <item>23 · Glacial Moraine</item>
+        <item>24 · Ironstone Plateau</item>
+        <item>25 · Stalagmite Cave</item>
+        <item>26 · Sulfur Springs</item>
+        <item>27 · Ash Dunes</item>
+        <item>28 · Tufa Pools</item>
+        <item>29 · Jade Fractures</item>
+        <item>30 · Granite Heath</item>
+        <item>31 · Cracked Mudflat</item>
+        <item>32 · Sea-eroded Shelf</item>
+        <item>33 · Gypsum Rosettes</item>
+        <item>34 · Shingle Spit</item>
+        <item>35 · Frozen Lake Floes</item>
+        <item>36 · River Delta</item>
+        <item>37 · Sea-stack Bay</item>
+        <item>38 · Foggy Peat Moor</item>
+        <item>39 · Desert Oasis</item>
+        <item>40 · Branching Reef</item>
+        <item>41 · Copper Weathering</item>
+        <item>42 · Loess Gullies</item>
+        <item>43 · Pack Ice Channels</item>
+        <item>44 · Burnt Woodland</item>
+        <item>45 · Sandstone Steps</item>
+        <item>46 · Polygonal Tundra</item>
+        <item>47 · Serpentinite Valley</item>
+        <item>48 · Amethyst Geode</item>
+        <item>49 · Fossil Riverbed</item>
+        <item>50 · 4x · Broken Ice Fjord</item>
+        <item>51 · 4x · Sandstone Labyrinth</item>
+        <item>52 · Red Mesa Windways</item>
+        <item>53 · Basalt Emberfield</item>
+        <item>54 · Frostsalt Shards</item>
+        <item>55 · Shipwreck Shoals</item>
+        <item>56 · Jungle Rootways</item>
+        <item>57 · Broken Lunar Rings</item>
+        <item>58 · Amethyst Rifts</item>
+        <item>59 · Fallen City Walls</item>
     </string-array>
     <string-array name="timeout_array">
         <item>30 Seconds</item>
@@ -80,17 +90,49 @@
         <item>3000</item>
         <item>4500</item>
     </string-array>
+    <string name="app_name">Liquid Wars OS</string>
     <string name="team">Team:</string>
-    <string name="time_limit">Time Limit:</string>
-    <string name="team_size">Team Size:</string>
+    <string name="time_limit">Time limit:</string>
+    <string name="team_size">Team size:</string>
     <string name="map">Map:</string>
     <string name="single_player_game">Single Player Game</string>
     <string name="multiplayer_game">Multiplayer Game</string>
     <string name="how_to_play">How To Play</string>
-    <string name="public_name">Public Name:</string>
+    <string name="public_name">Public name:</string>
     <string name="start">Start</string>
     <string name="connect_to_game">Connect To Game</string>
     <string name="start_new_game">Start New Game</string>
-    <string name="instructions_one">Goal:\nConvert the enemy\'s army to your own to win.</string>
-    <string name="instructions_two">How to play:\nWherever you touch the screen or moving your mouse pointer your army will run to. Use up to five fingers (mouse pointer can\'t do this) to guide your army. Enemy liquid will be converted to your own when they collide. Try to surround the enemy for the best effect.</string>
+    <string name="instructions_goal">Goal\nConvert every rival particle to your team’s color to win.</string>
+    <string name="instructions_controls">Controls\nTouch and drag on the battlefield to steer your team. Use up to five fingers to guide your particles from different directions.\n\nWhen teams collide, particles can change sides. Try surrounding rivals instead of pushing straight into them.</string>
+    <string name="team_unknown">Unknown team</string>
+    <string name="timeout_win">Time is up. You win!</string>
+    <string name="timeout_other_win">Time is up. %1$s wins!</string>
+    <string name="result_loss">You lose</string>
+    <string name="result_win">You win!</string>
+    <string name="result_team_win">%1$s wins!</string>
+    <string name="leave_match">Leave this match?</string>
+    <string name="leave_hosted_match">End the match for everyone?</string>
+    <string name="leave">Leave</string>
+    <string name="keep_playing">Keep playing</string>
+    <string name="game_cancelled">Match canceled</string>
+    <string name="connection_lost">Connection lost</string>
+    <string name="wifi_required">Connect to Wi-Fi to play on your local network.</string>
+    <string name="enter_room_name">Enter a name for this room</string>
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
+    <string name="client_update_required">Update Liquid Wars OS to join this room.</string>
+    <string name="host_update_required">The host needs to update Liquid Wars OS.</string>
+    <string name="sharing_game">Room open on %1$s · IP %2$s · Players: %3$d</string>
+    <string name="ip_example">Example: %1$s</string>
+    <string name="enter_ip">Enter IP address</string>
+    <string name="connect">Connect</string>
+    <string name="searching_on">Searching on %1$s…</string>
+    <string name="manual_connect">Enter IP</string>
+    <string name="connecting_to">Connecting to %1$s…</string>
+    <string name="connected_to">Connected to %1$s</string>
+    <string name="failed_to_connect_to">Could not connect to %1$s</string>
+    <string name="lost_connection_to">Lost connection to %1$s</string>
+    <string name="previous_map">Previous map</string>
+    <string name="next_map">Next map</string>
+    <string name="default_room_name">Liquid Wars Game</string>
 </resources>

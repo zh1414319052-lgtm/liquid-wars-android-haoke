@@ -1,0 +1,9 @@
+<resources>
+    <string name="ai_difficulty">电脑难度</string>
+    <string-array name="ai_difficulty_options"><item>休闲</item><item>标准</item><item>困难</item></string-array>
+    <string-array name="ai_room_labels"><item>休闲 AI</item><item>标准 AI</item><item>困难 AI</item></string-array>
+    <string name="ai_relaxed_description">反应较慢，单点追击，适合熟悉玩法。</string>
+    <string name="ai_classic_description">会探索、绕路和争夺有用道具，决策节奏较缓，适合日常对战。</string>
+    <string name="ai_hard_description">判断附近兵力，集结或撤退，支援盟友并择机使用道具。完全离线，不增加血量或粒子。</string>
+    <string name="ai_client_hint">电脑难度由房主选择，显示在房间名称后；本机按房主下发的目标行动。</string>
+</resources>

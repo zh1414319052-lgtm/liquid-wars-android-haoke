@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="item_names">
+<item>Growth Seed</item>
+<item>Stone Eater</item>
+<item>Time Freeze</item>
+<item>Blink Gate</item>
+<item>Time Rewind</item>
+<item>Phase Walk</item>
+<item>Invincible Time</item>
+<item>Death Time</item>
+<item>Friend Time</item>
+<item>Mass Balance</item>
+<item>Lithic Seal</item>
+<item>Thaw Current</item>
+<item>Spatial Anchor</item>
+<item>Causal Lock</item>
+<item>Phase Nail</item>
+<item>Shieldbreaker</item>
+<item>Death Ward</item>
+<item>Declaration</item>
+<item>Shadow Cloak</item>
+<item>Reveal Spark</item>
+</string-array>
+<string-array name="item_descriptions">
+<item>Grow25% of current troops, capped at50% of starting team size and available space.</item>
+<item>Dig interior walls for20s. Growth capped at25% of initial team size and500 troops.</item>
+<item>Freeze hostile movement for20s; Thaw prevents or clears it.</item>
+<item>One teleport via main map or minimap. Invalid targets retain the card.</item>
+<item>Appears once per match, including after rewind. Restores the opening and3s regroup; Causal blocks it.</item>
+<item>Cross interior walls for20s. Ordinary combat remains, with safe exit on expiry.</item>
+<item>Protect from combat and Death selection for20s; Shatter clears it. No attack bonus.</item>
+<item>Immediately eliminate every particle of a visible selected enemy, without gaining troops. Invincibility blocks selection; Ward absorbs one use.</item>
+<item>An20s ceasefire with one enemy; no shared victory. One pact globally. Conflicting targets retain the card.</item>
+<item>Block hostile growth effects for20s, without changing ordinary combat gains.</item>
+<item>Block hostile digging for20s; existing passages remain open.</item>
+<item>Clear and prevent freezing for you and allies for20s. No speed bonus.</item>
+<item>Block hostile teleport for20s; the card remains.</item>
+<item>Block rewind for20s, without restoring its once-per-match appearance.</item>
+<item>Clear hostile phase safely and prevent it for20s.</item>
+<item>Clear hostile invincibility and prevent it for20s, without troop damage.</item>
+<item>A20s single-use block against Death elimination, without combat protection or stacking.</item>
+<item>End your current ceasefire and protect allies from forced ceasefire for20s. Original alliances remain.</item>
+<item>Invisible to enemy view, minimap and model observations for20s. Allies can see you. Combat remains normal.</item>
+<item>Clear hostile cloak and prevent it for20s for you and allies. Normal minimap sight range remains.</item>
+</string-array>
+</resources>

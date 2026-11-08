@@ -1,14 +1,39 @@
+//    This file is part of Liquid Wars.
+//
+//    Copyright (C) 2013 Henry Shepperd (hshepperd@gmail.com)
+//
+//    Liquid Wars is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Liquid Wars is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Liquid Wars.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "move.hpp"
+#include "combat.hpp"
 
 void Move::stepDots() {
-    for(int i = 0; i < NUMBER_OF_TEAMS*state->dotsPerTeam; i++) {
+    state->items->begin(*state);
+    const size_t count=state->dots.size();
+    for(size_t i = 0; i < count; i++) {
         Dot* dot = state->dots[i];
         const Player* player = &state->players[dot->team];
-        moveDotToward(dot, player);
+        const int moves=state->items->moves(*state,*dot);
+        for(int n=0;n<moves;n++)moveDotToward(dot, player);
     }
+    state->items->end(*state);
 }
 
 void Move::moveDotToward(Dot* dot, const Player* player) {
+    // Protocol 15: explicit idle for model teams without a live command.
+    // No movement, auto-attack or RNG on this unit; enemies can still capture it.
+    if(player->x[0]==-2 && player->y[0]==-2)return;
     const short currentX = dot->x;
     const short currentY = dot->y;
     short playerX = player->x[0];
@@ -17,7 +42,7 @@ void Move::moveDotToward(Dot* dot, const Player* player) {
     int diffY = playerY - currentY;
     float dist = sqrt(diffX*diffX + diffY*diffY);
 
-    for(int i = 1; i < 5; i++) {
+    for(int i = 1; i < (player->x[4]==-3?3:5); i++) {
         if(player->x[i] == -1)
             continue;
         const short nextPlayerX = player->x[i];
@@ -100,7 +125,7 @@ void Move::moveDotToward(Dot* dot, const Player* player) {
 
     short nx = dot->x + dx;
     short ny = dot->y + dy;
-    if(!state->map->isWall(nx, ny) && (state->field[nx][ny] == NULL)) {
+    if(state->items->canEnter(*state,dot->team,nx,ny) && (state->field[nx][ny] == NULL)) {
         state->field[nx][ny] = dot;
         state->field[dot->x][dot->y] = NULL;
         dot->x = nx;
@@ -118,7 +143,7 @@ void Move::moveDotToward(Dot* dot, const Player* player) {
 
     nx = dot->x + d2x;
     ny = dot->y + d2y;
-    if(!state->map->isWall(nx, ny) && (state->field[nx][ny] == NULL)) {
+    if(state->items->canEnter(*state,dot->team,nx,ny) && (state->field[nx][ny] == NULL)) {
         state->field[nx][ny] = dot;
         state->field[dot->x][dot->y] = NULL;
         dot->x = nx;
@@ -136,7 +161,7 @@ void Move::moveDotToward(Dot* dot, const Player* player) {
 
     nx = dot->x + d3x;
     ny = dot->y + d3y;
-    if(!state->map->isWall(nx, ny) && (state->field[nx][ny] == NULL)) {
+    if(state->items->canEnter(*state,dot->team,nx,ny) && (state->field[nx][ny] == NULL)) {
         state->field[nx][ny] = dot;
         state->field[dot->x][dot->y] = NULL;
         dot->x = nx;
@@ -146,33 +171,21 @@ void Move::moveDotToward(Dot* dot, const Player* player) {
 
     nx = dot->x + dx;
     ny = dot->y + dy;
-    if(!state->map->isWall(nx, ny) && (state->field[nx][ny]->team != dot->team)) {
-        state->field[nx][ny]->health--;
-        if(state->field[nx][ny]->health <= 0) {
-            state->players[state->field[nx][ny]->team].score--;
-            state->players[dot->team].score++;
-            state->field[nx][ny]->team = dot->team;
-            state->field[nx][ny]->health = MAX_HEALTH/2;
-        }
+    if(state->items->canContact(*state,dot->team,nx,ny)) {
+        state->items->contact(*state,*state->field[nx][ny],*dot);
         return;
     }
 
     nx = dot->x + d2x;
     ny = dot->y + d2y;
-    if(!state->map->isWall(nx, ny) && (state->field[nx][ny]->team != dot->team)) {
-        state->field[nx][ny]->health--;
-        if(state->field[nx][ny]->health <= 0) {
-            state->players[state->field[nx][ny]->team].score--;
-            state->players[dot->team].score++;
-            state->field[nx][ny]->team = dot->team;
-            state->field[nx][ny]->health = MAX_HEALTH/2;
-        }
+    if(state->items->canContact(*state,dot->team,nx,ny)) {
+        state->items->contact(*state,*state->field[nx][ny],*dot);
         return;
     }
 
     nx = dot->x + dx;
     ny = dot->y + dy;
-    if(!state->map->isWall(nx, ny) && (state->field[nx][ny]->team == dot->team)) {
+    if(state->items->canEnter(*state,dot->team,nx,ny) && (state->field[nx][ny]->team == dot->team)) {
         if(state->field[nx][ny]->health < MAX_HEALTH) {
             if((state->moveRandom->next() % 100) > 95)
                 state->field[nx][ny]->health++;

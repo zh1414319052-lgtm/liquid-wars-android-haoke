@@ -1,0 +1,892 @@
+{
+  "modes": {
+    "0": {
+      "n": 64,
+      "wins": 52,
+      "losses": 7,
+      "ties": 4,
+      "mixed_alliance": 1,
+      "caps": 0,
+      "decided_win_rate": 0.8813559322033898,
+      "wilson95_descriptive": [
+        0.7747635960001866,
+        0.9413241722420957
+      ],
+      "new_pickups": 33,
+      "old_pickups": 4,
+      "new_uses": 8,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        3633,
+        590,
+        146,
+        0,
+        1186,
+        4503,
+        0
+      ],
+      "switches": 652,
+      "stalled_decisions": 2425,
+      "paired_map_seed_bootstrap95": [
+        0.7818181818181819,
+        0.9655172413793104
+      ]
+    },
+    "1": {
+      "n": 64,
+      "wins": 47,
+      "losses": 16,
+      "ties": 1,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.746031746031746,
+      "wilson95_descriptive": [
+        0.626588125633939,
+        0.8371958872667864
+      ],
+      "new_pickups": 114,
+      "old_pickups": 5,
+      "new_uses": 21,
+      "old_uses": 1,
+      "new_rejected_or_countered": 1,
+      "old_rejected_or_countered": 2,
+      "action_decisions": [
+        26509,
+        12854,
+        32,
+        9,
+        4714,
+        14614,
+        0
+      ],
+      "switches": 6359,
+      "stalled_decisions": 13924,
+      "paired_map_seed_bootstrap95": [
+        0.6507936507936508,
+        0.8412698412698413
+      ]
+    },
+    "2": {
+      "n": 64,
+      "wins": 54,
+      "losses": 7,
+      "ties": 1,
+      "mixed_alliance": 2,
+      "caps": 0,
+      "decided_win_rate": 0.8852459016393442,
+      "wilson95_descriptive": [
+        0.7815569152759928,
+        0.943287973392677
+      ],
+      "new_pickups": 108,
+      "old_pickups": 7,
+      "new_uses": 18,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        27720,
+        6755,
+        19,
+        269,
+        4707,
+        13598,
+        0
+      ],
+      "switches": 3342,
+      "stalled_decisions": 14936,
+      "paired_map_seed_bootstrap95": [
+        0.8032786885245902,
+        0.9523809523809523
+      ]
+    }
+  },
+  "by_map": {
+    "1": {
+      "n": 24,
+      "wins": 16,
+      "losses": 8,
+      "ties": 0,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.6666666666666666,
+      "wilson95_descriptive": [
+        0.4670631683813228,
+        0.8202780967270192
+      ],
+      "new_pickups": 27,
+      "old_pickups": 3,
+      "new_uses": 10,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 1,
+      "action_decisions": [
+        7560,
+        3200,
+        2,
+        116,
+        906,
+        3600,
+        0
+      ],
+      "switches": 1611,
+      "stalled_decisions": 4700
+    },
+    "8": {
+      "n": 24,
+      "wins": 21,
+      "losses": 1,
+      "ties": 0,
+      "mixed_alliance": 2,
+      "caps": 0,
+      "decided_win_rate": 0.9545454545454546,
+      "wilson95_descriptive": [
+        0.7820195416134333,
+        0.9919305723787358
+      ],
+      "new_pickups": 47,
+      "old_pickups": 2,
+      "new_uses": 9,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        6449,
+        2230,
+        4,
+        13,
+        1781,
+        2442,
+        0
+      ],
+      "switches": 1100,
+      "stalled_decisions": 3346
+    },
+    "17": {
+      "n": 24,
+      "wins": 21,
+      "losses": 3,
+      "ties": 0,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.875,
+      "wilson95_descriptive": [
+        0.6899611872950053,
+        0.9565566591987644
+      ],
+      "new_pickups": 27,
+      "old_pickups": 3,
+      "new_uses": 1,
+      "old_uses": 0,
+      "new_rejected_or_countered": 1,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        7368,
+        3548,
+        5,
+        20,
+        1022,
+        2892,
+        0
+      ],
+      "switches": 1376,
+      "stalled_decisions": 2445
+    },
+    "28": {
+      "n": 24,
+      "wins": 22,
+      "losses": 2,
+      "ties": 0,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.9166666666666666,
+      "wilson95_descriptive": [
+        0.7415119780678993,
+        0.976841184702956
+      ],
+      "new_pickups": 34,
+      "old_pickups": 3,
+      "new_uses": 0,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        7832,
+        2403,
+        8,
+        10,
+        1396,
+        2392,
+        0
+      ],
+      "switches": 1373,
+      "stalled_decisions": 3659
+    },
+    "41": {
+      "n": 24,
+      "wins": 19,
+      "losses": 4,
+      "ties": 0,
+      "mixed_alliance": 1,
+      "caps": 0,
+      "decided_win_rate": 0.8260869565217391,
+      "wilson95_descriptive": [
+        0.6286235235977446,
+        0.9302134643693727
+      ],
+      "new_pickups": 31,
+      "old_pickups": 4,
+      "new_uses": 17,
+      "old_uses": 1,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 1,
+      "action_decisions": [
+        8320,
+        3090,
+        10,
+        65,
+        836,
+        1197,
+        0
+      ],
+      "switches": 1724,
+      "stalled_decisions": 2603
+    },
+    "49": {
+      "n": 24,
+      "wins": 18,
+      "losses": 4,
+      "ties": 2,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.8181818181818182,
+      "wilson95_descriptive": [
+        0.6148339256287408,
+        0.9269311541657778
+      ],
+      "new_pickups": 45,
+      "old_pickups": 0,
+      "new_uses": 8,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        8008,
+        2124,
+        0,
+        1,
+        2303,
+        3783,
+        0
+      ],
+      "switches": 1232,
+      "stalled_decisions": 5947
+    },
+    "50": {
+      "n": 24,
+      "wins": 17,
+      "losses": 4,
+      "ties": 3,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.8095238095238095,
+      "wilson95_descriptive": [
+        0.5999943530979571,
+        0.9233243494723803
+      ],
+      "new_pickups": 22,
+      "old_pickups": 1,
+      "new_uses": 0,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        6276,
+        1238,
+        167,
+        52,
+        1840,
+        7153,
+        0
+      ],
+      "switches": 832,
+      "stalled_decisions": 4761
+    },
+    "54": {
+      "n": 24,
+      "wins": 19,
+      "losses": 4,
+      "ties": 1,
+      "mixed_alliance": 0,
+      "caps": 0,
+      "decided_win_rate": 0.8260869565217391,
+      "wilson95_descriptive": [
+        0.6286235235977446,
+        0.9302134643693727
+      ],
+      "new_pickups": 22,
+      "old_pickups": 0,
+      "new_uses": 2,
+      "old_uses": 0,
+      "new_rejected_or_countered": 0,
+      "old_rejected_or_countered": 0,
+      "action_decisions": [
+        6049,
+        2366,
+        1,
+        1,
+        523,
+        9256,
+        0
+      ],
+      "switches": 1105,
+      "stalled_decisions": 3824
+    }
+  },
+  "losses": [
+    {
+      "map": 1,
+      "seed": 17901,
+      "mode": 0,
+      "swap": 0,
+      "scores": [
+        69,
+        1931,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 122,
+      "new_pickups": 0,
+      "old_pickups": 1
+    },
+    {
+      "map": 1,
+      "seed": 17901,
+      "mode": 0,
+      "swap": 1,
+      "scores": [
+        1070,
+        930,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 195,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 1,
+      "seed": 17901,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        405,
+        887,
+        3097,
+        1611,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 189,
+      "new_pickups": 0,
+      "old_pickups": 1
+    },
+    {
+      "map": 1,
+      "seed": 17972,
+      "mode": 0,
+      "swap": 0,
+      "scores": [
+        146,
+        1882,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 1,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 1,
+      "seed": 17972,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        1299,
+        1305,
+        1469,
+        1551,
+        376,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 142,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 1,
+      "seed": 18043,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        0,
+        0,
+        0,
+        0,
+        4567,
+        552
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 108,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 1,
+      "seed": 18114,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        194,
+        0,
+        1536,
+        3174,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 96,
+      "new_pickups": 3,
+      "old_pickups": 0
+    },
+    {
+      "map": 1,
+      "seed": 18114,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        0,
+        509,
+        2905,
+        2586,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 190,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 8,
+      "seed": 18121,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        1,
+        0,
+        0,
+        0,
+        2880,
+        3119
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 229,
+      "new_pickups": 2,
+      "old_pickups": 1
+    },
+    {
+      "map": 17,
+      "seed": 17917,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        38,
+        4336,
+        534,
+        0,
+        1092,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 2,
+      "new_pickups": 4,
+      "old_pickups": 0
+    },
+    {
+      "map": 17,
+      "seed": 18130,
+      "mode": 0,
+      "swap": 0,
+      "scores": [
+        303,
+        1697,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 1,
+      "new_pickups": 0,
+      "old_pickups": 1
+    },
+    {
+      "map": 17,
+      "seed": 18130,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        4279,
+        0,
+        0,
+        108,
+        0,
+        1613
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 60,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 28,
+      "seed": 17999,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        386,
+        2614,
+        0,
+        0,
+        1247,
+        1753
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 284,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 28,
+      "seed": 18141,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        0,
+        0,
+        1388,
+        4612,
+        0,
+        0
+      ],
+      "termination": "elimination",
+      "stalled_decisions": 175,
+      "new_pickups": 0,
+      "old_pickups": 1
+    },
+    {
+      "map": 41,
+      "seed": 18012,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        326,
+        0,
+        0,
+        0,
+        325,
+        4504
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 17,
+      "new_pickups": 3,
+      "old_pickups": 0
+    },
+    {
+      "map": 41,
+      "seed": 18012,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        0,
+        0,
+        3035,
+        104,
+        0,
+        2281
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 357,
+      "new_pickups": 3,
+      "old_pickups": 0
+    },
+    {
+      "map": 41,
+      "seed": 18083,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        4045,
+        3,
+        0,
+        841,
+        0,
+        1111
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 46,
+      "new_pickups": 3,
+      "old_pickups": 0
+    },
+    {
+      "map": 41,
+      "seed": 18154,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        0,
+        0,
+        4161,
+        506,
+        0,
+        1333
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 24,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 49,
+      "seed": 18020,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        0,
+        524,
+        1300,
+        0,
+        1000,
+        1114
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 235,
+      "new_pickups": 4,
+      "old_pickups": 0
+    },
+    {
+      "map": 49,
+      "seed": 18091,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        383,
+        1914,
+        935,
+        1682,
+        124,
+        1065
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 391,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 49,
+      "seed": 18091,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        2154,
+        1494,
+        593,
+        406,
+        0,
+        1407
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 278,
+      "new_pickups": 2,
+      "old_pickups": 0
+    },
+    {
+      "map": 49,
+      "seed": 18162,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        1000,
+        0,
+        0,
+        3018,
+        982,
+        1000
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 72,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 50,
+      "seed": 17950,
+      "mode": 0,
+      "swap": 0,
+      "scores": [
+        965,
+        1035,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 228,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 50,
+      "seed": 18021,
+      "mode": 0,
+      "swap": 1,
+      "scores": [
+        1167,
+        833,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 198,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 50,
+      "seed": 18092,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        0,
+        0,
+        2191,
+        1410,
+        1402,
+        997
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 378,
+      "new_pickups": 0,
+      "old_pickups": 0
+    },
+    {
+      "map": 50,
+      "seed": 18163,
+      "mode": 2,
+      "swap": 0,
+      "scores": [
+        0,
+        0,
+        651,
+        404,
+        1210,
+        3735
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 187,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 54,
+      "seed": 17954,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        1392,
+        1000,
+        1404,
+        1062,
+        0,
+        1142
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 209,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 54,
+      "seed": 18025,
+      "mode": 1,
+      "swap": 1,
+      "scores": [
+        0,
+        1218,
+        3539,
+        460,
+        0,
+        1023
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 269,
+      "new_pickups": 2,
+      "old_pickups": 0
+    },
+    {
+      "map": 54,
+      "seed": 18096,
+      "mode": 0,
+      "swap": 0,
+      "scores": [
+        215,
+        1785,
+        0,
+        0,
+        0,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 50,
+      "new_pickups": 1,
+      "old_pickups": 0
+    },
+    {
+      "map": 54,
+      "seed": 18167,
+      "mode": 1,
+      "swap": 0,
+      "scores": [
+        676,
+        3280,
+        1916,
+        0,
+        128,
+        0
+      ],
+      "termination": "time_limit",
+      "stalled_decisions": 54,
+      "new_pickups": 0,
+      "old_pickups": 0
+    }
+  ],
+  "sample_caveat": "8 maps x4 seeds x3 modes x2 assignments; not59-map coverage; seeds shared with tuning. Intervals describe this matrix, not unseen maps or humans. FFA compares3 new vs3 old; paired mode swaps1 new pair/2 old pairs and2 new/1 old.",
+  "baseline_caveat": "Old1.78 HARD has global enemy positions except cloak; new uses local visibility. Headless duel removes4 teams; paired harness preserves production rewind capture behavior, not an Android lobby test."
+}

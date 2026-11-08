@@ -1,0 +1,19 @@
+<resources>
+    <string name="ui_back">返回</string>
+    <string name="ui_wordmark">LIQUID WARS</string><string name="ui_game_title">液态战争</string><string name="ui_edition">重制版</string>
+    <string name="ui_tagline">指尖引流，包围对手。</string><string name="ui_footer">经典规则 · 六队混战 · 全面屏地图</string>
+    <string name="ui_wifi">Wi-Fi 联机</string><string name="ui_rooms">附近的房间</string><string name="ui_devices">选择对战手机</string>
+    <string name="ui_setup_hint">选择地图，开始一场六队混战。</string><string name="ui_host_title">房间设置</string><string name="ui_host_hint">点击房间名称可改名，对局设置由房主决定。</string>
+    <string name="ui_client_title">等待房主开始</string><string name="ui_wait_hint">房主开始后，将自动进入战场。</string><string name="ui_leave_room">离开房间</string><string name="ui_pending">等待中…</string>
+    <string name="ui_map_preview">当前地图预览</string><string name="ui_maps_hint">59 张地图 · 长按箭头跳过 20 张</string>
+    <string name="ui_tip1_title">01  指尖引流</string><string name="ui_tip1_body">按住并拖动屏幕，引导你的粒子绕过障碍。</string>
+    <string name="ui_tip2_title">02  五指协同</string><string name="ui_tip2_body">最多同时使用五个触点，分路推进。</string>
+    <string name="ui_tip3_title">03  包围转化</string><string name="ui_tip3_body">将对手全部转为你的队伍颜色，赢得对局。</string>
+    <string name="release_attribution">Liquid Wars OS · 原作：Henry Shepperd（2013）。\n浩科优化版 %1$s · GPL-3.0-or-later。\n对应源码及许可证随安装包交付；包内 assets/licenses 也保留许可原文。</string>
+    <string name="ruins_title">新地貌地图 · 试玩</string>
+    <string name="ruins_message">本次试玩已关闭全部模型 API。你选择的队伍由你控制，其他队伍使用本地电脑；观战时全部为本地电脑。石块、冰盖、树根等地形会阻挡，暗色地面和浅水可通行。开始后倒计时约 3 秒，出生位置每局随机。</string>
+    <string name="ruins_start">开始试玩</string>
+    <string name="ruins_exit">返回菜单</string>
+    <string name="large_map_mode">大地图模式</string>
+    <string name="large_map_hint">10张地图 · 每张四图拼接 · 1600 × 960</string>
+</resources>

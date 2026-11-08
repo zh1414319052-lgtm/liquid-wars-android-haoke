@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+package com.xenris.liquidwarsos;
+import android.content.*;import android.os.*;import android.view.*;import androidx.test.core.app.ActivityScenario;import androidx.test.ext.junit.runners.AndroidJUnit4;import org.junit.*;import org.junit.runner.RunWith;import org.json.*;import java.util.*;import com.xenris.liquidwarsos.activities.GameActivity;
+@RunWith(AndroidJUnit4.class) public class Minimap170ProbeTest {
+ static Set<Integer> teams(int[] v){Set<Integer> out=new HashSet<>();Assert.assertEquals(0x4c575349,v[0]);for(int i=5;i+3<v.length;i+=4)out.add(v[i]);return out;}
+ @Test public void scoutingAlliesSpectatorAndUnchangedState()throws Exception{
+  try(ActivityScenario<GameActivity> s=ActivityScenario.launch(World169ProbeTest.prepare(50,17050,400,true,false))){
+   World169ProbeTest.frozen(s);MyGLSurfaceView[] gl={null};s.onActivity(a->gl[0]=a.findViewById(R.id.mySurfaceView));long deadline=SystemClock.uptimeMillis()+8000;while((gl[0].framesDrawn()==0||NativeInterface.sceneInfo()[6]!=4)&&SystemClock.uptimeMillis()<deadline)SystemClock.sleep(40);Assert.assertEquals(4,NativeInterface.sceneInfo()[6]);Assert.assertTrue(gl[0].framesDrawn()>0);SystemClock.sleep(180);long hash=NativeInterface.stateHash();int[] partial=NativeInterface.minimapSnapshot(false),full=NativeInterface.minimapSnapshot(true);Assert.assertEquals(hash,NativeInterface.stateHash());Set<Integer> visible=teams(partial),all=teams(full);Assert.assertTrue(visible.contains(2));Assert.assertEquals(6,all.size());int hidden=-1;for(int t=0;t<6;t++)if(!visible.contains(t)){hidden=t;break;}Assert.assertTrue("A truly unscouted enemy is hidden",hidden>=0);World169ProbeTest.picture("world170-scouting-ready-hidden.jpg");
+   int[] groups=new int[6];Arrays.fill(groups,-1);groups[2]=groups[hidden]=0;int n=0;for(int t=0;t<6;t++)if(groups[t]<0)groups[t]=1+(n++/2);NativeInterface.configureAlliances(groups);Assert.assertTrue(teams(NativeInterface.minimapSnapshot(false)).contains(hidden));SystemClock.sleep(180);World169ProbeTest.picture("world170-scouting-ready-ally.jpg");NativeInterface.configureAlliances(AllianceRules.solo());Assert.assertFalse(teams(NativeInterface.minimapSnapshot(false)).contains(hidden));Assert.assertEquals(hash,NativeInterface.stateHash());
+   World169ProbeTest.write("world170-scouting-ready.json",new JSONObject().put("status","PASS").put("range_world_units",144).put("hidden_enemy",hidden).put("visible_teams",new JSONArray(visible)).put("spectator_teams",new JSONArray(all)).put("new_ally_shown",true).put("exact_hash_unchanged",true).put("configuration_fixture",true).put("models",0));
+  }
+ }
+}

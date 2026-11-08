@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_title">Wi-Fi multiplayer</string>
+    <string name="lan_instructions">Connect both phones to the same Wi-Fi. Create a room on one phone, then tap its name here to join.</string>
+    <string name="lan_create_room">Create room</string>
+    <string name="lan_refresh">Refresh rooms</string>
+    <string name="lan_searching">Looking for rooms on this network…</string>
+    <string name="lan_no_rooms">No room found yet. Create a room on the other phone and check both use the same Wi-Fi. Guest Wi-Fi may block connections. You can refresh or use manual IP.</string>
+    <string name="lan_rooms_found">%1$d room(s) found — tap to join</string>
+    <string name="lan_room_address">%1$s · Tap to join</string>
+    <string name="lan_invalid_ip">Enter a valid IPv4 address, such as 192.168.1.10</string>
+    <string name="lan_host_failed">Could not open a room. Return and try creating it again.</string>
+    <string name="lan_host_status">Room: %1$s · %2$d/6 players\nOther phones on this Wi-Fi can tap this room to join. Manual IP: %3$s</string>
+</resources>

@@ -1,0 +1,104 @@
+"""Generate original Android View resources from the editable UI's shared tokens.
+No game/network data is generated or modified. Run from the source root.
+"""
+from pathlib import Path
+import json
+from xml.sax.saxutils import escape
+ROOT=Path(__file__).resolve().parents[1]; RES=ROOT/'app/src/main/res'
+TOKENS=json.loads((ROOT/'docs/game/ui-1.52/design.haoke-ui.json').read_text('utf8'))['tokens']
+def write(path,s):
+    p=RES/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(s.strip()+'\n',encoding='utf8')
+def xml(body):return '<?xml version="1.0" encoding="utf-8"?>\n'+body
+NS='xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"'
+def text(s,style='Ui.Body',extra='',id=None):return f'<TextView style="@style/{style}" android:text="@string/{s}" '+(f'android:id="@+id/{id}" ' if id else '')+extra+'/>'
+def button(s,handler,primary=False,extra='',id=None,icon=None):return f'<com.google.android.material.button.MaterialButton style="@style/Ui.Button'+('.Primary' if primary else '')+f'" android:text="@string/{s}" android:onClick="{handler}" '+(f'android:id="@+id/{id}" ' if id else '')+(f'app:icon="@drawable/ui_{icon}" ' if icon else '')+extra+'/>'
+def root(body):return xml(f'<LinearLayout {NS} android:id="@+id/ui_root" style="@style/Ui.Root" android:fitsSystemWindows="true">{body}</LinearLayout>')
+def header(title,subtitle):return f'<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal"><androidx.appcompat.widget.AppCompatImageButton style="@style/Ui.MapArrow" android:contentDescription="@string/ui_back" android:onClick="uiBack" android:src="@drawable/ui_back" android:layout_marginEnd="16dp"/><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">'+text(title,'Ui.Title')+text(subtitle,'Ui.Caption')+'</LinearLayout></LinearLayout>'
+def scroll(body,extra=''):return f'<ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true" {extra}><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">{body}</LinearLayout></ScrollView>'
+def field(label,id,spinner=True,click=''):
+    widget=f'<Spinner android:id="@+id/{id}" style="@style/Ui.Spinner" android:spinnerMode="dialog" android:prompt="@string/{label}"/>' if spinner else f'<TextView android:id="@+id/{id}" style="@style/Ui.Value" android:text="@string/ui_pending" {click}/>'
+    return f'<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="10dp">'+text(label,'Ui.Label',f'android:labelFor="@id/{id}"')+widget+'</LinearLayout>'
+def preview(host=False):
+    nav=''.join(f'<androidx.appcompat.widget.AppCompatImageButton style="@style/Ui.MapArrow" android:id="@+id/{which}_button" android:contentDescription="@string/{which}_map" android:onClick="{which}Map" android:src="@drawable/ui_{icon}"/>' for which,icon in [('previous','back'),('next','next')])
+    # Map stays fitCenter with a flexible non-zero preview area. Arrows remain 48dp.
+    return '<FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="130dp" android:background="@drawable/ui_panel" android:padding="8dp"><ImageView android:id="@+id/map_imageview" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" android:contentDescription="@string/ui_map_preview"/></FrameLayout><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="8dp">'+nav[:nav.index('<androidx',1)]+text('ui_maps_hint','Ui.Caption','android:layout_width="0dp" android:layout_weight="1" android:gravity="center"')+nav[nav.index('<androidx',1):]+'</LinearLayout>'
+def column(body,weight,extra=''):return f'<LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="{weight}" android:orientation="vertical" {extra}>{body}</LinearLayout>'
+def columns(left,right):return '<LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="12dp" android:orientation="horizontal">'+column(left,3)+column(right,2,'android:layout_marginStart="20dp"')+'</LinearLayout>'
+
+def main():
+    write(Path('values/ui_tokens.xml'),xml('<resources>\n'+''.join(f'<color name="ui_{k}">{v}</color>\n' for k,v in TOKENS.items() if isinstance(v,str) and v.startswith('#'))+'<dimen name="ui_radius">12dp</dimen><integer name="ui_motion_ms">160</integer></resources>'))
+    write(Path('values/theme.xml'),xml('''<resources>
+    <style name="Theme.LiqurdWars" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/ui_bg</item><item name="android:statusBarColor">@color/ui_bg</item><item name="android:navigationBarColor">@color/ui_bg</item>
+        <item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item>
+        <item name="colorPrimary">@color/ui_accent</item><item name="colorPrimaryVariant">@color/ui_accent</item><item name="colorOnPrimary">@color/ui_onAccent</item><item name="colorSecondary">@color/ui_accent</item><item name="colorOnSecondary">@color/ui_onAccent</item>
+        <item name="colorSurface">@color/ui_surface</item><item name="colorOnSurface">@color/ui_ink</item><item name="android:colorBackground">@color/ui_bg</item><item name="android:colorAccent">@color/ui_accent</item>
+        <item name="android:textColorPrimary">@color/ui_ink</item><item name="android:textColorSecondary">@color/ui_muted</item><item name="android:fontFamily">sans-serif</item>
+        <item name="android:alertDialogTheme">@style/Ui.PlatformDialog</item><item name="alertDialogTheme">@style/Ui.AppCompatDialog</item>
+        <item name="android:windowNoTitle">true</item><item name="android:windowFullscreen">true</item>
+    </style>
+    <style name="Ui.PlatformDialog" parent="android:style/Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/ui_accent</item><item name="android:windowBackground">@drawable/ui_panel</item><item name="android:colorBackground">@color/ui_surface</item><item name="android:textColorPrimary">@color/ui_ink</item><item name="android:textColorSecondary">@color/ui_muted</item><item name="android:fontFamily">sans-serif</item>
+    </style>
+    <style name="Ui.AppCompatDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/ui_surface</item><item name="colorOnSurface">@color/ui_ink</item><item name="colorPrimary">@color/ui_accent</item><item name="android:textColorPrimary">@color/ui_ink</item><item name="android:textColorSecondary">@color/ui_muted</item><item name="android:windowBackground">@drawable/ui_panel</item>
+    </style>
+    <style name="Ui"><item name="android:layout_width">match_parent</item><item name="android:layout_height">wrap_content</item></style>
+    <style name="Ui.Root"><item name="android:layout_width">match_parent</item><item name="android:layout_height">match_parent</item><item name="android:orientation">vertical</item><item name="android:padding">16dp</item><item name="android:background">@color/ui_bg</item></style>
+    <style name="Ui.Body"><item name="android:textColor">@color/ui_ink</item><item name="android:textSize">16sp</item><item name="android:lineSpacingExtra">3dp</item></style>
+    <style name="Ui.Title" parent="Ui.Body"><item name="android:textSize">23sp</item><item name="android:textStyle">bold</item><item name="android:accessibilityHeading">true</item></style>
+    <style name="Ui.Caption" parent="Ui.Body"><item name="android:textColor">@color/ui_muted</item><item name="android:textSize">13sp</item></style>
+    <style name="Ui.Label" parent="Ui.Caption"><item name="android:paddingBottom">4dp</item></style>
+    <style name="Ui.Value" parent="Ui.Body"><item name="android:minHeight">48dp</item><item name="android:gravity">center_vertical</item><item name="android:paddingHorizontal">12dp</item><item name="android:background">@drawable/ui_field</item></style>
+    <style name="Ui.Spinner"><item name="android:layout_width">match_parent</item><item name="android:layout_height">wrap_content</item><item name="android:minHeight">48dp</item><item name="android:background">@drawable/ui_spinner_bg</item></style>
+    <style name="Ui.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item><item name="android:layout_height">wrap_content</item><item name="android:minHeight">48dp</item><item name="android:minWidth">48dp</item><item name="android:insetTop">0dp</item><item name="android:insetBottom">0dp</item><item name="android:layout_marginVertical">4dp</item><item name="android:paddingHorizontal">14dp</item><item name="android:paddingVertical">10dp</item><item name="android:textAllCaps">false</item><item name="android:textSize">16sp</item><item name="android:textColor">@color/ui_button_text</item><item name="backgroundTint">@color/ui_button_bg</item><item name="cornerRadius">@dimen/ui_radius</item><item name="strokeColor">@color/ui_line</item><item name="strokeWidth">1dp</item><item name="iconTint">@color/ui_button_text</item><item name="iconSize">22dp</item><item name="iconGravity">textStart</item><item name="iconPadding">10dp</item><item name="android:stateListAnimator">@null</item>
+    </style>
+    <style name="Ui.Button.Primary"><item name="backgroundTint">@color/ui_primary_bg</item><item name="android:textColor">@color/ui_primary_text</item><item name="iconTint">@color/ui_primary_text</item><item name="strokeWidth">0dp</item></style>
+    <style name="Ui.MapArrow"><item name="android:layout_width">48dp</item><item name="android:layout_height">48dp</item><item name="android:padding">12dp</item><item name="android:background">@drawable/ui_pressable</item><item name="tint">@color/ui_ink</item></style>
+    </resources>'''))
+    for name,color,radius in [('panel','surface',12),('field','field',8)]:write(Path('drawable/ui_'+name+'.xml'),xml(f'<shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="@color/ui_{color}"/><corners android:radius="{radius}dp"/></shape>'))
+    write(Path('drawable/ui_pressable.xml'),xml('<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#3286B3A1"><item android:drawable="@drawable/ui_field"/></ripple>'))
+    icons={'back':'M15,5 L8,12 L15,19 M8,12 L21,12','next':'M9,5 L16,12 L9,19 M3,12 L16,12','play':'M8,5 L19,12 L8,19 Z','wifi':'M3,8 Q12,1 21,8 M6,12 Q12,7 18,12 M9,16 Q12,13 15,16 M12,20 L12,20','bluetooth':'M7,7 L17,17 L12,21 L12,3 L17,7 L7,17','book':'M12,6 Q6,2 2,5 L2,20 Q6,17 12,21 Q18,17 22,20 L22,5 Q18,2 12,6 L12,21','edit':'M4,16 L16,4 L20,8 L8,20 L4,20 Z','refresh':'M20,7 L20,2 M20,7 L15,7 M20,7 C16,0 3,2 3,12 C3,22 17,24 21,15'}
+    for name,path in icons.items():write(Path('drawable/ui_'+name+'.xml'),xml(f'<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24"><path android:pathData="{path}" android:strokeColor="@color/ui_ink" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="@android:color/transparent"/></vector>'))
+    write(Path('drawable/ui_spinner_bg.xml'),xml('<layer-list xmlns:android="http://schemas.android.com/apk/res/android"><item android:drawable="@drawable/ui_field"/><item android:width="20dp" android:height="20dp" android:gravity="end|center_vertical" android:right="10dp" android:drawable="@drawable/ui_chevron_down"/></layer-list>'))
+    write(Path('drawable/ui_chevron_down.xml'),xml('<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="20dp" android:height="20dp" android:viewportWidth="24" android:viewportHeight="24"><path android:pathData="M6,9 L12,15 L18,9" android:strokeColor="@color/ui_muted" android:strokeWidth="2" android:fillColor="@android:color/transparent"/></vector>'))
+    for name,normal,disabled in [('button_bg','field','surface'),('button_text','ink','muted'),('primary_bg','accent','field'),('primary_text','onAccent','muted')]:write(Path('color/ui_'+name+'.xml'),xml(f'<selector xmlns:android="http://schemas.android.com/apk/res/android"><item android:state_enabled="false" android:color="@color/ui_{disabled}"/><item android:color="@color/ui_{normal}"/></selector>'))
+    write(Path('layout/ui_spinner_item.xml'),xml(f'<TextView {NS} android:id="@android:id/text1" style="@style/Ui.Body" android:minHeight="48dp" android:gravity="center_vertical" android:paddingStart="12dp" android:paddingEnd="36dp" android:maxLines="2" android:ellipsize="end"/>'))
+    write(Path('layout/ui_spinner_dropdown_item.xml'),xml(f'<CheckedTextView {NS} android:id="@android:id/text1" style="@style/Ui.Body" android:minHeight="48dp" android:gravity="center_vertical" android:paddingHorizontal="20dp" android:paddingVertical="10dp" android:checkMark="?android:attr/listChoiceIndicatorSingle"/>'))
+    main_left=text('ui_wordmark','Ui.Caption')+text('ui_game_title','Ui.Title','android:textSize="44sp" android:layout_marginTop="6dp"')+text('ui_edition','Ui.Body','android:textColor="@color/ui_accent" android:textSize="21sp"')+text('ui_tagline','Ui.Body','android:layout_marginTop="12dp"')+'<com.xenris.liquidwarsos.ui.ArenaArtView android:layout_width="match_parent" android:layout_height="120dp" android:importantForAccessibility="no"/>'+text('ui_footer','Ui.Caption')
+    main_right=''.join(button(s,h,p,extra='android:minHeight="52dp"',icon=i) for s,h,p,i in [('single_player_game','singlePlayerMenu',True,'play'),('model_spectate','spectatorMenu',False,'play'),('ui_wifi','multiplayerMenu',False,'wifi'),('bt_multiplayer','bluetoothMenu',False,'bluetooth'),('how_to_play','instructions',False,'book')])+text('ui_version','Ui.Caption')
+    # Each pane scrolls independently; large fonts and short windows retain all actions.
+    def pane(body,weight,extra=''):return f'<ScrollView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="{weight}" android:fillViewport="true" {extra}><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_vertical">{body}</LinearLayout></ScrollView>'
+    write(Path('layout/main_menu.xml'),root('<LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal">'+pane(main_left,3)+pane(main_right,2,'android:layout_marginStart="24dp"')+'</LinearLayout>'))
+    for host in [False,True]:
+        left=''
+        if host:left=text('public_name','Ui.Label')+text('ui_pending','Ui.Value','android:clickable="true" android:focusable="true" android:onClick="changePublicName" android:drawableEnd="@drawable/ui_edit" android:layout_marginBottom="8dp"',id='public_name_textview')
+        left+=preview(host).replace('android:layout_height="0dp" android:layout_weight="1" android:minHeight="130dp"','android:layout_height="176dp" android:minHeight="130dp"')
+        if host:left+=button('bt_make_visible','makeBluetoothVisible',extra='android:visibility="gone"',id='bluetooth_visible_button')
+        fields=field('team','team_textview',False) if host else field('team','team_spinner')
+        fields+=field('map','map_spinner')+field('time_limit','timeout_spinner')+field('team_size','teamsize_spinner')
+        fields+=field('ai_difficulty','difficulty_spinner')+text('ai_classic_description','Ui.Caption','android:paddingBottom="10dp"',id='difficulty_description')
+        if host:fields+=text('ui_pending','Ui.Caption','android:accessibilityLiveRegion="polite"',id='multi_game_textview')
+        fields+=button('model_settings','modelSettings')
+        right=scroll(fields)+button('start','start',True,id='start_button',icon='play')
+        if not host:right+=button('model_spectate','spectate')
+        write(Path('layout/'+('multi_game_setup' if host else 'single_game_setup')+'.xml'),root(header('ui_host_title' if host else 'single_player_game','ui_host_hint' if host else 'ui_setup_hint')+columns(scroll(left),right)))
+    for bt in [False,True]:
+        prefix='bt' if bt else 'lan';left=text('ui_devices' if bt else 'ui_rooms','Ui.Title','android:paddingBottom="8dp"')+f'<FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="@drawable/ui_panel"><ListView android:id="@+id/{prefix}_'+('devices' if bt else 'rooms')+'" android:layout_width="match_parent" android:layout_height="match_parent" android:divider="@color/ui_bg" android:dividerHeight="6dp" android:padding="8dp" android:clipToPadding="false"/>'+text('bt_empty' if bt else 'lan_searching','Ui.Caption',f'android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:padding="16dp"',id=prefix+'_empty')+'</FrameLayout>'+text('bt_permission_hint' if bt else 'lan_searching','Ui.Caption','android:accessibilityLiveRegion="polite" android:paddingTop="6dp"',id=prefix+'_status')
+        acts=[('bt_create','createBluetoothRoom',True),('bt_scan','scanDevices',False),('bt_refresh','refreshPaired',False),('bt_settings','bluetoothSettings',False),('bt_app_permissions','permissionSettings',False)] if bt else [('lan_create_room','startNewGame',True),('lan_refresh','refreshRooms',False),('manual_connect','manualConnect',False),('bt_multiplayer','bluetoothMenu',False)]
+        right=scroll(''.join(button(s,h,p) for s,h,p in acts))
+        write(Path('layout/'+('bluetooth_menu' if bt else 'multiplayer_menu')+'.xml'),root(header('bt_multiplayer' if bt else 'ui_wifi','bt_instructions' if bt else 'lan_instructions')+columns(left,right)))
+    left=preview() # remove navigation entirely; client never changes the host map.
+    left=left[:left.index('<LinearLayout')]
+    right=scroll(text('ui_pending','Ui.Caption','android:accessibilityLiveRegion="polite" android:paddingBottom="8dp"',id='client_game_textview')+''.join(field(s,id,False) for s,id in [('team','team_textview'),('map','map_textview'),('time_limit','timeout_textview'),('team_size','teamsize_textview')])+text('ai_client_hint','Ui.Caption')+text('ui_wait_hint','Ui.Caption'))+button('ui_leave_room','uiBack')
+    write(Path('layout/client_game_setup.xml'),root(header('ui_client_title','ui_wait_hint')+columns(left,right)))
+    cards=''
+    for n in range(1,4):cards+=column('<com.xenris.liquidwarsos.ui.ArenaArtView android:layout_width="match_parent" android:layout_height="72dp" android:importantForAccessibility="no"/>'+text('ui_tip'+str(n)+'_title','Ui.Title','android:textColor="@color/ui_accent"')+text('ui_tip'+str(n)+'_body','Ui.Body','android:layout_marginTop="10dp"'),1,'android:background="@drawable/ui_panel" android:padding="16dp" android:layout_marginEnd="8dp"')
+    # Reading content scrolls vertically; columns have wrap height through a separate wrapper.
+    cards=cards.replace('android:layout_height="match_parent"','android:layout_height="wrap_content"')
+    body='<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="16dp">'+cards+'</LinearLayout>'+text('instructions_goal','Ui.Body','android:layout_marginTop="16dp"')+text('instructions_controls','Ui.Body','android:layout_marginTop="12dp"')+text('release_attribution','Ui.Caption','android:layout_marginTop="24dp"')
+    write(Path('layout/instructions.xml'),root(header('how_to_play','ui_tagline')+scroll(body)))
+    write(Path('layout/lan_room_row.xml'),xml(f'<LinearLayout {NS} android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="72dp" android:background="@drawable/ui_pressable" android:padding="12dp" android:gravity="center_vertical" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical"><TextView android:id="@android:id/text1" style="@style/Ui.Body" android:textSize="18sp" android:maxLines="2" android:ellipsize="end"/><TextView android:id="@android:id/text2" style="@style/Ui.Caption"/></LinearLayout><ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_marginStart="12dp" android:importantForAccessibility="no" android:src="@drawable/ui_next"/></LinearLayout>'))
+    print('Generated 7 menu layouts, shared theme, controls and vector icons from editable tokens.')
+if __name__=='__main__':main()

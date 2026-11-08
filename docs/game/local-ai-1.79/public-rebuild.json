@@ -1,0 +1,31 @@
+{
+  "status": "PASS_REBUILDS_SAME_CODE",
+  "entry_differences": [
+    "META-INF/version-control-info.textproto",
+    "lib/arm64-v8a/libnativeinterface.so",
+    "lib/armeabi-v7a/libnativeinterface.so",
+    "lib/x86/libnativeinterface.so",
+    "lib/x86_64/libnativeinterface.so"
+  ],
+  "source_apk_sha256": "b1a3271070ab3674c316ada9c9323e29cf4ec0975671579b3e0c26b7f5c6aaa1",
+  "rebuilt_apk_sha256": "8faa3348a8897c0a7ce80d6c519c1f95bd04ee33381c06b5a915db2d65ac9fc3",
+  "entries": 1127,
+  "command": "gradlew assembleRelease --offline",
+  "signing_not_repeated": true,
+  "byte_identical_apk": false,
+  "native_section_differences": {
+    "lib/arm64-v8a/libnativeinterface.so": [
+      ".note.gnu.build-id"
+    ],
+    "lib/armeabi-v7a/libnativeinterface.so": [
+      ".note.gnu.build-id"
+    ],
+    "lib/x86/libnativeinterface.so": [
+      ".note.gnu.build-id"
+    ],
+    "lib/x86_64/libnativeinterface.so": [
+      ".note.gnu.build-id"
+    ]
+  },
+  "reason": "Only ELF GNU build-id notes and AGP Git revision metadata differ; all native code/data sections and all DEX/resources/assets byte-identical. No private signing in rebuild."
+}

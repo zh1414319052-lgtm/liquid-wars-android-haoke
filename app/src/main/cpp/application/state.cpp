@@ -1,4 +1,23 @@
+//    This file is part of Liquid Wars.
+//
+//    Copyright (C) 2013 Henry Shepperd (hshepperd@gmail.com)
+//
+//    Liquid Wars is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Liquid Wars is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Liquid Wars.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "state.hpp"
+#include "spawn.hpp"
+#include "map_catalog.hpp"
 
 State* state;
 
@@ -18,9 +37,7 @@ State::State(int team, int mapId, int seed, int dotsPerTeam) {
     points.resize(NUMBER_OF_TEAMS*dotsPerTeam*3);
     colours.resize(NUMBER_OF_TEAMS*dotsPerTeam*4);
 
-    for(int w = 0; w < WIDTH; w++)
-        for(int h = 0; h < HEIGHT; h++)
-            field[w][h] = NULL;
+
 
     for(int i = 0; i < NUMBER_OF_TEAMS*dotsPerTeam*4; i++)
         colours[i] = 1;
@@ -28,40 +45,25 @@ State::State(int team, int mapId, int seed, int dotsPerTeam) {
     moveRandom = new Random(seed);
     aiRandom = new Random(seed);
 
-    if(mapId == -1)
-        map = new Map(aiRandom->next() % NUMBER_OF_MAPS);
-    else
-        map = new Map(mapId);
+    // Keep one existing AI RNG draw for random-map choice. Stable asset IDs
+    // preserve explicit map+seed births/flips for every surviving map.
+    const int actualMap = mapId == -1 ? map_catalog::idAt(aiRandom->next() % NUMBER_OF_MAPS)
+                                      : map_catalog::resolveExplicit(mapId);
+    map = new Map(actualMap, spawn::mapFlip(seed, actualMap));
 
-    placeTeams();
+    field.reset(map->width,map->height);
+    placeTeams(seed, actualMap);
+    items=new Items(seed,actualMap);
 }
 
 State::~State() {
-    for(int i = 0; i < NUMBER_OF_TEAMS*dotsPerTeam; i++)
-        delete(dots[i]);
+    for(auto dot:dots)delete dot;
+    delete items;
     delete(map);
     delete(moveRandom);
     delete(aiRandom);
 }
 
-void State::placeTeams() {
-    for(int t = 0; t < NUMBER_OF_TEAMS; t++) {
-        int sx = Info::playerStartPositionX(t);
-        int sy = Info::playerStartPositionY(t);
-        int x = sx;
-        int y = sy;
-        int c = 0;
-        for(int i = 0; i < dotsPerTeam; i++) {
-            while(map->isWall(x, y) || (field[x][y] != NULL))
-                Spiral::getNextXY(sx, sy, ++c, &x, &y);
-            Dot* dot = new Dot(x, y, t);
-            dots[t*dotsPerTeam + i] = dot;
-            field[x][y] = dot;
-        }
-    }
-
-    for(int i = 0; i < NUMBER_OF_TEAMS; i++) {
-        players[i].x[0] = Info::playerStartPositionX(i);
-        players[i].y[0] = Info::playerStartPositionY(i);
-    }
+void State::placeTeams(int seed, int mapId) {
+    spawn::place(*this, seed, mapId);
 }

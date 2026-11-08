@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="match_result_title">对局结果</string>
+    <string name="play_again">再来一局</string>
+    <string name="exit_match">退出对局</string>
+    <string name="return_to_room">返回房间</string>
+    <string name="exit_room">退出房间</string>
+    <string name="continue_spectating">继续观战</string>
+    <string name="room_next_match_hint">返回房间后，由房主开始下一局。</string>
+    <string name="host_lost_actions_hint">可以继续观战。返回房间将结束所有玩家的本局对战。</string>
+</resources>

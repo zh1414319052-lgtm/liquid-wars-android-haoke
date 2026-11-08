@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<color name="ui_bg">#20262A</color>
+<color name="ui_surface">#29343C</color>
+<color name="ui_field">#35434C</color>
+<color name="ui_line">#52636D</color>
+<color name="ui_ink">#DDE5E7</color>
+<color name="ui_muted">#A9B8C0</color>
+<color name="ui_accent">#86B3A1</color>
+<color name="ui_onAccent">#182923</color>
+<dimen name="ui_radius">12dp</dimen><integer name="ui_motion_ms">160</integer></resources>

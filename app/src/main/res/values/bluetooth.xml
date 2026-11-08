@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bt_multiplayer">Bluetooth play</string>
+    <string name="bt_instructions">Two phones, no Wi-Fi required. One creates a room; the other selects that phone. Confirm any system pairing prompts on both phones.</string>
+    <string name="bt_create">Create room</string>
+    <string name="bt_scan">Find phones</string>
+    <string name="bt_refresh">Paired devices</string>
+    <string name="bt_settings">Bluetooth settings</string>
+    <string name="bt_app_permissions">App permissions</string>
+    <string name="bt_empty">Select the phone running this game with a Bluetooth room open. If not listed, make the host discoverable or pair in system Bluetooth settings, then refresh.</string>
+    <string name="bt_permission_hint">Choose an action to allow the required Nearby devices permission.</string>
+    <string name="bt_permission_denied">Bluetooth permission was denied. You can retry or allow Nearby devices in App permissions. Wi-Fi play is still available.</string>
+    <string name="bt_unavailable">Bluetooth Classic is unavailable on this device. Please use Wi-Fi play.</string>
+    <string name="bt_enable_hint">Bluetooth is off or enabling was cancelled. Choose an action to try again.</string>
+    <string name="bt_operation_failed">Bluetooth operation failed. Check Bluetooth and permissions, then retry.</string>
+    <string name="bt_scan_failed">Could not start discovery. Retry or pair in system Bluetooth settings.</string>
+    <string name="bt_scanning">Finding nearby devices… Tap the phone hosting this game.</string>
+    <string name="bt_devices_found">%1$d device(s). Select the phone with a room open.</string>
+    <string name="bt_paired_peer">%1$s · Paired · Tap to connect</string>
+    <string name="bt_new_peer">%1$s · Not paired · Android may ask to pair</string>
+    <string name="bt_legacy_pairing">On this Android version, pair in system Bluetooth settings, return, then refresh. This app does not request location permission.</string>
+    <string name="bt_make_visible">Make phone discoverable for 120 seconds</string>
+    <string name="bt_visibility_declined">Discoverability was not enabled. Already-paired phones can still connect; you can request discoverability again.</string>
+    <string name="bt_host_failed">Could not open the Bluetooth room. Check Bluetooth and Nearby devices permission, then retry.</string>
+    <string name="bt_host_status">Bluetooth room: %1$s · %2$d/2 phones\nThe other phone should select: %3$s. The remaining four teams are AI.</string>
+    <string name="bt_unknown_device">this phone</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_title">同 Wi-Fi 联机</string>
+    <string name="lan_instructions">两台手机连接同一 Wi-Fi。一台创建房间，另一台在下方点房间名称加入。</string>
+    <string name="lan_create_room">创建房间</string>
+    <string name="lan_refresh">刷新房间</string>
+    <string name="lan_searching">正在寻找当前局域网的房间…</string>
+    <string name="lan_no_rooms">暂未找到房间。请让另一台手机先创建房间，并确认连接同一 Wi-Fi；访客网络可能禁止手机互连。也可刷新或手动输入 IP。</string>
+    <string name="lan_rooms_found">找到 %1$d 个房间，点名称即可加入</string>
+    <string name="lan_room_address">%1$s · 点击加入</string>
+    <string name="lan_invalid_ip">请输入有效的 IPv4 地址，例如 192.168.1.10</string>
+    <string name="lan_host_failed">房间未能开启，请返回后重新创建。</string>
+    <string name="lan_host_status">房间：%1$s · %2$d/6 人\n同 Wi-Fi 的其他手机可点房间加入。备用手动 IP：%3$s</string>
+</resources>

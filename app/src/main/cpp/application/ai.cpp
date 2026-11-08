@@ -1,11 +1,28 @@
+//    This file is part of Liquid Wars.
+//
+//    Copyright (C) 2013 Henry Shepperd (hshepperd@gmail.com)
+//
+//    Liquid Wars is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Liquid Wars is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Liquid Wars.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "ai.hpp"
 
 int AI::getNearestDot(int p, short px, short py) {
     int nearestX = 0;
     int nearestY = 0;
     float dist = 10000;
-    for(int i = 0; i < NUMBER_OF_TEAMS*state->dotsPerTeam; i++) {
-        if(state->dots[i]->team == p)
+    for(size_t i = 0; i < state->dots.size(); i++) {
+        if(state->allied(state->dots[i]->team,p)||state->items->concealedFrom(*state,p,state->dots[i]->team))
             continue;
         const int tempx = state->dots[i]->x;
         const int tempy = state->dots[i]->y;

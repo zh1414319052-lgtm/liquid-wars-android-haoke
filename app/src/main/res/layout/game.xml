@@ -2,14 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true">
+    android:background="@color/game_background_soft"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <com.dergoogler.liquidwars.MyGLSurfaceView
+    <TextView android:id="@+id/model_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:textSize="12sp" android:textColor="#CCDAD4" android:padding="4dp" android:visibility="gone" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+    <com.xenris.liquidwarsos.MyGLSurfaceView
         android:id="@+id/mySurfaceView"
-        android:layout_width="fill_parent"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+    <com.xenris.liquidwarsos.ItemOverlay android:id="@+id/item_overlay" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <com.xenris.liquidwarsos.MatchIntroView android:id="@+id/match_intro" android:layout_width="match_parent" android:layout_height="match_parent" />
+    </FrameLayout>
 
 </LinearLayout>
 

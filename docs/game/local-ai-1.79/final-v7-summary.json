@@ -1,0 +1,29 @@
+{
+  "0": {
+    "n": 64,
+    "wins": 52,
+    "losses": 7,
+    "ties": 5,
+    "win_rate": 0.8813559322033898,
+    "new_pickups": 33,
+    "old_pickups": 4
+  },
+  "1": {
+    "n": 64,
+    "wins": 47,
+    "losses": 16,
+    "ties": 1,
+    "win_rate": 0.746031746031746,
+    "new_pickups": 114,
+    "old_pickups": 5
+  },
+  "2": {
+    "n": 64,
+    "wins": 54,
+    "losses": 7,
+    "ties": 3,
+    "win_rate": 0.8852459016393442,
+    "new_pickups": 108,
+    "old_pickups": 7
+  }
+}

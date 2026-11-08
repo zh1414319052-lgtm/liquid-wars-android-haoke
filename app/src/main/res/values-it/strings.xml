@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="teams_array">
+        <item>Verde</item>
+        <item>Blu</item>
+        <item>Rosso</item>
+        <item>Bianco</item>
+        <item>Giallo</item>
+        <item>Viola</item>
+    </string-array>
+    <string-array name="maps_array">
+        <item>Random map</item>
+        <item>01 · Wind-carved Sandstone</item>
+        <item>02 · Glacial Fjord</item>
+        <item>03 · Basalt Lava Field</item>
+        <item>04 · Rainforest Roots</item>
+        <item>05 · Salt Crystal Flats</item>
+        <item>06 · Red Clay Badlands</item>
+        <item>07 · Mangrove Estuary</item>
+        <item>08 · Karst Pavement</item>
+        <item>09 · Alpine Scree</item>
+        <item>10 · Taiga Windfall</item>
+        <item>11 · Tidal Rock Pools</item>
+        <item>12 · Fungal Cavern</item>
+        <item>13 · Meteor Badlands</item>
+        <item>14 · Coral Atoll</item>
+        <item>15 · Obsidian Fault</item>
+        <item>16 · Petrified Woodland</item>
+        <item>17 · Terrace Embankments</item>
+        <item>18 · Braided Dry River</item>
+        <item>19 · Chalk Headland</item>
+        <item>20 · Autumn Woodland</item>
+        <item>21 · Bamboo Groves</item>
+        <item>22 · Reed Marsh</item>
+        <item>23 · Glacial Moraine</item>
+        <item>24 · Ironstone Plateau</item>
+        <item>25 · Stalagmite Cave</item>
+        <item>26 · Sulfur Springs</item>
+        <item>27 · Ash Dunes</item>
+        <item>28 · Tufa Pools</item>
+        <item>29 · Jade Fractures</item>
+        <item>30 · Granite Heath</item>
+        <item>31 · Cracked Mudflat</item>
+        <item>32 · Sea-eroded Shelf</item>
+        <item>33 · Gypsum Rosettes</item>
+        <item>34 · Shingle Spit</item>
+        <item>35 · Frozen Lake Floes</item>
+        <item>36 · River Delta</item>
+        <item>37 · Sea-stack Bay</item>
+        <item>38 · Foggy Peat Moor</item>
+        <item>39 · Desert Oasis</item>
+        <item>40 · Branching Reef</item>
+        <item>41 · Copper Weathering</item>
+        <item>42 · Loess Gullies</item>
+        <item>43 · Pack Ice Channels</item>
+        <item>44 · Burnt Woodland</item>
+        <item>45 · Sandstone Steps</item>
+        <item>46 · Polygonal Tundra</item>
+        <item>47 · Serpentinite Valley</item>
+        <item>48 · Amethyst Geode</item>
+        <item>49 · Fossil Riverbed</item>
+        <item>50 · 4x · Broken Ice Fjord</item>
+        <item>51 · 4x · Sandstone Labyrinth</item>
+        <item>52 · Red Mesa Windways</item>
+        <item>53 · Basalt Emberfield</item>
+        <item>54 · Frostsalt Shards</item>
+        <item>55 · Shipwreck Shoals</item>
+        <item>56 · Jungle Rootways</item>
+        <item>57 · Broken Lunar Rings</item>
+        <item>58 · Amethyst Rifts</item>
+        <item>59 · Fallen City Walls</item>
+    </string-array>
+    <string-array name="timeout_array">
+        <item>30 Secondi</item>
+        <item>1 Minuto</item>
+        <item>2 Minuti</item>
+        <item>3 Minuti</item>
+        <item>5 Minuti</item>
+        <item>10 Minuti</item>
+        <item>23 Giorni</item>
+    </string-array>
+    <string name="team">Team:</string>
+    <string name="time_limit">Time Limit:</string>
+    <string name="team_size">Team Size:</string>
+    <string name="map">Map:</string>
+    <string name="single_player_game">Single Player Game</string>
+    <string name="multiplayer_game">Multiplayer Game</string>
+    <string name="how_to_play">How To Play</string>
+    <string name="public_name">Public Name:</string>
+    <string name="start">Start</string>
+    <string name="connect_to_game">Connect To Game</string>
+    <string name="start_new_game">Start New Game</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_title">同 Wi-Fi 連線</string>
+    <string name="lan_instructions">兩台手機連接同一 Wi-Fi。一台建立房間，另一台在下方點房間名稱加入。</string>
+    <string name="lan_create_room">建立房間</string>
+    <string name="lan_refresh">重新搜尋</string>
+    <string name="lan_searching">正在尋找目前區域網路的房間…</string>
+    <string name="lan_no_rooms">暫未找到房間。請讓另一台手機先建立房間，並確認連接同一 Wi-Fi；訪客網路可能禁止手機互連。也可重新搜尋或手動輸入 IP。</string>
+    <string name="lan_rooms_found">找到 %1$d 個房間，點名稱即可加入</string>
+    <string name="lan_room_address">%1$s · 點擊加入</string>
+    <string name="lan_invalid_ip">請輸入有效的 IPv4 地址，例如 192.168.1.10</string>
+    <string name="lan_host_failed">房間未能開啟，請返回後重新建立。</string>
+    <string name="lan_host_status">房間：%1$s · %2$d/6 人\n同 Wi-Fi 的其他手機可點房間加入。備用手動 IP：%3$s</string>
+</resources>

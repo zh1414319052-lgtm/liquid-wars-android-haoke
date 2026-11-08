@@ -1,0 +1,268 @@
+{
+  "samples": [
+    {
+      "label": "before-isolated",
+      "file": "perf168-baseline-ai179-before-isolated-map1-1000.json",
+      "status": "NOT_TESTED_SURFACE_PRESENTATION",
+      "ui_ms_p50_p95_p99": [
+        2.311078,
+        5.708013,
+        15.794297
+      ],
+      "raw": {
+        "version": "1.78-baseline",
+        "phase": "baseline-ai179-before-isolated-map1",
+        "status": "NOT_TESTED_SURFACE_PRESENTATION",
+        "map": 1,
+        "seed": 17901,
+        "particles_per_team": 1000,
+        "models": 0,
+        "sample_wall_ns": 6308586131,
+        "simulation_ms_start": 287,
+        "simulation_ms_end": 6594,
+        "gl_thread_cpu_ns": 472705126,
+        "simulation_thread_cpu_ns": 660000000,
+        "surface_layer": "",
+        "display_hz": 120.00000762939453,
+        "display_modes": [
+          {
+            "id": 1,
+            "width": 1264,
+            "height": 2780,
+            "hz": 120.00000762939453
+          }
+        ],
+        "refresh_period_ns": 0,
+        "presentation_timestamps_ns": [],
+        "pss_kib": 108727,
+        "human_play": false,
+        "physical_phone": false,
+        "recording_during_sample": false,
+        "gl_render_completions": 749,
+        "gl_completions_are_not_present_fps": true,
+        "configured_frame_limit": 0
+      }
+    },
+    {
+      "label": "before-isolated",
+      "file": "perf168-baseline-ai179-before-isolated-map54-1000.json",
+      "status": "NOT_TESTED_SURFACE_PRESENTATION",
+      "ui_ms_p50_p95_p99": [
+        3.374137,
+        11.348341,
+        34.133352
+      ],
+      "raw": {
+        "version": "1.78-baseline",
+        "phase": "baseline-ai179-before-isolated-map54",
+        "status": "NOT_TESTED_SURFACE_PRESENTATION",
+        "map": 54,
+        "seed": 17954,
+        "particles_per_team": 1000,
+        "models": 0,
+        "sample_wall_ns": 6306429991,
+        "simulation_ms_start": 546,
+        "simulation_ms_end": 6818,
+        "gl_thread_cpu_ns": 586954378,
+        "simulation_thread_cpu_ns": 920000000,
+        "surface_layer": "",
+        "display_hz": 120.00000762939453,
+        "display_modes": [
+          {
+            "id": 1,
+            "width": 1264,
+            "height": 2780,
+            "hz": 120.00000762939453
+          }
+        ],
+        "refresh_period_ns": 0,
+        "presentation_timestamps_ns": [],
+        "pss_kib": 119824,
+        "human_play": false,
+        "physical_phone": false,
+        "recording_during_sample": false,
+        "gl_render_completions": 735,
+        "gl_completions_are_not_present_fps": true,
+        "configured_frame_limit": 0
+      }
+    },
+    {
+      "label": "before-isolated",
+      "file": "perf168-baseline-ai179-before-isolated-map54-4500.json",
+      "status": "NOT_TESTED_SURFACE_PRESENTATION",
+      "ui_ms_p50_p95_p99": [
+        4.128925,
+        7.80241,
+        14.185935
+      ],
+      "raw": {
+        "version": "1.78-baseline",
+        "phase": "baseline-ai179-before-isolated-map54",
+        "status": "NOT_TESTED_SURFACE_PRESENTATION",
+        "map": 54,
+        "seed": 17954,
+        "particles_per_team": 4500,
+        "models": 0,
+        "sample_wall_ns": 6305280646,
+        "simulation_ms_start": 280,
+        "simulation_ms_end": 6580,
+        "gl_thread_cpu_ns": 878449947,
+        "simulation_thread_cpu_ns": 2430000000,
+        "surface_layer": "",
+        "display_hz": 120.00000762939453,
+        "display_modes": [
+          {
+            "id": 1,
+            "width": 1264,
+            "height": 2780,
+            "hz": 120.00000762939453
+          }
+        ],
+        "refresh_period_ns": 0,
+        "presentation_timestamps_ns": [],
+        "pss_kib": 123376,
+        "human_play": false,
+        "physical_phone": false,
+        "recording_during_sample": false,
+        "gl_render_completions": 756,
+        "gl_completions_are_not_present_fps": true,
+        "configured_frame_limit": 0
+      }
+    },
+    {
+      "label": "after-v7-isolated",
+      "file": "perf168-baseline-ai179-after-v7-isolated-map1-1000.json",
+      "status": "NOT_TESTED_SURFACE_PRESENTATION",
+      "ui_ms_p50_p95_p99": [
+        1.731145,
+        2.34461,
+        2.647858
+      ],
+      "raw": {
+        "version": "1.79",
+        "phase": "baseline-ai179-after-v7-isolated-map1",
+        "status": "NOT_TESTED_SURFACE_PRESENTATION",
+        "map": 1,
+        "seed": 17901,
+        "particles_per_team": 1000,
+        "models": 0,
+        "sample_wall_ns": 6302743830,
+        "simulation_ms_start": 273,
+        "simulation_ms_end": 6580,
+        "gl_thread_cpu_ns": 303264445,
+        "simulation_thread_cpu_ns": 540000000,
+        "surface_layer": "",
+        "display_hz": 120.00000762939453,
+        "display_modes": [
+          {
+            "id": 1,
+            "width": 1264,
+            "height": 2780,
+            "hz": 120.00000762939453
+          }
+        ],
+        "refresh_period_ns": 0,
+        "presentation_timestamps_ns": [],
+        "pss_kib": 104816,
+        "human_play": false,
+        "physical_phone": false,
+        "recording_during_sample": false,
+        "gl_render_completions": 758,
+        "gl_completions_are_not_present_fps": true,
+        "configured_frame_limit": 0
+      }
+    },
+    {
+      "label": "after-v7-isolated",
+      "file": "perf168-baseline-ai179-after-v7-isolated-map54-1000.json",
+      "status": "NOT_TESTED_SURFACE_PRESENTATION",
+      "ui_ms_p50_p95_p99": [
+        2.116986,
+        3.108382,
+        3.833306
+      ],
+      "raw": {
+        "version": "1.79",
+        "phase": "baseline-ai179-after-v7-isolated-map54",
+        "status": "NOT_TESTED_SURFACE_PRESENTATION",
+        "map": 54,
+        "seed": 17954,
+        "particles_per_team": 1000,
+        "models": 0,
+        "sample_wall_ns": 6302351640,
+        "simulation_ms_start": 273,
+        "simulation_ms_end": 6580,
+        "gl_thread_cpu_ns": 313058005,
+        "simulation_thread_cpu_ns": 590000000,
+        "surface_layer": "",
+        "display_hz": 120.00000762939453,
+        "display_modes": [
+          {
+            "id": 1,
+            "width": 1264,
+            "height": 2780,
+            "hz": 120.00000762939453
+          }
+        ],
+        "refresh_period_ns": 0,
+        "presentation_timestamps_ns": [],
+        "pss_kib": 116047,
+        "human_play": false,
+        "physical_phone": false,
+        "recording_during_sample": false,
+        "gl_render_completions": 757,
+        "gl_completions_are_not_present_fps": true,
+        "configured_frame_limit": 0
+      }
+    },
+    {
+      "label": "after-v7-isolated",
+      "file": "perf168-baseline-ai179-after-v7-isolated-map54-4500.json",
+      "status": "NOT_TESTED_SURFACE_PRESENTATION",
+      "ui_ms_p50_p95_p99": [
+        3.432193,
+        6.250871,
+        7.905664
+      ],
+      "raw": {
+        "version": "1.79",
+        "phase": "baseline-ai179-after-v7-isolated-map54",
+        "status": "NOT_TESTED_SURFACE_PRESENTATION",
+        "map": 54,
+        "seed": 17954,
+        "particles_per_team": 4500,
+        "models": 0,
+        "sample_wall_ns": 6303919798,
+        "simulation_ms_start": 280,
+        "simulation_ms_end": 6587,
+        "gl_thread_cpu_ns": 740861222,
+        "simulation_thread_cpu_ns": 2250000000,
+        "surface_layer": "",
+        "display_hz": 120.00000762939453,
+        "display_modes": [
+          {
+            "id": 1,
+            "width": 1264,
+            "height": 2780,
+            "hz": 120.00000762939453
+          }
+        ],
+        "refresh_period_ns": 0,
+        "presentation_timestamps_ns": [],
+        "pss_kib": 119572,
+        "human_play": false,
+        "physical_phone": false,
+        "recording_during_sample": false,
+        "gl_render_completions": 759,
+        "gl_completions_are_not_present_fps": true,
+        "configured_frame_limit": 0
+      }
+    }
+  ],
+  "conditions": "MuMu2 Android15 1390x632;6s per scene; no screenrecord or concurrent host benchmark; native GL completion is not presentation FPS",
+  "not_tested": [
+    "physical-phone thermals",
+    "long-run performance",
+    "SurfaceFlinger presentation timestamps unavailable"
+  ]
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bt_multiplayer">藍牙連線</string>
+    <string name="bt_instructions">支援兩部手機，無需 Wi-Fi。一台建立房間，另一台選擇這部手機；若出現系統配對提示，請在兩台手機確認。</string>
+    <string name="bt_create">建立藍牙房間</string>
+    <string name="bt_scan">尋找附近手機</string>
+    <string name="bt_refresh">重新整理已配對</string>
+    <string name="bt_settings">系統藍牙設定</string>
+    <string name="bt_app_permissions">應用權限設定</string>
+    <string name="bt_empty">請選擇已開啟本遊戲藍牙房間的手機。找不到時，讓房主設為可被發現，或先在系統藍牙設定配對，再返回重新整理。</string>
+    <string name="bt_permission_hint">點擊所需操作後，會申請對應的「附近裝置」權限。</string>
+    <string name="bt_permission_denied">藍牙權限被拒絕。可重試，或在「應用權限設定」中允許附近裝置；仍可使用 Wi-Fi 連線。</string>
+    <string name="bt_unavailable">此裝置不支援經典藍牙，請使用 Wi-Fi 連線。</string>
+    <string name="bt_enable_hint">藍牙未開啟，或你取消了開啟。可點擊所需操作重新開啟。</string>
+    <string name="bt_operation_failed">藍牙操作未成功，請檢查藍牙和權限後重試。</string>
+    <string name="bt_scan_failed">無法開始尋找，請重試，或先在系統藍牙設定配對。</string>
+    <string name="bt_scanning">正在尋找附近裝置，請選擇已建立本遊戲房間的手機…</string>
+    <string name="bt_devices_found">找到 %1$d 台裝置，請選已建立房間的手機</string>
+    <string name="bt_paired_peer">%1$s · 已配對 · 點擊連線</string>
+    <string name="bt_new_peer">%1$s · 未配對 · 系統可能要求確認配對</string>
+    <string name="bt_legacy_pairing">此 Android 版本請先在系統藍牙設定配對，再返回重新整理；應用不申請定位權限。</string>
+    <string name="bt_make_visible">讓這部手機可被發現（120 秒）</string>
+    <string name="bt_visibility_declined">未允許可被發現。已配對手機仍能選擇連線，也可再次點擊可被發現按鈕。</string>
+    <string name="bt_host_failed">藍牙房間未能開啟，請檢查藍牙和附近裝置權限後重試。</string>
+    <string name="bt_host_status">藍牙房間：%1$s · %2$d/2 部手機\n另一台手機請選擇：%3$s；其餘四隊由 AI 控制。</string>
+    <string name="bt_unknown_device">這部手機</string>
+</resources>

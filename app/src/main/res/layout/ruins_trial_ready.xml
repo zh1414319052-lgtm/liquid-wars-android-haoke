@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="24dp" android:background="@drawable/ui_panel">
+        <TextView android:id="@+id/ruins_ready_title" style="@style/Ui.Title" android:text="@string/ruins_title"
+            android:gravity="center" android:textSize="24sp" android:textColor="@color/ui_accent"/>
+        <TextView android:id="@+id/ruins_ready_message" style="@style/Ui.Body" android:text="@string/ruins_message"
+            android:layout_marginVertical="16dp" android:textSize="15sp"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/ruins_start"
+            style="@style/Ui.Button.Primary" android:text="@string/ruins_start" android:minHeight="48dp"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/ruins_exit"
+            style="@style/Ui.Button" android:text="@string/ruins_exit" android:minHeight="48dp"/>
+    </LinearLayout>
+</ScrollView>

@@ -22,3 +22,10 @@
 
 -keep class org.apache.cordova.** { *; }
 -keep public class * extends org.apache.cordova.CordovaPlugin
+
+# JNI exports use the original Java namespace even in the independent Haoke app ID.
+-keep,allowoptimization class com.xenris.liquidwarsos.NativeInterface { *; }
+# Android XML android:onClick handlers, including inherited LocalizedActivity.uiBack.
+-keepclassmembers class com.xenris.liquidwarsos.activities.** {
+    public void *(android.view.View);
+}

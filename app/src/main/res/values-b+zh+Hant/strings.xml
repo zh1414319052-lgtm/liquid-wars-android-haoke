@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">液态战争重制版</string>
+    <string-array name="teams_array">
+        <item>綠隊</item>
+        <item>藍隊</item>
+        <item>紅隊</item>
+        <item>白隊</item>
+        <item>黃隊</item>
+        <item>紫隊</item>
+    </string-array>
+</resources>

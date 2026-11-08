@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="item_names">
+<item>增殖核心</item>
+<item>噬岩之牙</item>
+<item>时间冻结</item>
+<item>瞬间移动</item>
+<item>重置时间</item>
+<item>无障碍穿行</item>
+<item>无敌时间</item>
+<item>死亡时间</item>
+<item>朋友时间</item>
+<item>抑制增殖</item>
+<item>岩层封印</item>
+<item>破冰暖流</item>
+<item>空间锚</item>
+<item>因果锁</item>
+<item>相位钉</item>
+<item>破盾裁决</item>
+<item>替命符</item>
+<item>独立宣言</item>
+<item>暗影披风</item>
+<item>显影火花</item>
+</string-array>
+<string-array name="item_descriptions">
+<item>增加当前兵力25%，单次最多增加开局每队数量的50%；受空间与108000总上限约束，不再直接翻倍。</item>
+<item>啃开内部墙体20秒；最多增兵开局数量25%且不超过500颗，预算用尽仍可开路。</item>
+<item>冻结敌方行动20秒，破冰暖流可预防或解除。</item>
+<item>一次定点传送，可直接点小地图地面；点墙或空间不足保留卡。</item>
+<item>整局最多刷出一次，回溯后也不会再刷。恢复开局并3秒集结；因果锁可阻止。</item>
+<item>穿过内部障碍20秒，仍与敌方正常互相吞噬，结束安全退出墙体。</item>
+<item>保护20秒免受普通吞噬与死亡选择；破盾裁决可解除，不加攻击力。</item>
+<item>选中可见敌队后立即淘汰全部粒子，不增兵；无敌阻止选择，替命符可挡一次。</item>
+<item>与指定敌队临时停战20秒，不互吞但不共享胜利；全场同时只一份协议，冲突目标保留卡。</item>
+<item>20秒内压制敌方增殖与噬岩增兵，不影响普通吞噬所得粒子。</item>
+<item>20秒内阻止敌方啃墙，不回填已打开的通道。</item>
+<item>立即解冻自己和盟友，并保护20秒，不加移动速度。</item>
+<item>20秒内阻止敌方传送；敌方保留传送卡。</item>
+<item>20秒内阻止回溯；不会恢复本局回溯出现次数。</item>
+<item>解除敌方穿墙并安全退出障碍，20秒内阻止再穿墙。</item>
+<item>解除敌方无敌，20秒内阻止再获得，不直接伤害兵力。</item>
+<item>20秒内挡一次死亡淘汰，普通吞噬不触发，不叠加。</item>
+<item>解除涉及自己的临时停战，自己和盟友免疫强制停战20秒，原组队不变。</item>
+<item>隐身20秒，敌方画面、小地图和模型观察看不到你位置；自己和盟友可见，仍正常互相吞噬。</item>
+<item>解除敌方隐身，为自己和盟友提供20秒显影保护；不扩大普通小地图侦察范围。</item>
+</string-array>
+</resources>

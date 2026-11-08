@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:fillViewport="false">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="24dp" android:background="@drawable/ui_panel">
+        <TextView style="@style/Ui.Caption" android:text="@string/match_result_title" android:gravity="center"/>
+        <TextView android:id="@+id/result_message" style="@style/Ui.Title"
+            android:gravity="center" android:textColor="@color/ui_accent" android:textSize="24sp"
+            android:layout_marginVertical="16dp" android:accessibilityLiveRegion="polite"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/result_primary"
+            style="@style/Ui.Button.Primary"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/result_exit"
+            style="@style/Ui.Button"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/result_spectate"
+            style="@style/Ui.Button" android:text="@string/continue_spectating" android:visibility="gone"/>
+    </LinearLayout>
+</ScrollView>

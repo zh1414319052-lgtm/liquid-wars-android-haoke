@@ -1,0 +1,9 @@
+<resources>
+    <string name="ai_difficulty">AI difficulty</string>
+    <string-array name="ai_difficulty_options"><item>Relaxed</item><item>Standard</item><item>Hard</item></string-array>
+    <string-array name="ai_room_labels"><item>Relaxed AI</item><item>Standard AI</item><item>Hard AI</item></string-array>
+    <string name="ai_relaxed_description">Slower reactions and single-target pursuit. Good for learning.</string>
+    <string name="ai_classic_description">Scouts, navigates obstacles and contests useful items. A steady challenge with slower decisions.</string>
+    <string name="ai_hard_description">Judges nearby forces, regroups or retreats, supports allies and uses items tactically. Fully offline; no bonus health or particles.</string>
+    <string name="ai_client_hint">The host controls AI difficulty. It is shown after the room name; your phone follows the host’s targets.</string>
+</resources>

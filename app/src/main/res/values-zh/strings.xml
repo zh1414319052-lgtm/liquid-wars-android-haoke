@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="teams_array">
+        <item>绿队</item>
+        <item>蓝队</item>
+        <item>红队</item>
+        <item>白队</item>
+        <item>黄队</item>
+        <item>紫队</item>
+    </string-array>
+    <string-array name="maps_array">
+        <item>随机地图</item>
+        <item>01 · 风蚀砂谷</item>
+        <item>02 · 冰裂峡湾</item>
+        <item>03 · 熔岩裂原</item>
+        <item>04 · 雨林板根</item>
+        <item>05 · 盐晶浅滩</item>
+        <item>06 · 赤土荒沟</item>
+        <item>07 · 红树林湾</item>
+        <item>08 · 石灰迷岩</item>
+        <item>09 · 高山碎石</item>
+        <item>10 · 针叶倒木</item>
+        <item>11 · 潮汐岩池</item>
+        <item>12 · 荧菌洞地</item>
+        <item>13 · 陨坑红壤</item>
+        <item>14 · 珊瑚环礁</item>
+        <item>15 · 黑曜断脊</item>
+        <item>16 · 硅木林地</item>
+        <item>17 · 梯田水埂</item>
+        <item>18 · 干河辫道</item>
+        <item>19 · 白垩岬湾</item>
+        <item>20 · 秋林落叶</item>
+        <item>21 · 青竹幽径</item>
+        <item>22 · 芦苇泥沼</item>
+        <item>23 · 冰碛石垄</item>
+        <item>24 · 铁红台地</item>
+        <item>25 · 钟乳洞坪</item>
+        <item>26 · 硫泉洼地</item>
+        <item>27 · 灰烬沙丘</item>
+        <item>28 · 钙华浅池</item>
+        <item>29 · 翡翠矿脉</item>
+        <item>30 · 石楠荒原</item>
+        <item>31 · 龟裂泥坪</item>
+        <item>32 · 海蚀洞滩</item>
+        <item>33 · 石膏晶簇</item>
+        <item>34 · 砾石沙嘴</item>
+        <item>35 · 冻湖冰排</item>
+        <item>36 · 河口三角</item>
+        <item>37 · 礁柱群湾</item>
+        <item>38 · 雾沼草甸</item>
+        <item>39 · 沙海绿洲</item>
+        <item>40 · 枝珊瑚海</item>
+        <item>41 · 铜绿蚀地</item>
+        <item>42 · 黄土沟壑</item>
+        <item>43 · 浮冰裂海</item>
+        <item>44 · 焦木灰林</item>
+        <item>45 · 砂岩断台</item>
+        <item>46 · 冻土多边</item>
+        <item>47 · 蛇纹石谷</item>
+        <item>48 · 紫晶洞盆</item>
+        <item>49 · 古骨河床</item>
+        <item>50 · 4倍 · 断冰峡湾</item>
+        <item>51 · 4倍 · 丹霞回廊</item>
+        <item>52 · 赤砂风廊</item>
+        <item>53 · 熔脉玄原</item>
+        <item>54 · 霜盐碎境</item>
+        <item>55 · 沉船浅滩</item>
+        <item>56 · 丛林根脉</item>
+        <item>57 · 月海断环</item>
+        <item>58 · 紫晶裂隙</item>
+        <item>59 · 废城断垣</item>
+    </string-array>
+    <string-array name="timeout_array">
+        <item>30 秒</item>
+        <item>1 分钟</item>
+        <item>2 分钟</item>
+        <item>3 分钟</item>
+        <item>5 分钟</item>
+        <item>10 分钟</item>
+        <item>23 天</item>
+    </string-array>
+    <string name="app_name">液态战争重制版</string>
+    <string name="team">阵营：</string>
+    <string name="time_limit">对局时限：</string>
+    <string name="team_size">每队粒子数：</string>
+    <string name="map">地图：</string>
+    <string name="single_player_game">单人对战</string>
+    <string name="multiplayer_game">局域网联机</string>
+    <string name="how_to_play">玩法说明</string>
+    <string name="public_name">房间名称：</string>
+    <string name="start">开始对局</string>
+    <string name="connect_to_game">加入房间</string>
+    <string name="start_new_game">创建房间</string>
+    <string name="instructions_goal">胜利目标\n把对手的粒子全部转化为己方颜色。</string>
+    <string name="instructions_controls">操作方式\n按住战场并拖动，引导己方粒子移动。最多可同时使用五个触点，从不同方向引导队伍。\n\n双方接触时，粒子可能被转化。试着分路包围对手。</string>
+    <string name="team_unknown">未知阵营</string>
+    <string name="timeout_win">时间到，你赢了！</string>
+    <string name="timeout_other_win">时间到，%1$s获胜！</string>
+    <string name="result_loss">你输了</string>
+    <string name="result_win">你赢了！</string>
+    <string name="result_team_win">%1$s获胜！</string>
+    <string name="leave_match">离开本局？</string>
+    <string name="leave_hosted_match">结束所有玩家的本局对战？</string>
+    <string name="leave">离开</string>
+    <string name="keep_playing">继续游戏</string>
+    <string name="game_cancelled">对局已取消</string>
+    <string name="connection_lost">连接已断开</string>
+    <string name="wifi_required">请连接 Wi-Fi 后再进行局域网联机。</string>
+    <string name="enter_room_name">请输入房间名称</string>
+    <string name="done">完成</string>
+    <string name="cancel">取消</string>
+    <string name="client_update_required">请更新液态战争重制版后再加入。</string>
+    <string name="host_update_required">请房主更新液态战争重制版。</string>
+    <string name="sharing_game">房间已在 %1$s 开放 · IP %2$s · 玩家：%3$d 人</string>
+    <string name="ip_example">例如：%1$s</string>
+    <string name="enter_ip">输入 IP 地址</string>
+    <string name="connect">连接</string>
+    <string name="searching_on">正在 %1$s 中搜索房间…</string>
+    <string name="manual_connect">手动输入 IP</string>
+    <string name="connecting_to">正在连接 %1$s…</string>
+    <string name="connected_to">已连接 %1$s</string>
+    <string name="failed_to_connect_to">无法连接 %1$s</string>
+    <string name="lost_connection_to">与 %1$s 的连接已断开</string>
+    <string name="previous_map">上一张地图</string>
+    <string name="next_map">下一张地图</string>
+    <string name="default_room_name">液态战争房间</string>
+</resources>

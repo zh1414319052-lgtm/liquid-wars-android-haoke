@@ -1,0 +1,19 @@
+<resources>
+    <string name="ui_back">Back</string>
+    <string name="ui_wordmark">LIQUID WARS</string><string name="ui_game_title">Liquid Wars</string><string name="ui_edition">Remastered</string>
+    <string name="ui_tagline">Guide the flow. Surround your rivals.</string><string name="ui_footer">Classic rules · Six teams · Widescreen maps</string>
+    <string name="ui_wifi">Wi-Fi multiplayer</string><string name="ui_rooms">Nearby rooms</string><string name="ui_devices">Choose a phone</string>
+    <string name="ui_setup_hint">Choose a map for your next six-team match.</string><string name="ui_host_title">Room settings</string><string name="ui_host_hint">Tap the room name to rename it. The host controls match settings.</string>
+    <string name="ui_client_title">Waiting for the host</string><string name="ui_wait_hint">The match opens automatically when the host starts.</string><string name="ui_leave_room">Leave room</string><string name="ui_pending">Waiting…</string>
+    <string name="ui_map_preview">Selected map preview</string><string name="ui_maps_hint">59 maps · Hold arrows to skip 20</string>
+    <string name="ui_tip1_title">01  Guide the flow</string><string name="ui_tip1_body">Touch and drag to guide your particles around obstacles.</string>
+    <string name="ui_tip2_title">02  Use five fingers</string><string name="ui_tip2_body">Use up to five touch points at once to split your forces.</string>
+    <string name="ui_tip3_title">03  Surround rivals</string><string name="ui_tip3_body">Convert every rival particle to your team colour to win.</string>
+    <string name="release_attribution">Liquid Wars OS · Copyright (C) 2013 Henry Shepperd.\nHaoke edition %1$s · GPL-3.0-or-later.\nThe corresponding source and license accompany this APK. License text is also included in assets/licenses.</string>
+    <string name="ruins_title">Biome map playtest</string>
+    <string name="ruins_message">All model APIs are disabled in this preview. You control the selected team; other teams use local AI. Spectating uses local AI for every team. Raised rocks, ice and roots block movement; dark ground and shallow water are passable. Start begins the three-second countdown. Spawns change each match.</string>
+    <string name="ruins_start">Start playtest</string>
+    <string name="ruins_exit">Back to menu</string>
+    <string name="large_map_mode">Large map mode</string>
+    <string name="large_map_hint">10 maps · four tiles each · 1600 × 960</string>
+</resources>

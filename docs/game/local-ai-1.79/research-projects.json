@@ -1,0 +1,32 @@
+[
+  {
+    "repo": "Tencent/behaviac",
+    "url": "https://github.com/Tencent/behaviac",
+    "license": "NOASSERTION",
+    "archived": false,
+    "defaultBranch": "master",
+    "pushedAt": "2023-07-07T07:25:48Z",
+    "inspectedCommit": "351442b36726a2baddffd2d78e7cdc2168077d93",
+    "commitDate": "2022-07-06T13:12:18Z"
+  },
+  {
+    "repo": "libgdx/gdx-ai",
+    "url": "https://github.com/libgdx/gdx-ai",
+    "license": "Apache-2.0",
+    "archived": false,
+    "defaultBranch": "master",
+    "pushedAt": "2024-10-01T16:56:55Z",
+    "inspectedCommit": "6726e345248ddcad7cec0737f6ad83e4e028266d",
+    "commitDate": "2024-10-01T16:56:54Z"
+  },
+  {
+    "repo": "Farama-Foundation/MicroRTS",
+    "url": "https://github.com/Farama-Foundation/MicroRTS",
+    "license": "GPL-3.0",
+    "archived": false,
+    "defaultBranch": "master",
+    "pushedAt": "2025-08-11T20:18:57Z",
+    "inspectedCommit": "72f2fd94039adf3323f4591947e98661a572f927",
+    "commitDate": "2025-08-11T20:18:57Z"
+  }
+]

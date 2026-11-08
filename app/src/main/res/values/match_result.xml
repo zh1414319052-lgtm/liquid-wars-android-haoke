@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="match_result_title">Match result</string>
+    <string name="play_again">Play again</string>
+    <string name="exit_match">Exit match</string>
+    <string name="return_to_room">Return to room</string>
+    <string name="exit_room">Leave room</string>
+    <string name="continue_spectating">Keep watching</string>
+    <string name="room_next_match_hint">Return to the room; the host can start the next match.</string>
+    <string name="host_lost_actions_hint">You can keep watching. Returning to the room ends this match for everyone.</string>
+</resources>

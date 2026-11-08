@@ -1,0 +1,3 @@
+PASS 142998 production Java assertions; JNI stub, not Android or real LAN
+
+PASS 3599 comfort/camera/30-60-90-120Hz/5pointer/lifecycle checks; stationary lead 61.02942..61.030273
