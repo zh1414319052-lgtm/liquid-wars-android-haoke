@@ -28,6 +28,8 @@ import android.os.Looper;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MyGLSurfaceView extends GLSurfaceView {
+    private GameAudio audio;
+    public GameAudio audio(){return audio;}
     private SurfaceCallbacks surfaceCallbacks;
     public final WorldCamera camera=new WorldCamera();private boolean worldBound;
     public void syncWorld(){int[] s=NativeInterface.sceneInfo();if(s!=null&&s.length>=6){android.app.Activity a=DisplayFrameRate.activity(getContext());boolean spectator=a!=null&&a.getIntent().getBooleanExtra("spectator",false);if(camera.id!=s[2]||camera.width!=s[0]||camera.height!=s[1])camera.world(s[0],s[1],s[2],s[3],spectator,s[4],s[5]);worldBound=true;applyCamera();if(getParent() instanceof android.view.View){android.view.View intro=((android.view.View)getParent()).findViewById(R.id.match_intro);if(intro!=null)intro.invalidate();}}}
@@ -56,11 +58,11 @@ public class MyGLSurfaceView extends GLSurfaceView {
         initialize();
     }
 
-    private void initialize(){setRenderer(new MyRenderer(()->{framesDrawn++;framePending.set(false);}));setRenderMode(RENDERMODE_WHEN_DIRTY);}
+    private void initialize(){audio=new GameAudio(getContext());setRenderer(new MyRenderer(()->{framesDrawn++;framePending.set(false);}));setRenderMode(RENDERMODE_WHEN_DIRTY);}
     private void displayFrame(long time){
         if(!worldBound)syncWorld();
         if(getWidth()>0&&getHeight()>0)camera.viewport(getWidth()/(float)getHeight());
-        if(getParent() instanceof android.view.View){ItemOverlay overlay=((android.view.View)getParent()).findViewById(R.id.item_overlay);if(overlay!=null)overlay.onDisplayFrame(time);}
+        if(getParent() instanceof android.view.View){ItemOverlay overlay=((android.view.View)getParent()).findViewById(R.id.item_overlay);if(overlay!=null)overlay.onDisplayFrame(time);TacticalOverlay tactical=((android.view.View)getParent()).findViewById(R.id.tactical_overlay);if(tactical!=null)tactical.frame(time);android.app.Activity a=DisplayFrameRate.activity(getContext());audio.frame(overlay==null?null:overlay.facts(),tactical==null?null:tactical.facts(),StaticBits.team,a!=null&&a.getIntent().getBooleanExtra("spectator",false));}
         if(framePending.compareAndSet(false,true))requestRender();
     }
     public float targetHz(){return targetHz;}
@@ -70,15 +72,15 @@ public class MyGLSurfaceView extends GLSurfaceView {
     public void refreshRate(){
         targetHz=DisplayFrameRate.apply(this);float actual=getDisplay()==null?60:getDisplay().getRefreshRate();pacer.rate(actual,targetHz);
     }
-    private void updatePacer(){if(attached&&resumed&&surfaceReady&&hasWindowFocus()&&getWindowVisibility()==VISIBLE)pacer.start();else pacer.stop();}
+    private void updatePacer(){boolean active=attached&&resumed&&surfaceReady&&hasWindowFocus()&&getWindowVisibility()==VISIBLE;if(active)pacer.start();else pacer.stop();if(audio!=null)audio.foreground(active);}
     @Override protected void onWindowVisibilityChanged(int visibility){super.onWindowVisibilityChanged(visibility);if(pacer!=null)updatePacer();}
     @Override public void onResume(){super.onResume();resumed=true;worldBound=false;framePending.set(false);refreshRate();updatePacer();}
-    @Override public void onPause(){resumed=false;camera.endTouch();camera.resetSmoothing();pacer.stop();DisplayFrameRate.release(this);super.onPause();framePending.set(false);}
+    @Override public void onPause(){resumed=false;audio.foreground(false);camera.endTouch();camera.resetSmoothing();pacer.stop();DisplayFrameRate.release(this);super.onPause();framePending.set(false);}
     @Override protected void onAttachedToWindow(){super.onAttachedToWindow();attached=true;((DisplayManager)getContext().getSystemService(Context.DISPLAY_SERVICE)).registerDisplayListener(displayListener,new Handler(Looper.getMainLooper()));updatePacer();}
-    @Override protected void onDetachedFromWindow(){attached=false;pacer.stop();((DisplayManager)getContext().getSystemService(Context.DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);super.onDetachedFromWindow();}
+    @Override protected void onDetachedFromWindow(){attached=false;pacer.stop();audio.release();((DisplayManager)getContext().getSystemService(Context.DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);super.onDetachedFromWindow();}
     @Override public void surfaceCreated(SurfaceHolder holder){super.surfaceCreated(holder);surfaceReady=true;framePending.set(false);if(resumed)refreshRate();updatePacer();}
     @Override public void surfaceChanged(SurfaceHolder holder,int format,int w,int h){super.surfaceChanged(holder,format,w,h);if(resumed)refreshRate();}
-    @Override public void surfaceDestroyed(SurfaceHolder holder){surfaceReady=false;pacer.stop();super.surfaceDestroyed(holder);framePending.set(false);}
+    @Override public void surfaceDestroyed(SurfaceHolder holder){surfaceReady=false;pacer.stop();audio.foreground(false);super.surfaceDestroyed(holder);framePending.set(false);}
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -113,10 +115,10 @@ public class MyGLSurfaceView extends GLSurfaceView {
             if (base == context) break;
             context = base;
         }
-        if (context instanceof android.app.Activity) GameWindow.apply((android.app.Activity) context);
+        if (context instanceof android.app.Activity){((android.app.Activity)context).setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);GameWindow.apply((android.app.Activity) context);}
     }
 
-    public void controls(short[] x,short[] y){if(surfaceCallbacks!=null)surfaceCallbacks.onControls(x,y);}
+    public void controls(short[] x,short[] y){if(surfaceCallbacks!=null){surfaceCallbacks.onControls(x,y);audio.command(x,y);}}
 
     public interface SurfaceCallbacks {
         void onControls(short[] x,short[] y);

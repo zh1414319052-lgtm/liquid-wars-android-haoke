@@ -70,6 +70,7 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
         getWindow().addFlags(fullscreen | keepOn);
 
         setContentView(R.layout.game);
+        if(com.xenris.liquidwarsos.online.OnlineSession.active!=null)com.xenris.liquidwarsos.online.OnlineSession.active.attach(this);
         com.xenris.liquidwarsos.GameWindow.apply(this);
         myGLSurfaceView = (MyGLSurfaceView)findViewById(R.id.mySurfaceView);
         myGLSurfaceView.setSurfaceCallbacks(this);
@@ -80,6 +81,7 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
         java.util.Arrays.fill(xs,(short)-1);java.util.Arrays.fill(ys,(short)-1);
         xs[0]=starts[StaticBits.team*2];ys[0]=starts[StaticBits.team*2+1];
         NativeInterface.configureAlliances(StaticBits.alliances);
+        NativeInterface.configureOperations(StaticBits.operationsMode);
         intro=findViewById(R.id.match_intro);
         intro.bind(StaticBits.team,false,starts);
         if(!java.util.Arrays.equals(StaticBits.alliances,com.xenris.liquidwarsos.AllianceRules.solo())){android.widget.TextView rules=findViewById(R.id.model_status);rules.setVisibility(android.view.View.VISIBLE);rules.setText(com.xenris.liquidwarsos.AllianceRules.label(StaticBits.alliances));}
@@ -158,7 +160,7 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
     private void checkForWinner() {
         if (gameFinished) return;
         for (int i = 0; i < 6; i++) {
-            if (NativeInterface.totalParticles() > 0 && com.xenris.liquidwarsos.AllianceRules.score(i) == NativeInterface.totalParticles()) {
+            if (com.xenris.liquidwarsos.OperationMode.wins(i)) {
                 gameFinished = true;
                 showResult(com.xenris.liquidwarsos.AllianceRules.allied(i,StaticBits.team) ? getString(R.string.result_win)
                         : getString(R.string.result_team_win, com.xenris.liquidwarsos.AllianceSettings.name(this, i)), false);

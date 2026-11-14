@@ -54,11 +54,13 @@ State::State(int team, int mapId, int seed, int dotsPerTeam) {
     field.reset(map->width,map->height);
     placeTeams(seed, actualMap);
     items=new Items(seed,actualMap);
+    operations=new Operations(*this);
 }
 
 State::~State() {
     for(auto dot:dots)delete dot;
     delete items;
+    delete operations;
     delete(map);
     delete(moveRandom);
     delete(aiRandom);

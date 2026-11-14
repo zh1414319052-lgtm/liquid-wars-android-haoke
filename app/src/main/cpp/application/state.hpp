@@ -28,6 +28,7 @@
 #include "random.hpp"
 #include "spiral.hpp"
 #include "items.hpp"
+#include "operations.hpp"
 
 class State {
     public:
@@ -52,6 +53,7 @@ class State {
         Random* aiRandom;
         int dotsPerTeam;
         Items* items=nullptr;
+        Operations* operations=nullptr;
         int birthX[6]={},birthY[6]={},spawnFallbacks=0;
         int alliances[6]={0,1,2,3,4,5};
         bool allied(int a,int b) const {return alliances[a]==alliances[b]||(items&&items->truceUntil>items->elapsed&&((alliances[a]==items->truceA&&alliances[b]==items->truceB)||(alliances[b]==items->truceA&&alliances[a]==items->truceB)));}

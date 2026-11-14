@@ -56,6 +56,10 @@ public class NativeInterface {
     public static native int terrainRevision();
     /** Immutable authoritative pickups, effects, event and score copy. */
     public static native int[] itemSnapshot();
+    public static native void configureOperations(int mode);
+    public static native int[] operationsSnapshot(int viewer,boolean spectator);
+    public static native int operationWinner();
+    public static native int operationScore(int team);
     /** Display-only allied scouting; never writes rule state or RNG. */
     public static native int[] minimapSnapshot(boolean spectator);
     public static native void setTimeSidebar(float t);

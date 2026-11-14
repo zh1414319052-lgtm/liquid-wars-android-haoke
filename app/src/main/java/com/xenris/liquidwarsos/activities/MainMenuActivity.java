@@ -26,6 +26,7 @@ import android.content.Intent;
 import com.xenris.liquidwarsos.R;
 
 public class MainMenuActivity extends LocalizedActivity {
+    private com.xenris.liquidwarsos.updates.MenuUpdateHost updates;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +34,12 @@ public class MainMenuActivity extends LocalizedActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.main_menu);
+        updates=new com.xenris.liquidwarsos.updates.MenuUpdateHost(this,true);
     }
+    @Override public void onResume(){super.onResume();if(updates!=null)updates.resume();}
+    @Override public void onPause(){if(updates!=null)updates.pause();super.onPause();}
+    @Override public void onDestroy(){if(updates!=null)updates.close();super.onDestroy();}
+    @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);if(updates!=null)updates.focus(focused);}
 
     public void singlePlayerMenu(View view) {
         Intent intent = new Intent(this, SinglePlayerGameSetupActivity.class);
@@ -46,6 +52,7 @@ public class MainMenuActivity extends LocalizedActivity {
         // Discovery does not require reading SSID/location or a legacy Wi-Fi IPv4 value.
         startActivity(new Intent(this, MultiplayerMenuActivity.class));
     }
+    public void onlineMenu(View view) {startActivity(new Intent(this,OnlineLobbyActivity.class));}
 
     public void instructions(View view) {
         Intent intent = new Intent(this, InstructionsActivity.class);

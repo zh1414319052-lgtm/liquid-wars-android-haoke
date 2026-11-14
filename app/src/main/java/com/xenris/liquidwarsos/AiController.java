@@ -36,13 +36,14 @@ public final class AiController {
     public void update(short[][] xs,short[][] ys,int controlledMask) {
         if((controlledMask&0x3f)==0)return; // A six-human room needs no AI work.
         int local=controlledMask&~cloudMask&63;
+        boolean strategic=level!=AiDifficulty.RELAXED||StaticBits.operationsMode==1;
         readyMask&=local;
         int due=0,cadence=level==AiDifficulty.HARD?4:8;
         for(int p=0;p<6;p++)if(p%cadence==tick%cadence)due|=local&(1<<p);
-        if(level!=AiDifficulty.RELAXED && due!=0){
+        if(strategic && due!=0){
             // Spread independent teams across worker ticks; do not hold the shared
             // render/state mutex for six route searches in a single frame.
-            long started=System.nanoTime();boolean available=NativeInterface.updateAiTargets(refreshed,due,level);
+            long started=System.nanoTime();boolean available=NativeInterface.updateAiTargets(refreshed,due,Math.max(1,level));
             long elapsed=System.nanoTime()-started;planningNanos+=elapsed;planningCalls++;maxPlanningNanos=Math.max(maxPlanningNanos,elapsed);
             if(available){for(int p=0;p<6;p++)if((due&(1<<p))!=0)System.arraycopy(refreshed,p*10,planned,p*10,10);readyMask|=due;}
             else readyMask&=~due;
@@ -52,18 +53,18 @@ public final class AiController {
             // Retain the old call order/cadence and RNG path even when a controller
             // holds its cursor or uses a read-only strategic target instead.
             int nearest=NativeInterface.getNearestDot(team,xs[team][0],ys[team][0]);
-            if(level==AiDifficulty.RELAXED && (tick<64 || tick%12!=0))continue;
-            if(level!=AiDifficulty.RELAXED && (readyMask&(1<<team))!=0 && planned[team*10]>=0 && planned[team*10+5]>=0) {
+            if(!strategic && (tick<64 || tick%12!=0))continue;
+            if(strategic && (readyMask&(1<<team))!=0 && planned[team*10]>=0 && planned[team*10+5]>=0) {
                 System.arraycopy(planned,team*10,xs[team],0,5);
                 System.arraycopy(planned,team*10+5,ys[team],0,5);
             } else {
                 // Hard/standard never fall back to the old omniscient target.
-                if(level==AiDifficulty.RELAXED){xs[team][0]=(short)(nearest>>>16);ys[team][0]=(short)nearest;}
+                if(!strategic){xs[team][0]=(short)(nearest>>>16);ys[team][0]=(short)nearest;}
                 else if((readyMask&(1<<team))!=0)xs[team][0]=ys[team][0]=MODEL_IDLE;
                 for(int slot=1;slot<5;slot++)xs[team][slot]=ys[team][slot]=-1;
             }
         }
-        if(level==AiDifficulty.RELAXED)chooseLocalItems(xs,ys,controlledMask);
+        if(!strategic)chooseLocalItems(xs,ys,controlledMask);
         applyModelInputs(xs,ys,controlledMask);
         tick=tick==Integer.MAX_VALUE?64:tick+1;
     }

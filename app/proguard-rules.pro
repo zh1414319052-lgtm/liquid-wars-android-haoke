@@ -29,3 +29,6 @@
 -keepclassmembers class com.xenris.liquidwarsos.activities.** {
     public void *(android.view.View);
 }
+# EdDSA receives an EdDSAPublicKey directly. The unreachable JDK-only X509Key
+# fallback is absent on Android; keep this exception narrowly scoped.
+-dontwarn sun.security.x509.X509Key

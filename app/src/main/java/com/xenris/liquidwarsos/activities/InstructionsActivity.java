@@ -24,6 +24,7 @@ import android.view.Window;
 import com.xenris.liquidwarsos.R;
 
 public class InstructionsActivity extends LocalizedActivity {
+    private com.xenris.liquidwarsos.updates.MenuUpdateHost updates;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,5 +35,10 @@ public class InstructionsActivity extends LocalizedActivity {
         setContentView(R.layout.instructions);
         ((android.widget.TextView)findViewById(R.id.release_attribution_text)).setText(
                 getString(R.string.release_attribution,getString(R.string.ui_version)));
+        updates=new com.xenris.liquidwarsos.updates.MenuUpdateHost(this,false);
+        updates.addAboutControls((android.widget.LinearLayout)findViewById(R.id.release_attribution_text).getParent());
     }
+    @Override public void onResume(){super.onResume();if(updates!=null)updates.resume();}
+    @Override public void onPause(){if(updates!=null)updates.pause();super.onPause();}
+    @Override public void onDestroy(){if(updates!=null)updates.close();super.onDestroy();}
 }

@@ -10,7 +10,7 @@ class State;
 class Items {
 public:
  enum Kind { DOUBLE, QUARRY, FREEZE, TELEPORT, RESET, PHASE, INVINCIBLE, DEATH, FRIEND, ANTIGROW, ROCKSEAL, THAW, ANCHOR, CAUSAL, PHASENAIL, SHATTER, WARD, LIBERTY, INVISIBLE, REVEAL, COUNT };
- static constexpr int EFFECT_MS=20000;
+ static constexpr int EFFECT_MS=10000;
  static constexpr int STEP_MS=7,MAX_PARTICLES=108000,BUFF_STRIDE=20;
  static constexpr int PICKUP_RADIUS=8;
  static int radiusForHp(int hp){if(hp<=0)return 0;for(int r=2;r<PICKUP_RADIUS;r++)if(hp*PICKUP_RADIUS*PICKUP_RADIUS<=PICKUP_HP*r*r)return r;return PICKUP_RADIUS;}

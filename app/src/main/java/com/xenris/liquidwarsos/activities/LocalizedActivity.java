@@ -27,6 +27,33 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Locale;
 
 public abstract class LocalizedActivity extends AppCompatActivity {
+    @Override protected void onCreate(android.os.Bundle state) {
+        super.onCreate(state);
+        getWindow().setBackgroundDrawableResource(com.xenris.liquidwarsos.R.color.ui_bg);
+        if (android.os.Build.VERSION.SDK_INT >= 28) {
+            android.view.WindowManager.LayoutParams p=getWindow().getAttributes();
+            p.layoutInDisplayCutoutMode=android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(p);
+        }
+    }
+
+    /** Menus paint behind the camera cutout; interactive content stays inside it.
+     * The battlefield keeps its existing GameWindow/GL coordinate ownership. */
+    @Override public void onContentChanged() {
+        super.onContentChanged();
+        android.view.ViewGroup content=findViewById(android.R.id.content);
+        if(content==null||content.getChildCount()==0||findViewById(com.xenris.liquidwarsos.R.id.mySurfaceView)!=null)return;
+        android.view.View root=content.getChildAt(0);
+        final int l=root.getPaddingLeft(),t=root.getPaddingTop(),r=root.getPaddingRight(),b=root.getPaddingBottom();
+        root.setFitsSystemWindows(false);
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(),false);
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
+            androidx.core.graphics.Insets safe=insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()|androidx.core.view.WindowInsetsCompat.Type.displayCutout()|androidx.core.view.WindowInsetsCompat.Type.ime());
+            view.setPadding(l+safe.left,t+safe.top,r+safe.right,b+safe.bottom);
+            return insets;
+        });
+        androidx.core.view.ViewCompat.requestApplyInsets(root);
+    }
     /** Menu-only back affordance; existing activity lifecycle owns connection cleanup. */
     public void uiBack(android.view.View view) {
         finish();

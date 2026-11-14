@@ -45,6 +45,7 @@ public final class ModelGameSupport {
             int[] item=NativeInterface.itemSnapshot();boolean reset=item!=null&&item.length>208&&itemEpoch>=0&&itemEpoch!=item[146];if(item!=null&&item.length>208)itemEpoch=item[146];
             if(reset){if(rebuilding!=null)rebuilding.cancel(true);rebuilding=null;hasTerrain=false;match.replaceTerrain(new ModelTerrain(NativeInterface.modelTerrain()));}
             match.itemState(item);
+            match.operationsState(NativeInterface.operationsSnapshot(-1,false));
             int revision=NativeInterface.terrainRevision();
             if(!hasTerrain){byte[] terrain=NativeInterface.modelTerrain();if(terrain!=null){match.terrain(terrain);hasTerrain=true;terrainRevision=revision;}}
             if(rebuilding!=null&&rebuilding.isDone()){

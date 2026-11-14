@@ -1,0 +1,17 @@
+Online networking dependencies (1.84):
+
+OkHttp 4.12.0 — Square, Inc. — Apache License 2.0.
+https://github.com/square/okhttp
+
+Okio — Square, Inc. — Apache License 2.0.
+https://github.com/square/okio
+
+Kotlin standard library — JetBrains s.r.o. and contributors — Apache License 2.0.
+https://github.com/JetBrains/kotlin
+
+Apache License 2.0 full text is included alongside this notice as
+Grafika-Apache-2.0.txt. These dependencies are unmodified Maven artifacts;
+their source and published notices remain available at the repositories above.
+
+Liquid drop emotes were supplied by the project owner for this game and platform.
+Noto Sans SC is licensed under SIL OFL 1.1 (NotoSansSC-OFL.txt).

@@ -1,0 +1,3 @@
+EdDSA-Java 0.3.0 by str4d, CC0 1.0 Universal. https://github.com/str4d/ed25519-java
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Native update module adapted from Haoke WPGen, GPL-3.0-or-later.

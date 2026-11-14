@@ -10,6 +10,7 @@ public final class SnapshotItems {
  public static int hp(int[] s,int slot){int at=health(s,slot);return at<0?1200:s[at];}
  public static int maxHp(int[] s,int slot){int at=health(s,slot);return at<0?1200:s[at+1];}
  public static int leader(int[] s,int slot){int at=health(s,slot);return at<0?-1:s[at+2];}
+ public static int contribution(int[] s,int slot,int team){int at=health(s,slot);return at<0||team<0||team>=6?0:s[at+4+team];}
  private static int balance(int[] s){int at=s==null?-1:s.length-TRAILER-62-17;return at>=209&&s[at]==0x4c573137?at:-1;}
  public static boolean rewindSpawned(int[] s){int at=balance(s);return at>=0&&s[at+1]!=0;}
  public static int group(int[] s,int team){int g=s[147+team*10+8],at=balance(s);return at>=0&&s[at+4]>s[0]&&(g==s[at+2]||g==s[at+3])?s[at+2]:g;}

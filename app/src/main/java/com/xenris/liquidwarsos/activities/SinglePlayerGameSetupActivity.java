@@ -60,6 +60,7 @@ public class SinglePlayerGameSetupActivity extends LocalizedActivity implements 
         refreshMapImage();
         initSpinners();
         initButtons();
+        com.xenris.liquidwarsos.OperationMode.bind(this,true,null);
         com.xenris.liquidwarsos.ui.DifficultyPicker.bind(this, false, null);
         if(getIntent().getBooleanExtra("spectatorSetup",false))((android.widget.TextView)findViewById(R.id.start_button)).setText(R.string.model_spectate);
     }

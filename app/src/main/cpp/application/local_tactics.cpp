@@ -152,6 +152,7 @@ std::array<short,60> LocalTactics::plan(const State& s,unsigned mask,int level){
    for(int k2=0;k2<8;k2++){int x=p.x+int(std::cos(k2*3.14159265/4)*r),y=p.y+int(std::sin(k2*3.14159265/4)*r);int n=nodeAt(s,x,y);if(n>=0&&cost[n]<travel&&clear(s,nodes[n].x,nodes[n].y,p.x,p.y,k)){best=n;travel=cost[n];}}
    float danger=power(hostile,p.x,p.y);float value=itemValue(s,team,k,own,threat);if(danger>own&&!brave)value-=std::min(160.f,(danger-own)*.2f);offer({PICKUP,-1,k,p.x,p.y,best,value});
   }
+  if(s.operations->mode)for(size_t k=0;k<s.operations->sites.size();k++){const auto& site=s.operations->sites[k];bool friendly=site.owner>=0&&s.alliances[site.owner]==s.alliances[team];float priority=friendly?(site.contested||site.claim>=0?210.f:0.f):200.f;float danger=power(hostile,site.x,site.y);if(danger>own*1.25f&&!brave)priority-=110;offer({EXPLORE,-1,-1,site.x,site.y,nodeAt(s,site.x,site.y),priority});}
   // Retreat is a short reachable escape from an unfavourable local fight, never
   // an endless flight from globally stronger armies on the other side of a wall.
   bool retreat=level>=2&&!brave&&nearestEnemy<150&&(threat>own*1.35f||(memory.action==RETREAT&&now-memory.since<1120&&threat>own*.85f));

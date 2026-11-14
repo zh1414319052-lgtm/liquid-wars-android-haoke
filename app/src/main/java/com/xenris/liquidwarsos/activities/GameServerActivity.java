@@ -78,6 +78,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         getWindow().addFlags(fullscreen | keepOn);
 
         setContentView(R.layout.game);
+        if(com.xenris.liquidwarsos.online.OnlineSession.active!=null)com.xenris.liquidwarsos.online.OnlineSession.active.attach(this);
         com.xenris.liquidwarsos.GameWindow.apply(this);
         myGLSurfaceView = (MyGLSurfaceView)findViewById(R.id.mySurfaceView);
         myGLSurfaceView.setSurfaceCallbacks(this);
@@ -91,6 +92,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         NativeInterface.createGame(StaticBits.team, StaticBits.map, StaticBits.seed, StaticBits.dotsPerTeam);
         Util.loadPlayerInitialPositions(xs, ys);
         NativeInterface.configureAlliances(StaticBits.alliances);
+        NativeInterface.configureOperations(StaticBits.operationsMode);
 
         StaticBits.server.setCallbacks(this);
 
@@ -147,6 +149,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
             }
             synchronized (xs) {
                 models.beforeInputs(aiController,xs,ys);
+                if(!frozen&&!com.xenris.liquidwarsos.MatchIntro.warming(gameStep))orders.apply(xs,ys);
                 playerHistory.savePlayerPositions(xs, ys);
             }
             if(!frozen) {
@@ -195,7 +198,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
             gameFinished = true;
             int winningTeam = 0;
             for (int i = 0; i < 6; i++) {
-                if (com.xenris.liquidwarsos.AllianceRules.score(i) > com.xenris.liquidwarsos.AllianceRules.score(winningTeam))
+                if (com.xenris.liquidwarsos.OperationMode.compare(i,winningTeam)>0)
                     winningTeam = i;
             }
             StaticBits.server.sendToAll(StaticBits.OUT_OF_TIME, winningTeam);
@@ -215,7 +218,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
     private void checkForWinner() {
         if (gameFinished) return;
         for (int i = 0; i < 6; i++) {
-            if (NativeInterface.totalParticles() > 0 && com.xenris.liquidwarsos.AllianceRules.score(i) == NativeInterface.totalParticles()) {
+            if (com.xenris.liquidwarsos.OperationMode.wins(i)) {
                 gameFinished = true;
                 frozen = true;
                 showResult(com.xenris.liquidwarsos.AllianceRules.allied(i,StaticBits.team) ? getString(R.string.result_win)
@@ -257,6 +260,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
     }
 
     private com.xenris.liquidwarsos.AiController aiController;
+    private final com.xenris.liquidwarsos.OrderQueue orders=new com.xenris.liquidwarsos.OrderQueue();
 
     private void waitForEveryoneToBeReady() {
         if((StaticBits.server == null) || (ready == null))
@@ -326,7 +330,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         }
     }
 
-    private void syncRewind(){int[] d=NativeInterface.itemSnapshot();if(d==null||d.length<209||d[146]==itemEpoch)return;itemEpoch=d[146];lostGame=false;aiStartDelay=6;aiController=new com.xenris.liquidwarsos.AiController(StaticBits.aiDifficulty);synchronized(xs){Util.loadPlayerInitialPositions(xs,ys);}runOnUiThread(()->{com.xenris.liquidwarsos.ItemOverlay v=findViewById(R.id.item_overlay);if(v!=null)v.resetControl();if(dialog!=null){dialog.dismiss();dialog=null;}});}
+    private void syncRewind(){int[] d=NativeInterface.itemSnapshot();if(d==null||d.length<209||d[146]==itemEpoch)return;itemEpoch=d[146];lostGame=false;aiStartDelay=6;aiController=new com.xenris.liquidwarsos.AiController(StaticBits.aiDifficulty);synchronized(xs){orders.clear();Util.loadPlayerInitialPositions(xs,ys);}runOnUiThread(()->{com.xenris.liquidwarsos.ItemOverlay v=findViewById(R.id.item_overlay);if(v!=null)v.resetControl();if(dialog!=null){dialog.dismiss();dialog=null;}});}
 
     private void stepGame() {
         if(com.xenris.liquidwarsos.MatchIntro.warming(gameStep)){
@@ -354,7 +358,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         models.didApplyInputs();
     }
 
-    @Override public void onControls(short[] x,short[] y){if(!running||gameFinished)return;synchronized(xs){int t=clientIdToPlayerNumber(0);if(t>=0){System.arraycopy(x,0,xs[t],0,5);System.arraycopy(y,0,ys[t],0,5);}}}
+    @Override public void onControls(short[] x,short[] y){if(!running||gameFinished)return;synchronized(xs){int t=clientIdToPlayerNumber(0);if(t>=0){orders.offer(t,x,y,xs,ys);}}}
 
     @Override
     public void onTouch(MotionEvent event) {
@@ -362,7 +366,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         synchronized (xs) {
             int team = clientIdToPlayerNumber(0);
             if (team >= 0) {
-                TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
+                orders.clear(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
             }
         }
     }
@@ -400,15 +404,13 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
             if(playerWithMissedStepsId == -1)
                 noteMissedSteps(id, args[1]);
         } else if(args[0] == StaticBits.PLAYER_POSITION_DATA) {
+            if(args.length!=11)return;
             final int p = clientIdToPlayerNumber(id);
             if (p < 0) {
                 return;
             }
             synchronized (xs) {
-                for (int i = 0; i < 5; i++) {
-                    xs[p][i] = (short) args[i + 1];
-                    ys[p][i] = (short) args[i + 6];
-                }
+                short[] inputX=new short[5],inputY=new short[5];for(int i=0;i<5;i++){inputX[i]=(short)args[i+1];inputY[i]=(short)args[i+6];}orders.offer(p,inputX,inputY,xs,ys);
             }
         } else if(args[0] == StaticBits.CLIENT_CURRENT_GAMESTEP) {
             final int p = clientIdToPlayerNumber(id);

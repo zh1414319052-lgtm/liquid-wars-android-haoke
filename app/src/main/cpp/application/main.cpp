@@ -38,7 +38,9 @@ void stepDots() {
 }
 
 void setPlayerPosition(int team, short* x, short* y) {
-    if(state != NULL) {
+    if(state != NULL && team>=0 && team<6) {
+        if(state->operations->command(*state,team,x,y))return;
+        if(x[0]>=0 || (x[0]==-2 && x[4]!=-3))state->operations->direct(team);
         for(int i = 0; i < 5; i++) {
             state->players[team].x[i] = x[i];
             state->players[team].y[i] = y[i];

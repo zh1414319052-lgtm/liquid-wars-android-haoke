@@ -3,6 +3,10 @@
 #include "../application/state.hpp"
 #include <jni.h>
 std::mutex nativeStateMutex;
+extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_configureOperations(JNIEnv*,jclass,jint mode){std::lock_guard<std::mutex> g(nativeStateMutex);if(state)state->operations->configure(*state,mode);}
+extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_operationsSnapshot(JNIEnv* env,jclass,jint viewer,jboolean all){std::lock_guard<std::mutex> g(nativeStateMutex);if(!state)return nullptr;auto v=state->operations->snapshot(*state,viewer,all);jintArray out=env->NewIntArray(v.size());if(out)env->SetIntArrayRegion(out,0,v.size(),v.data());return out;}
+extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_operationWinner(JNIEnv*,jclass){std::lock_guard<std::mutex> g(nativeStateMutex);return state?state->operations->winningTeam(*state):-1;}
+extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_operationScore(JNIEnv*,jclass,jint t){std::lock_guard<std::mutex> g(nativeStateMutex);return state&&t>=0&&t<6?state->operations->alliancePoints(*state,t):0;}
 extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_itemSnapshot(JNIEnv* env,jclass){
     std::lock_guard<std::mutex> guard(nativeStateMutex);
     if(!state)return nullptr;auto values=state->items->snapshot(*state);

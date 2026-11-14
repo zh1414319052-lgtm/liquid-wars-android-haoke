@@ -15,14 +15,14 @@ final class BattleEffects {
  void polygon(Canvas c,float x,float y,float r,int sides,float angle,int color,float alpha){path.reset();for(int i=0;i<=sides;i++){double a=angle+i*2*Math.PI/sides;float xx=x+(float)Math.cos(a)*r,yy=y+(float)Math.sin(a)*r;if(i==0)path.moveTo(xx,yy);else path.lineTo(xx,yy);}p.setShader(null);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.5f*dp);p.setColor(color);p.setAlpha((int)(255*alpha));c.drawPath(path,p);}
  void devour(Canvas c,int kind,float cx,float cy,float rx,float ry,int hp,int maxHp,int leader,boolean eating,int[] state){
   float remaining=Math.max(0,Math.min(1,hp/(float)Math.max(1,maxHp))),damage=1-remaining;int color=leader>=0&&leader<6?TeamPalette.color(leader):COLOR[kind];
-  p.setShader(null);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.2f*dp);p.setColor(0xbbebeee5);p.setAlpha(200);c.drawOval(cx-rx,cy-ry,cx+rx,cy+ry,p);
+
   if(damage>0){p.setColor(0xee17232b);p.setStyle(Paint.Style.FILL);for(int j=0;j<3;j++){double a=j*2.399+kind*.7;float r=(.8f+damage*2.8f)*dp;c.drawCircle(cx+(float)Math.cos(a)*rx*.7f,cy+(float)Math.sin(a)*ry*.7f,r,p);}}
   if(eating&&leader>=0&&leader<6){int at=147+leader*10;float direction=(float)Math.atan2(y(state[at+3])-cy,x(state[at+2])-cx);for(int j=0;j<12;j++){float u=((time%900)/900f+j/12f)%1,angle=direction+(j%5-2)*.23f,sx=cx+(float)Math.cos(angle)*rx,sy=cy+(float)Math.sin(angle)*ry;float reach=(10+12*(j%3))*dp;p.setColor(color);p.setAlpha((int)(220*(1-u)));p.setStyle(Paint.Style.FILL);c.drawCircle(sx+(float)Math.cos(angle)*reach*u,sy+(float)Math.sin(angle)*reach*u,(1.3f+1.8f*(1-u))*dp,p);line(c,color,(1-u)*.6f,1,sx,sy,sx+(float)Math.cos(angle)*reach*u*.65f,sy+(float)Math.sin(angle)*reach*u*.65f);}}
   p.setAlpha(255);p.setStyle(Paint.Style.FILL);
  }
- void pickup(Canvas c,int kind,float x,float y,float radius){int color=COLOR[kind];float phase=(time%2100)/2100f;glow(c,x,y,radius*2.5f,color,.32f);ring(c,x,y,radius*(1.15f+.35f*phase),color,.65f*(1-phase),1.6f);ring(c,x,y,radius*1.05f,color,.8f,1);
-  p.setColor(0xed111d28);p.setAlpha(240);p.setStyle(Paint.Style.FILL);c.drawCircle(x,y,radius,p);
-  for(int i=0;i<3;i++){double a=time*.0018+i*2.094;float xx=x+(float)Math.cos(a)*radius*1.25f,yy=y+(float)Math.sin(a)*radius*1.25f;glow(c,xx,yy,4*dp,color,.8f);}
+ void pickup(Canvas c,int kind,float x,float y,float radius){
+  // The glyph and HP bar carry identity/progress; no decorative perimeter.
+  p.setShader(null);p.setColor(0xe0111d28);p.setAlpha(230);p.setStyle(Paint.Style.FILL);c.drawCircle(x,y,radius,p);p.setAlpha(255);
  }
  void counter(Canvas c,int kind,float x,float y,float u,float alpha){int col=COLOR[kind];float r=(16+25*u)*dp;
   switch(kind){

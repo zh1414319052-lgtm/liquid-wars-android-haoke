@@ -43,6 +43,7 @@ void Items::rewind(State& s){
  s.moveRandom->setSeed(bootMove);s.aiRandom->setSeed(bootAI);s.map->restore();s.timeSidebar=0;
  next();nextWave=8000+int(bounded(4001));suppressResetWave=true;elapsed=wave=0;epoch++;warmup=3003;for(auto& p:pickups)p=Pickup{};
  truceA=truceB=-1;truceUntil=0;quarryBudget.fill(0);deathOwner.fill(-1);events.clear();s.points.resize(s.dots.size()*3,0);s.colours.resize(s.dots.size()*4,1);
+ s.operations->reset(s);
 }
 void Items::spawnPair(State& s){
  const int W=s.map->width,H=s.map->height,STRIDE=W+1,R=PICKUP_RADIUS;std::vector<int> floor;floor.reserve(W*H);
@@ -90,13 +91,19 @@ void Items::begin(State& s){
  }
 }
 int Items::moves(const State&,const Dot& d)const{return enabled&&(warmup>0||active(d.team,FREEZE))?0:1;}
-void Items::contact(State& s,Dot& defender,Dot& attacker){if(s.allied(defender.team,attacker.team)||(enabled&&active(defender.team,INVINCIBLE)))return;combat::contact(defender,attacker.team,s.players);}
+void Items::contact(State& s,Dot& defender,Dot& attacker){
+ if(s.allied(defender.team,attacker.team))return;
+ // Hostile contact reveals both forces, even when a shield absorbs the hit.
+ // Rendering, minimap and both AI observers read this same authoritative effect.
+ if(enabled){until[defender.team][INVISIBLE]=0;until[attacker.team][INVISIBLE]=0;if(active(defender.team,INVINCIBLE))return;}
+ int before=defender.team;combat::contact(defender,attacker.team,s.players);if(defender.team!=before)defender.squad=attacker.squad;
+}
 int Items::grow(State& s,int team,int count){const int W=s.map->width;if(team<0||team>=6||s.players[team].score==0||opposed(s,team,ANTIGROW))return 0;count=std::max(0,std::min(count,MAX_PARTICLES-int(s.dots.size())));if(!count)return 0;auto cells=area(s,team,count);s.dots.reserve(s.dots.size()+cells.size());for(int p:cells){Dot* d=new Dot(p%W,p/W,team);s.field[d->x][d->y]=d;s.dots.push_back(d);s.players[team].score++;}return int(cells.size());}
 int Items::relocate(State& s,int team,int x,int y){const int W=s.map->width;
  if(!inside(s,x,y)||s.map->isWall(x,y))return 0;
  std::vector<Dot*> army;for(auto d:s.dots)if(d->team==team){army.push_back(d);s.field[d->x][d->y]=nullptr;}
  auto cells=area(s,team,int(army.size()),x,y);bool fits=!army.empty()&&cells.size()==army.size();
- for(size_t i=0;i<army.size();i++){Dot* d=army[i];if(fits){d->x=cells[i]%W;d->y=cells[i]/W;}s.field[d->x][d->y]=d;}return fits?int(army.size()):0;
+ for(size_t i=0;i<army.size();i++){Dot* d=army[i];if(fits){d->x=cells[i]%W;d->y=cells[i]/W;}s.field[d->x][d->y]=d;}if(fits)s.operations->clearTeam(s,team);return fits?int(army.size()):0;
 }
 void Items::exitPhase(State& s,int team){const int W=s.map->width,H=s.map->height;[[maybe_unused]] const int N=W*H;
  std::vector<int> nearest(N,-1),queue;queue.reserve(N);

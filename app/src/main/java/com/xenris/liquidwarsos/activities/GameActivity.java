@@ -93,6 +93,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         NativeInterface.createGame(StaticBits.team, StaticBits.map, StaticBits.seed, StaticBits.dotsPerTeam);
         Util.loadPlayerInitialPositions(xs, ys);
         NativeInterface.configureAlliances(StaticBits.alliances);
+        NativeInterface.configureOperations(StaticBits.operationsMode);
 
         models=new com.xenris.liquidwarsos.cloud.ModelGameSupport(this,spectator,spectator?0x3f:(0x3f & ~(1<<StaticBits.team)));
         intro=findViewById(R.id.match_intro);
@@ -215,7 +216,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
             gameFinished = true;
             int winningTeam = 0;
             for (int i = 0; i < 6; i++) {
-                if (com.xenris.liquidwarsos.AllianceRules.score(i) > com.xenris.liquidwarsos.AllianceRules.score(winningTeam))
+                if (com.xenris.liquidwarsos.OperationMode.compare(i,winningTeam)>0)
                     winningTeam = i;
             }
             showResult(!spectator && com.xenris.liquidwarsos.AllianceRules.allied(winningTeam,StaticBits.team) ? getString(R.string.timeout_win)
@@ -234,7 +235,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     private void checkForWinner() {
         if (gameFinished) return;
         for (int i = 0; i < 6; i++) {
-            if (NativeInterface.totalParticles() > 0 && com.xenris.liquidwarsos.AllianceRules.score(i) == NativeInterface.totalParticles()) {
+            if (com.xenris.liquidwarsos.OperationMode.wins(i)) {
                 gameFinished = true;
                 showResult(!spectator && com.xenris.liquidwarsos.AllianceRules.allied(i,StaticBits.team) ? getString(R.string.result_win)
                         : getString(R.string.result_team_win, com.xenris.liquidwarsos.AllianceSettings.name(this, i)), false);
@@ -283,8 +284,9 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     }
 
     private com.xenris.liquidwarsos.AiController aiController;
+    private final com.xenris.liquidwarsos.OrderQueue orders=new com.xenris.liquidwarsos.OrderQueue();
 
-    private void syncRewind(){int[] d=NativeInterface.itemSnapshot();if(d==null||d.length<209||d[146]==itemEpoch)return;itemEpoch=d[146];lostGame=false;aiStartDelay=6;aiController=new com.xenris.liquidwarsos.AiController(StaticBits.aiDifficulty);synchronized(xs){Util.loadPlayerInitialPositions(xs,ys);}runOnUiThread(()->{com.xenris.liquidwarsos.ItemOverlay v=findViewById(R.id.item_overlay);if(v!=null)v.resetControl();if(dialog!=null){dialog.dismiss();dialog=null;}});}
+    private void syncRewind(){int[] d=NativeInterface.itemSnapshot();if(d==null||d.length<209||d[146]==itemEpoch)return;itemEpoch=d[146];lostGame=false;aiStartDelay=6;aiController=new com.xenris.liquidwarsos.AiController(StaticBits.aiDifficulty);synchronized(xs){orders.clear();Util.loadPlayerInitialPositions(xs,ys);}runOnUiThread(()->{com.xenris.liquidwarsos.ItemOverlay v=findViewById(R.id.item_overlay);if(v!=null)v.resetControl();if(dialog!=null){dialog.dismiss();dialog=null;}});}
 
     private void stepGame() {
         setPlayerPositions();
@@ -298,6 +300,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     private void setPlayerPositions() {
         synchronized (xs) {
             models.beforeInputs(aiController,xs,ys);
+            orders.apply(xs,ys);
             for (int i = 0; i < 6; i++) {
                 NativeInterface.setPlayerPosition(i, xs[i], ys[i]);
             }
@@ -305,14 +308,14 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         }
     }
 
-    @Override public void onControls(short[] x,short[] y){if(spectator||!running||gameFinished)return;synchronized(xs){System.arraycopy(x,0,xs[StaticBits.team],0,5);System.arraycopy(y,0,ys[StaticBits.team],0,5);}}
+    @Override public void onControls(short[] x,short[] y){if(spectator||!running||gameFinished)return;synchronized(xs){orders.offer(StaticBits.team,x,y,xs,ys);}}
 
     @Override
     public void onTouch(MotionEvent event) {
         if (spectator || !running || gameFinished) return;
         synchronized (xs) {
             int team = StaticBits.team;
-            TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
+            orders.clear(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
         }
     }
 

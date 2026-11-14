@@ -47,6 +47,7 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
     private int retries;
     private int myID = 0;
     private Client roomClient;
+    private com.xenris.liquidwarsos.online.OnlineSession online;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,12 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
         setTextView(R.id.client_game_textview, getString(R.string.connecting_to, serverName));
         int port = extras.getInt("port", StaticBits.PORT_NUMBER);
         if (port < 1 || port > 65535) port = StaticBits.PORT_NUMBER;
-        if (extras.getBoolean(BluetoothTransport.EXTRA_MODE, false)) {
+        if(extras.getBoolean("online",false)){
+            online=com.xenris.liquidwarsos.online.OnlineSession.active;
+            if(online==null||online.host){finish();return;}
+            roomClient=new Client(this,"cleanbizai.com",online.relay.connector());
+            online.attach(this);
+        } else if (extras.getBoolean(BluetoothTransport.EXTRA_MODE, false)) {
             if (!BluetoothAccess.has(this, BluetoothPermissions.Action.CONNECT)) {
                 toast(getString(R.string.bt_permission_denied), Toast.LENGTH_LONG);
                 finish();return;
@@ -83,6 +89,7 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
     public void onDestroy() {
         super.onDestroy();
         if (roomClient != null) roomClient.destroy();
+        if(online!=null)online.close();
     }
 
     private void refreshMapImage() {
@@ -126,7 +133,7 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
             StaticBits.map = com.xenris.liquidwarsos.MapCatalog.mapIdForSelection(args[1]);
             refreshMapImage();
         } else if(args[0] == StaticBits.START_GAME) {
-            if(argc!=10){checkVersionCompatibility(12);return;}
+            if(argc!=11||args[10]<0||args[10]>1){checkVersionCompatibility(28);return;}
             if(!com.xenris.liquidwarsos.MapCatalog.validMapChoice(args[2])){finish();return;}
             int[] groups=java.util.Arrays.copyOfRange(args,4,10);
             if(!com.xenris.liquidwarsos.AllianceRules.valid(groups)){finish();return;}
@@ -134,11 +141,14 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
             StaticBits.seed = args[1];
             StaticBits.map = args[2];
             StaticBits.dotsPerTeam = args[3];
+            StaticBits.operationsMode=args[10];
             StaticBits.client.setCallbacks(null);
             startClientGame();
         } else if(args[0] == StaticBits.SEND_VERSION_CODE) {
             if(args[1] != StaticBits.VERSION_CODE)
                 checkVersionCompatibility(args[1]);
+        } else if(args[0] == StaticBits.SET_OPERATIONS_MODE) {
+            if(argc==2&&args[1]>=0&&args[1]<=1){StaticBits.operationsMode=args[1];setTextView(R.id.client_game_textview,serverName+(args[1]==1?" · 据点争夺 / Conquest":" · Classic"));}
         } else if(args[0] == StaticBits.SET_TEAM_SIZE) {
             StaticBits.dotsPerTeam = args[1];
             setTextView(R.id.teamsize_textview, args[1] + "");

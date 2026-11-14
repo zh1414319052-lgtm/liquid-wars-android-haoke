@@ -20,6 +20,7 @@
 
 void Move::stepDots() {
     state->items->begin(*state);
+    state->operations->step(*state);
     const size_t count=state->dots.size();
     for(size_t i = 0; i < count; i++) {
         Dot* dot = state->dots[i];
@@ -33,16 +34,19 @@ void Move::stepDots() {
 void Move::moveDotToward(Dot* dot, const Player* player) {
     // Protocol 15: explicit idle for model teams without a live command.
     // No movement, auto-attack or RNG on this unit; enemies can still capture it.
-    if(player->x[0]==-2 && player->y[0]==-2)return;
+    int commandX=-1,commandY=-1;
+    bool ordered=state->operations->target(*state,*dot,commandX,commandY);
+    if(ordered && (commandX<0||commandY<0))return;
+    if(!ordered && player->x[0]==-2 && player->y[0]==-2)return;
     const short currentX = dot->x;
     const short currentY = dot->y;
-    short playerX = player->x[0];
-    short playerY = player->y[0];
+    short playerX = ordered?short(commandX):player->x[0];
+    short playerY = ordered?short(commandY):player->y[0];
     int diffX = playerX - currentX;
     int diffY = playerY - currentY;
     float dist = sqrt(diffX*diffX + diffY*diffY);
 
-    for(int i = 1; i < (player->x[4]==-3?3:5); i++) {
+    for(int i = 1; !ordered && i < (player->x[4]==-3?3:5); i++) {
         if(player->x[i] == -1)
             continue;
         const short nextPlayerX = player->x[i];

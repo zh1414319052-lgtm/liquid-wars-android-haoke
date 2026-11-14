@@ -28,6 +28,7 @@ class Dot {
         unsigned char health;
         unsigned char damageQuarter; // Pending fractional contact damage, always 0..3.
         unsigned char armorCarry=0; // Exact half-quarter while a shield is active.
+        unsigned char squad=0; // Stable tactical membership; captured units join main force.
         Dot(unsigned short x, unsigned short y, unsigned char team);
         float getRed();
         float getGreen();

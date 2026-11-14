@@ -21,11 +21,13 @@
         android:xlargeScreens="true" />
 
     <application
+        android:allowBackup="false"
         android:appCategory="game"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:isGame="true"
         android:label="@string/app_name">
+        <activity android:name=".activities.OnlineLobbyActivity" android:exported="false" android:configChanges="orientation|keyboardHidden" android:screenOrientation="landscape" android:theme="@style/Theme.LiqurdWars" />
         <activity android:name=".activities.ModelSettingsActivity" android:exported="false" android:screenOrientation="landscape" android:theme="@style/Theme.LiqurdWars" />
 
         <activity

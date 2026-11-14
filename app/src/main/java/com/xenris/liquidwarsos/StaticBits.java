@@ -28,6 +28,7 @@ public class StaticBits {
     public static int map;
     public static int seed;
     public static int dotsPerTeam = 400;
+    public static int operationsMode=0;
     public static volatile int aiDifficulty = AiDifficulty.CLASSIC;
     public static int[] alliances=AllianceRules.solo();
     public static long startTimestamp;
@@ -37,7 +38,7 @@ public class StaticBits {
     public static String publicName;
     public static int[] teams = new int[6];
     public static boolean gameWasDisconnected = false;
-    public static final int VERSION_CODE = 28; // Deterministic paired items, dynamic armies and destructible terrain.
+    public static final int VERSION_CODE = 30; // Deterministic paired items, dynamic armies and destructible terrain.
     public static final int NUMBER_OF_TEAMS = 6;
     public static final int AI_PLAYER = -1;
     public static final int NUMBER_OF_MAPS = MapCatalog.COUNT;
@@ -63,6 +64,7 @@ public class StaticBits {
     public static final int START_GAME = 0x81;
     public static final int SEND_VERSION_CODE = 0x82;
     public static final int SET_TEAM_SIZE = 0x83;
+    public static final int SET_OPERATIONS_MODE = 0x84;
 
     public static void init() {
         team = 0;
