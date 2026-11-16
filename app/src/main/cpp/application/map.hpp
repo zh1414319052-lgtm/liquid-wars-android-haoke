@@ -38,7 +38,7 @@ class Map {
         float textureU = 1, textureV = 1;
         std::string path;
         int flip;
-        std::vector<uint8_t> walls,baseWalls,patchPixels,ground;
+        std::vector<uint8_t> walls,baseWalls,patchPixels,ground,phaseLand;
         std::vector<int> opened;
         GLuint patchTexture=0;
         int patchWidth=1024,patchHeight=512,patchContentW=800,patchContentH=480;
@@ -53,13 +53,17 @@ class Map {
         void drawOpenings();
     public:
         const int width,height,id;
-        Map(int mapID, int transform=0);
+        Map(int mapID, int transform=0, bool garden=false);
         int transform() const { return flip; }
         ~Map();
         void loadTexture();
         void draw(float viewX=0,float viewY=0,float viewW=0,float viewH=0);
         std::array<int,5> textureInfo() const {return {{tiled?tileColumns*tileRows:0,tileContentW,tileContentH,tileStorageW,tileStorageH}};}
         bool isWall(int width, int height);
+        bool phaseAllowed(int x,int y)const;
+        // Expedition obstacles occupy otherwise valid land; clearing restores
+        // only their recorded cells, never rivers, bridges or original rocks.
+        bool temporaryObstacle(int x,int y,int radius,bool solid);
         bool excavate(int x,int y);
         void restore();
         int revision() const {return terrainRevision;}

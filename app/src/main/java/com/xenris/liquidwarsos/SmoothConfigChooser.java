@@ -9,6 +9,9 @@ import javax.microedition.khronos.egl.EGLDisplay;
 
 /** GLES1-compatible selection; all three game activities share this viewport. */
 public final class SmoothConfigChooser implements GLSurfaceView.EGLConfigChooser {
+    private final int depth,renderable;
+    public SmoothConfigChooser(){this(false);}
+    public SmoothConfigChooser(boolean threeD){depth=threeD?16:0;renderable=threeD?4:1;}
     @Override public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
         for (int samples : new int[]{4, 2, 0}) {
             EGLConfig config = find(egl, display, 8, 8, 8, samples);
@@ -23,11 +26,12 @@ public final class SmoothConfigChooser implements GLSurfaceView.EGLConfigChooser
         return fallback;
     }
 
-    private static EGLConfig find(EGL10 egl, EGLDisplay display, int red, int green, int blue, int samples) {
+    private EGLConfig find(EGL10 egl, EGLDisplay display, int red, int green, int blue, int samples) {
         int[] spec = {
             EGL10.EGL_RED_SIZE, red, EGL10.EGL_GREEN_SIZE, green, EGL10.EGL_BLUE_SIZE, blue,
             EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
-            0x3040, 1, // EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT (GLES1)
+            EGL10.EGL_DEPTH_SIZE,depth,
+            0x3040, renderable, // Garden GLES2; classic GLES1 is unchanged.
             EGL10.EGL_SAMPLE_BUFFERS, samples == 0 ? 0 : 1,
             EGL10.EGL_SAMPLES, samples, EGL10.EGL_NONE
         };

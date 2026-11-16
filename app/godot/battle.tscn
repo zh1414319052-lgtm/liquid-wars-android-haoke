@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://battle.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/mainland.glb" id="2"]
+
+[node name="Battlefield" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Mainland" parent="." instance=ExtResource("2")]
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(1632,250,-1024)
+rotation = Vector3(-1.57079632679,0,0)
+projection = 1
+size = 150
+near = 0.1
+far = 600.0
+current = true
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-65,-28,0)
+light_color = Color(1,0.98,0.94,1)
+light_energy = 0.65
+shadow_enabled = true
+shadow_opacity = 0.72
+directional_shadow_mode = 0
+directional_shadow_max_distance = 550.0
+shadow_bias = 0.1
+shadow_normal_bias = 2.0

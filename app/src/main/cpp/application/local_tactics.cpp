@@ -72,6 +72,7 @@ void LocalTactics::search(const State& s,int start,int team,bool brave){
 }
 float LocalTactics::itemValue(const State& s,int team,int slot,float own,float danger)const {
  const auto& p=s.items->pickups[slot];auto& it=*s.items;int k=p.kind;if(k<0)return -10000;
+ if(k>=Items::COUNT)return it.pickupAllowed(team,k)?(k==Items::ACTIVE_CLEANSE?130:180):-10000;
  const float base[]={145,95,250,85,0,75,230,255,100,45,35,50,40,25,35,45,65,35,90,40};float v=base[k];
  const int counter[]={9,10,11,12,13,14,15,16,17,-1,-1,-1,-1,-1,-1,-1,-1,-1,19,-1};
  if(counter[k]>=0&&it.opposed(s,team,counter[k]))v=8;
@@ -84,7 +85,7 @@ float LocalTactics::itemValue(const State& s,int team,int slot,float own,float d
  }
  // Known pickups are on every player's minimap. Acquiring the counter before a
  // rival reaches its paired power is useful even before that power is active.
- for(const auto& q:it.pickups)if(q.kind>=0&&counter[q.kind]==k&&power(hostile,q.x,q.y)>0)v+=75;
+ for(const auto& q:it.pickups)if(q.kind>=0&&q.kind<Items::COUNT&&counter[q.kind]==k&&power(hostile,q.x,q.y)>0)v+=75;
  if((k==Items::TELEPORT||k==Items::DEATH||k==Items::FRIEND)&&it.pending[team])v*=.25f;
  if(danger>own*1.2f&&(k==Items::INVINCIBLE||k==Items::FREEZE||k==Items::FRIEND||k==Items::TELEPORT))v+=70;
  if(k==Items::DOUBLE&&s.dots.size()>=Items::MAX_PARTICLES)v=0;
@@ -177,6 +178,10 @@ std::array<short,60> LocalTactics::plan(const State& s,unsigned mask,int level){
    float d=std::max(1.f,length(ox,oy,tx,ty)),spread=std::min(12.f,std::sqrt(float(totals[team]))*.3f);
    for(int side=0;side<2;side++){float sign=side?1.f:-1.f;int x=int(tx-sign*(ty-oy)/d*spread),y=int(ty+sign*(tx-ox)/d*spread);if(clear(s,ox,oy,x,y)){out[team*10+side+1]=short(x);out[team*10+side+6]=short(y);}}
   }
+  int use=-1;
+  if(s.items->stock[team][1]>0&&s.items->ready[team][1]<=now&&s.items->active(team,Items::FREEZE))use=1;
+  else if(s.items->stock[team][0]>0&&s.items->ready[team][0]<=now&&!s.items->active(team,Items::FREEZE)&&nearestEnemy<120)use=0;
+  if(use>=0){for(int k=0;k<10;k++)out[team*10+k]=-1;out[team*10]=-5;out[team*10+5]=35;out[team*10+1]=short(now/7%30000+1);out[team*10+6]=short(s.operations->generation[team]);out[team*10+2]=short(use);continue;}
   int kind=s.items->pending[team],target=-1;float value=-1;
   if(!s.items->active(team,Items::FREEZE)&&s.items->warmup==0){
    if(kind==Items::DEATH||kind==Items::FRIEND){for(int t=0;t<6;t++)if(!allies[t]&&visibleTotals[t]){

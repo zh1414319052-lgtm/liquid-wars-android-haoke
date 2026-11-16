@@ -34,7 +34,7 @@ public final class ModelMatch implements AutoCloseable {
     private ModelTerrain terrain;private int[] previous;private long previousAt,frame;private boolean paused=true,closed;private int generation;
     private int cloakMask;private ModelWorld[] views=new ModelWorld[6];
     private ModelWorld view(int team){return views[team]==null?world:views[team];}
-    private void rebuildViews(){if(world==null||terrain==null)return;java.util.Map<Integer,ModelWorld> cache=new java.util.HashMap<>();cache.put(0,world);for(int p=0;p<6;p++)if(configs[p].enabled){int mask=ModelVisibility.hiddenMask(p,itemState,alliances);ModelWorld v=cache.get(mask);if(v==null){v=new ModelWorld(ModelVisibility.filter(world.raw,terrain.width,mask),terrain.navigation);cache.put(mask,v);}views[p]=v;}}
+    private void rebuildViews(){if(world==null||terrain==null)return;java.util.Map<Integer,ModelWorld> cache=new java.util.HashMap<>();cache.put(0,world);for(int p=0;p<6;p++)if(configs[p].enabled){int mask=ModelVisibility.hiddenMask(p,itemState,alliances);ModelWorld v=cache.get(mask);if(v==null){v=new ModelWorld(ModelVisibility.filter(world.raw,terrain.width,terrain.height,mask),terrain.navigation);cache.put(mask,v);}views[p]=v;}}
     private int itemEpoch=-1;private int[] itemState;
     private org.json.JSONObject itemFacts=new org.json.JSONObject();
     private org.json.JSONObject operationsFacts=new org.json.JSONObject();

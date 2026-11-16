@@ -14,7 +14,7 @@ inline std::vector<int> snapshot(const State& s) {
     int counts[6][240]={},sx[6][240]={},sy[6][240]={};
     const int W=s.map->width,H=s.map->height;const bool wide=W>1024;
     size_t index=217;
-    for(const Dot* d:s.dots){int p=d->team;if(p>=6||d->x>=W||d->y>=H)continue;out[index++]=W>2048?(int(d->x)|(int(d->y)<<12)|(p<<22)|(int(d->health)<<25)):wide?(int(d->x)|(int(d->y)<<11)|(p<<21)|(int(d->health)<<24)):(int(d->x)|(int(d->y)<<10)|(p<<19)|(int(d->health)<<22));int at=p*8;out[at]++;out[at+1]+=d->health;out[at+2]+=d->x;out[at+3]+=d->y;int c=(int(d->y)*12/H)*20+int(d->x)*20/W;counts[p][c]++;sx[p][c]+=d->x;sy[p][c]+=d->y;
+    for(const Dot* d:s.dots){int p=d->team;if(p>=6||d->x>=W||d->y>=H)continue;out[index++]=H>1024?(int(d->x)|(int(d->y)<<12)|(p<<24)|(int(d->health)<<27)):W>2048?(int(d->x)|(int(d->y)<<12)|(p<<22)|(int(d->health)<<25)):wide?(int(d->x)|(int(d->y)<<11)|(p<<21)|(int(d->health)<<24)):(int(d->x)|(int(d->y)<<10)|(p<<19)|(int(d->health)<<22));int at=p*8;out[at]++;out[at+1]+=d->health;out[at+2]+=d->x;out[at+3]+=d->y;int c=(int(d->y)*12/H)*20+int(d->x)*20/W;counts[p][c]++;sx[p][c]+=d->x;sy[p][c]+=d->y;
         for(int dx=-1;dx<=1;dx++)for(int dy=-1;dy<=1;dy++){int x=int(d->x)+dx,y=int(d->y)+dy;if(x<0||x>=W||y<0||y>=H)continue;const Dot* other=s.field[x][y];if(other&&other->team<6&&other->team!=p)out[120+p*6+other->team]++;}}
     for(int p=0;p<6;p++){int at=p*8;if(!out[at])continue;out[at+1]=out[at+1]*100/(MAX_HEALTH*out[at]);out[at+2]/=out[at];out[at+3]/=out[at];
         std::array<int,240> order{};for(int c=0;c<240;c++)order[c]=c;

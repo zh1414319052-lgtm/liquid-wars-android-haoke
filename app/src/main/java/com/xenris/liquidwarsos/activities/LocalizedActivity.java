@@ -68,6 +68,7 @@ public abstract class LocalizedActivity extends AppCompatActivity {
     @Override
     protected void attachBaseContext(Context base) {
         Configuration language = new Configuration();
+        com.xenris.liquidwarsos.BattleText.configure(Resources.getSystem().getConfiguration().getLocales());
         language.setLocale(uiLocale(Resources.getSystem().getConfiguration().getLocales()));
         super.attachBaseContext(base.createConfigurationContext(language));
     }

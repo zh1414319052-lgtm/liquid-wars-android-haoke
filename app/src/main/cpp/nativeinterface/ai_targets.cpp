@@ -13,8 +13,8 @@ void resetAiTargets(){planner.reset();plannerRevision=-1;localPlanner.reset();}
 extern "C" jshortArray Java_com_xenris_liquidwarsos_NativeInterface_initialPositions(JNIEnv* env,jclass) {
     std::lock_guard<std::mutex> guard(nativeStateMutex);
     if(!state)return nullptr;
-    jshort out[12];for(int p=0;p<6;p++){out[p*2]=state->players[p].x[0];out[p*2+1]=state->players[p].y[0];}
-    jshortArray result=env->NewShortArray(12);if(result)env->SetShortArrayRegion(result,0,12,out);return result;
+    const int count=state->teamCount; jshort out[20];for(int p=0;p<count;p++){bool own=!state->expeditionMode||p==state->me;out[p*2]=own?state->players[p].x[0]:-1;out[p*2+1]=own?state->players[p].y[0]:-1;}
+    jshortArray result=env->NewShortArray(count*2);if(result)env->SetShortArrayRegion(result,0,count*2,out);return result;
 }
 extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_modelSnapshot(JNIEnv* env,jclass) {
     std::lock_guard<std::mutex> guard(nativeStateMutex);

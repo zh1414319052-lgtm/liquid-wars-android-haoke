@@ -17,21 +17,23 @@
 
 #include "move.hpp"
 #include "combat.hpp"
+#include "expedition.hpp"
 
 void Move::stepDots() {
     state->items->begin(*state);
+    if(state->expedition&&state->expedition->cutoff>=0)return;
     state->operations->step(*state);
     const size_t count=state->dots.size();
     for(size_t i = 0; i < count; i++) {
         Dot* dot = state->dots[i];
         const Player* player = &state->players[dot->team];
         const int moves=state->items->moves(*state,*dot);
-        for(int n=0;n<moves;n++)moveDotToward(dot, player);
+        for(int n=0;n<moves;n++)moveDotToward(dot, player,n==0);
     }
     state->items->end(*state);
 }
 
-void Move::moveDotToward(Dot* dot, const Player* player) {
+void Move::moveDotToward(Dot* dot, const Player* player,bool allowContact) {
     // Protocol 15: explicit idle for model teams without a live command.
     // No movement, auto-attack or RNG on this unit; enemies can still capture it.
     int commandX=-1,commandY=-1;
@@ -175,6 +177,7 @@ void Move::moveDotToward(Dot* dot, const Player* player) {
 
     nx = dot->x + dx;
     ny = dot->y + dy;
+    if(!allowContact)return; // Shoes never increase contact/attack or healing rate.
     if(state->items->canContact(*state,dot->team,nx,ny)) {
         state->items->contact(*state,*state->field[nx][ny],*dot);
         return;

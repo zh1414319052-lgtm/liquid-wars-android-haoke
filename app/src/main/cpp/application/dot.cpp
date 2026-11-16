@@ -16,8 +16,11 @@
 //    along with Liquid Wars.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dot.hpp"
+#include <atomic>
 
 Dot::Dot(unsigned short x, unsigned short y, unsigned char team) {
+    static std::atomic<uint64_t> nextVisualId{1};
+    visualId=nextVisualId.fetch_add(1,std::memory_order_relaxed);
     this->x = x;
     this->y = y;
     this->team = team;

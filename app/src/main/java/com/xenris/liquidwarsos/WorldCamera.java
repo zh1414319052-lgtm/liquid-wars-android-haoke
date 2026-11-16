@@ -6,26 +6,27 @@ public final class WorldCamera {
  public int width=800,height=480,id=-1,flip;
  public float left,bottom,viewWidth=800,viewHeight=480;
  public boolean overview=true,following=true;
+ public boolean detail=false;
  private final boolean[] touchProjection=new boolean[32];
  private final int[] touchOrder={-1,-1,-1,-1,-1};
  private final float[] touchNX=new float[32],touchNY=new float[32];
  private float aspect=2.2f,goalX,goalY,armyX,armyY,velocityX,velocityY;
  private boolean hasTarget;private long lastFrame;
  public boolean touching(){for(boolean held:touchProjection)if(held)return true;return false;}
- public boolean large(){return width>800||height>480;}
+ public boolean large(){return id==1001||width>800||height>480;}
  private static float clamp(float v,float a,float b){return Math.max(a,Math.min(b,v));}
  private static float soft(float v,float zone){return Math.copySign(Math.max(0,Math.abs(v)-zone),v);}
  // A smooth shoulder keeps thumb tremor in the central36% of the view from panning.
  private static float lead(float v){float t=clamp((Math.abs(v)-.18f)/.26f,0,1);return Math.copySign(.14f*t*t*(3-2*t),v);}
  public void viewport(float ratio){if(ratio>0&&Math.abs(ratio-aspect)>.0001f){float x=left+viewWidth/2,y=bottom+viewHeight/2;aspect=ratio;focus(x,y);}}
  public void world(int w,int h,int map,int transform,boolean spectator,float x,float y){
-  endTouch();width=w;height=h;id=map;flip=transform;overview=!large()||spectator;following=true;
+  endTouch();width=w;height=h;id=map;flip=transform;overview=!large()||spectator||(id==1001&&w<=800);following=true;detail=false;
   armyX=x;armyY=y;hasTarget=false;focus(x,y);
  }
  public void focus(float x,float y){goalX=x;goalY=y;resetSmoothing();place(x,y);}
  private void place(float x,float y){
   if(!large()){viewWidth=width;viewHeight=height;left=bottom=0;return;}
-  viewWidth=overview?Math.max(width,height*aspect):Math.min(800,width);
+  viewWidth=overview?Math.max(width,height*aspect):Math.min(id==1001&&(width<=800||width>=3264)?(width>=3264&&detail?200:400):(detail?400:800),width);
   viewHeight=overview?Math.max(height,width/aspect):Math.min(height,viewWidth/aspect);
   left=overview?(width-viewWidth)/2:clamp(x-viewWidth/2,0,width-viewWidth);
   bottom=overview?(height-viewHeight)/2:clamp(y-viewHeight/2,0,height-viewHeight);
@@ -86,6 +87,8 @@ public final class WorldCamera {
  public short touchY(float py,float pixels,int pointer){return mapY(py,pixels);}
  public void resetSmoothing(){lastFrame=0;velocityX=velocityY=0;}
  public void pan(float x,float y){endTouch();overview=false;following=false;focus(x,y);}
+ /** Manual viewing scale only; default scales and authoritative coordinates stay unchanged. */
+ public void detailToggle(){if(!large()||(id==1001&&width<3264))return;endTouch();float x=left+viewWidth/2,y=bottom+viewHeight/2;detail=!detail;overview=false;focus(x,y);}
  public void toggle(float x,float y){endTouch();if(overview||!following){overview=false;following=true;}else overview=true;hasTarget=false;focus(x,y);}
  public short mapX(float px,float pixels){return (short)clamp((int)(left+px*viewWidth/Math.max(1,pixels)),0,width-1);}
  public short mapY(float py,float pixels){return (short)clamp((int)Math.ceil(bottom+viewHeight-1-py*viewHeight/Math.max(1,pixels)),0,height-1);}

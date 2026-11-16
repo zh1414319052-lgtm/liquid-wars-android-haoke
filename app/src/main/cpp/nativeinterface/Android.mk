@@ -10,6 +10,6 @@ MY_LOCAL_SRC_FILES := $(wildcard $(MY_LOCAL_PATH)/*.cpp)
 LOCAL_SRC_FILES := $(subst cpp/, , $(MY_LOCAL_SRC_FILES))
 
 LOCAL_STATIC_LIBRARIES := application
-LOCAL_LDLIBS := -llog -landroid -lGLESv1_CM
+LOCAL_LDLIBS := -llog -landroid -lGLESv1_CM -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)

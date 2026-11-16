@@ -18,6 +18,6 @@ std::vector<uint8_t> roundParticle(unsigned size, float diameterPixels);
 std::vector<uint8_t> pearlParticle(unsigned size, float diameterPixels, bool highlight);
 // Six baked-colour porcelain sprites,4x2 POT atlas, transparent gutters.
 // diameterPixels is physical screen size, not simulation/grid size.
-Texture porcelainParticles(unsigned tileSize, float diameterPixels);
+Texture porcelainParticles(unsigned tileSize, float diameterPixels,unsigned teams=6);
 }
 #endif

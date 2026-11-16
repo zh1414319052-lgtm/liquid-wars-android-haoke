@@ -32,3 +32,13 @@
 # EdDSA receives an EdDSAPublicKey directly. The unreachable JDK-only X509Key
 # fallback is absent on Android; keep this exception narrowly scoped.
 -dontwarn sun.security.x509.X509Key
+
+# Godot's embedded native library looks up Java classes/methods by name.
+# The Maven AAR supplies no consumer rules. Preserve that JNI/reflection API
+# and the two methods registered by UsedByGodot on our presentation bridge.
+-keep class org.godotengine.godot.** { *; }
+-keep @interface org.godotengine.godot.plugin.UsedByGodot
+-keepattributes RuntimeVisibleAnnotations
+-keepclassmembers class com.xenris.liquidwarsos.GodotBattlePlugin {
+    @org.godotengine.godot.plugin.UsedByGodot <methods>;
+}

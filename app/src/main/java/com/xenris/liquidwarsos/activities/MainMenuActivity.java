@@ -34,6 +34,7 @@ public class MainMenuActivity extends LocalizedActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.main_menu);
+        ((android.widget.TextView)findViewById(R.id.garden_trial)).setTypeface(android.graphics.Typeface.createFromAsset(getAssets(),"fonts/NotoSansSC-Lobby600.ttf"));
         updates=new com.xenris.liquidwarsos.updates.MenuUpdateHost(this,true);
     }
     @Override public void onResume(){super.onResume();if(updates!=null)updates.resume();}
@@ -46,6 +47,13 @@ public class MainMenuActivity extends LocalizedActivity {
         startActivity(intent);
     }
     public void largeMapMenu(View view){startActivity(new Intent(this,SinglePlayerGameSetupActivity.class).putExtra("largeMode",true));}
+    public void garden3DMenu(View view){
+        android.widget.LinearLayout box=new android.widget.LinearLayout(this);box.setOrientation(1);box.setPadding(28,20,28,20);
+        android.graphics.Typeface font=android.graphics.Typeface.createFromAsset(getAssets(),"fonts/NotoSansSC-Lobby600.ttf");
+        android.widget.TextView title=new android.widget.TextView(this);title.setTypeface(font);title.setText(com.xenris.liquidwarsos.BattleText.t("3D远征 · 选择总席位\n本地由你和电脑参战；每队1000颗，按兵力排名","3D Expedition · Select seats\nPlay locally with AI; 1,000 units per army, ranked by army size"));title.setTextSize(17);box.addView(title);
+        android.widget.NumberPicker seats=new android.widget.NumberPicker(this);seats.setMinValue(2);seats.setMaxValue(10);seats.setValue(Math.max(2,Math.min(10,getSharedPreferences("battle-controls",0).getInt("expedition-seats",6))));seats.setOnValueChangedListener((picker,oldValue,newValue)->getSharedPreferences("battle-controls",0).edit().putInt("expedition-seats",newValue).apply());box.addView(seats);android.widget.Button online=new android.widget.Button(this);online.setText(com.xenris.liquidwarsos.BattleText.t("联机远征 · 匹配与好友房","Online expedition · Matchmaking and friend rooms"));online.setTypeface(font);online.setTextColor(0xffc5e5d3);box.addView(online);
+        android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setView(box).setPositiveButton(com.xenris.liquidwarsos.BattleText.t("开始远征","Start expedition"),(d,k)->startActivity(new Intent(this,GodotGardenActivity.class).putExtra(com.xenris.liquidwarsos.GardenSession.EXTRA,true).putExtra("expedition_seats",seats.getValue()))).setNegativeButton(com.xenris.liquidwarsos.BattleText.t("返回","Back"),null).create();dialog.show();online.setOnClickListener(v->{dialog.dismiss();startActivity(new Intent(this,ExpeditionLobbyActivity.class));});for(int i:new int[]{-1,-2}){dialog.getButton(i).setTypeface(font);dialog.getButton(i).setTextColor(0xffb4ddc9);}
+    }
     public void spectatorMenu(View view){startActivity(new Intent(this,SinglePlayerGameSetupActivity.class).putExtra("spectatorSetup",true));}
 
     public void multiplayerMenu(View view) {

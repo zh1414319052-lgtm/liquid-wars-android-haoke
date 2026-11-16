@@ -105,15 +105,17 @@ std::vector<uint8_t> pearlParticle(unsigned size,float diameterPixels,bool highl
     }
     return out;
 }
-Texture porcelainParticles(unsigned tileSize,float diameterPixels) {
+Texture porcelainParticles(unsigned tileSize,float diameterPixels,unsigned teams) {
     if(tileSize<8 || tileSize>256 || (tileSize&(tileSize-1)) ||
        !std::isfinite(diameterPixels) || diameterPixels<=0) return Texture{};
     Texture out{};
     out.width=out.contentWidth=tileSize*4;
-    out.height=out.contentHeight=tileSize*2;
+    teams=std::max(1u,std::min(10u,teams));
+    out.height=out.contentHeight=tileSize*(teams>8?4:2);
     out.rgba.resize(size_t(out.width)*out.height*4,0);
     const float radius=std::max(.5f,diameterPixels*.5f),extent=radius+.9f;
-    for(unsigned team=0;team<6;team++)for(unsigned y=0;y<tileSize;y++)for(unsigned x=0;x<tileSize;x++) {
+    static const float extra[4][3]={{55,194,187},{241,139,186},{228,128,42},{134,171,235}};
+    for(unsigned team=0;team<teams;team++)for(unsigned y=0;y<tileSize;y++)for(unsigned x=0;x<tileSize;x++) {
         const float dx=((x+.5f)/tileSize*2-1)*extent;
         const float dy=((y+.5f)/tileSize*2-1)*extent;
         const float r=std::sqrt(dx*dx+dy*dy),nx=dx/radius,ny=dy/radius;
@@ -134,7 +136,7 @@ Texture porcelainParticles(unsigned tileSize,float diameterPixels) {
         uint8_t* p=out.rgba.data()+(size_t(atY)*out.width+atX)*4;
         for(unsigned c=0;c<3;c++) {
             const float edge=22.f+c*5.f;
-            float body=TEAM_RGB[team][c]*shade;
+            float body=(team<6?TEAM_RGB[team][c]:extra[team-6][c])*shade;
             body=body*(1.f-rim)+edge*rim;
             body=body*(1.f-glint)+(c==2?239.f:250.f)*glint;
             // Straight alpha for the existing SRC_ALPHA blend mode. Meaningful

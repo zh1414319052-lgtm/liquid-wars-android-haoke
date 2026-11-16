@@ -36,15 +36,15 @@ final class DisplayFrameRate {
         if(chosen==null)for(Display.Mode mode:modes(display))if(chosen==null||mode.getRefreshRate()<chosen.getRefreshRate())chosen=mode;
         if(chosen!=null){target=chosen.getRefreshRate();if(preference>0&&target>preference+.5f)target/=Math.ceil(target/preference-.01);}
         Activity a=activity(view.getContext());if(a!=null){WindowManager.LayoutParams p=a.getWindow().getAttributes();int id=chosen==null?0:chosen.getModeId();if(p.preferredDisplayModeId!=id||p.preferredRefreshRate!=target){p.preferredDisplayModeId=id;p.preferredRefreshRate=target;a.getWindow().setAttributes(p);}}
-        Surface surface=view.getHolder().getSurface();
-        if(Build.VERSION.SDK_INT>=30&&surface.isValid())try{
+        Surface surface=view.renderSurface();
+        if(Build.VERSION.SDK_INT>=30&&surface!=null&&surface.isValid())try{
             if(Build.VERSION.SDK_INT>=31)surface.setFrameRate(target,Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS);
             else surface.setFrameRate(target,Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
         }catch(IllegalArgumentException|IllegalStateException ignored){/* Driver/transition: vsync remains usable. */}
         return target;
     }
     static void release(MyGLSurfaceView view){
-        if(Build.VERSION.SDK_INT>=30&&view.getHolder().getSurface().isValid())try{view.getHolder().getSurface().setFrameRate(0,Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);}catch(IllegalArgumentException|IllegalStateException ignored){}
+        if(Build.VERSION.SDK_INT>=30&&view.renderSurface()!=null&&view.renderSurface().isValid())try{view.renderSurface().setFrameRate(0,Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);}catch(IllegalArgumentException|IllegalStateException ignored){}
         Activity a=activity(view.getContext());if(a!=null){WindowManager.LayoutParams p=a.getWindow().getAttributes();p.preferredDisplayModeId=0;p.preferredRefreshRate=0;a.getWindow().setAttributes(p);}
     }
 }

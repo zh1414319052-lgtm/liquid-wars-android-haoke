@@ -20,11 +20,22 @@ package com.xenris.liquidwarsos;
 import android.content.res.AssetManager;
 
 public class NativeInterface {
+    public static native void createExpeditionProxy(int team,int seats);
+    public static native int[] expeditionWire(int viewer);
+    public static native boolean expeditionReceive(int[] packet);
+    public static native void expeditionBot(int team,boolean bot);
+    public static native void expeditionRemoteCommand(int actor,int kind,int group,int x,int y,short[] xs,short[] ys);
     static {
         System.loadLibrary("nativeinterface");
     }
 
+    public static native float[] godotFrame(float left,float bottom,float width,float height,boolean spectator);
     public static native void onSurfaceCreated();
+    public static native boolean createGardenGame(int seed);
+    public static native boolean createExpeditionGame(int team,int seats,int seed);
+    public static native int[] expeditionSnapshot();
+    public static native boolean expeditionCommand(int actor,int serial,int kind,int group,int x,int y);
+    public static native int gardenRenderStatus();
     public static native int[] sceneInfo();
     /** Read-only deterministic rule diagnostic; does not include camera or consume RNG. */
     public static native long stateHash();
@@ -63,4 +74,6 @@ public class NativeInterface {
     /** Display-only allied scouting; never writes rule state or RNG. */
     public static native int[] minimapSnapshot(boolean spectator);
     public static native void setTimeSidebar(float t);
+    public static native void gardenPauseVisual(boolean paused);
+    public static native double[] gardenDiagnostics();
 }

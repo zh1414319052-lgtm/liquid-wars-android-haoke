@@ -28,6 +28,7 @@ public final class ModelGameSupport {
         this.spectator=spectator;this.controlled=controlled;
         int qaMask=63;boolean debug=(a.getApplicationInfo().flags&android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0;
         if(debug&&a.getIntent().hasExtra("qa_model_teams"))qaMask=a.getIntent().getIntExtra("qa_model_teams",0)&63;
+        if(a.getIntent().getBooleanExtra(GardenSession.EXTRA,false))qaMask=0;
         // Pure-local instrumentation must not even load saved provider settings.
         ModelConfig[] configs=qaMask==0?new ModelConfig[6]:ModelStore.all(a);
         for(int p=0;p<6;p++)if((controlled&qaMask&(1<<p))==0)configs[p]=ModelConfig.empty();

@@ -29,15 +29,20 @@
 #include "spiral.hpp"
 #include "items.hpp"
 #include "operations.hpp"
+class Expedition;
 
 class State {
     public:
         int me;
+        const bool garden3D;
+        const int teamCount;
+        const bool expeditionMode;
+        Expedition* expedition=nullptr;
         bool currentlyDrawing;
         float timeSidebar;
         int displayWidth;
         int displayHeight;
-        Player players[NUMBER_OF_TEAMS];
+        Player players[MAX_TEAMS];
         Map* map;
         std::vector<Dot*> dots;
         struct Field {
@@ -54,10 +59,10 @@ class State {
         int dotsPerTeam;
         Items* items=nullptr;
         Operations* operations=nullptr;
-        int birthX[6]={},birthY[6]={},spawnFallbacks=0;
-        int alliances[6]={0,1,2,3,4,5};
+        int birthX[MAX_TEAMS]={},birthY[MAX_TEAMS]={},spawnFallbacks=0;
+        int alliances[MAX_TEAMS]={0,1,2,3,4,5,6,7,8,9};
         bool allied(int a,int b) const {return alliances[a]==alliances[b]||(items&&items->truceUntil>items->elapsed&&((alliances[a]==items->truceA&&alliances[b]==items->truceB)||(alliances[b]==items->truceA&&alliances[a]==items->truceB)));}
-        State(int team, int mapId, int seed, int dotsPerTeam);
+        State(int team, int mapId, int seed, int dotsPerTeam, bool garden=false,int expeditionSeats=0);
         ~State();
         void placeTeams(int seed, int mapId);
 };

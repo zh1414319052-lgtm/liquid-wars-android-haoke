@@ -23,12 +23,12 @@ import android.content.Context;
 
 public class Util {
     public static void loadPlayerInitialPositions(short[][] xs, short[][] ys) {
-        for(int p = 0; p < 6; p++)
+        for(int p = 0; p < xs.length; p++)
             for(int i = 0; i < 5; i++)
                 xs[p][i] = ys[p][i] = -1;
         short[] points=NativeInterface.initialPositions();
-        if(points==null||points.length!=12)throw new IllegalStateException("Create native match before reading spawn cursors");
-        for(int p=0;p<6;p++){xs[p][0]=points[p*2];ys[p][0]=points[p*2+1];}
+        if(points==null||points.length<4||points.length>20||points.length%2!=0)throw new IllegalStateException("Create native match before reading spawn cursors");
+        for(int p=0;p<Math.min(xs.length,points.length/2);p++){xs[p][0]=points[p*2];ys[p][0]=points[p*2+1];}
     }
 
     public static String teamToNameString(Context context, int team) {

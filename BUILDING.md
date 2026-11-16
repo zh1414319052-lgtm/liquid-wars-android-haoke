@@ -1,8 +1,35 @@
+# Build 1.94 (64)
+
+Use JDK21, Android SDK35/build-tools35.0.1, NDK28.2.13676358 and the checked-in Gradle wrapper. Set JAVA_HOME/ANDROID_HOME or local.properties to your own installation. Maven dependencies remain pinned in app/build.gradle; Godot Android library is 4.7.2.stable. Restore v1.94 resources at the repository root first. This single archive is complete; older resource releases are unnecessary.
+
+`gradlew.bat assembleRelease lintVitalRelease -PuiQa185` produces an unsigned four-ABI APK. `-PuiQa185` only excludes obsolete test JNI fixtures; it does not change release package identity. Debug QA uses `assembleDebug -PgardenQa186` and a separate applicationId. Never ship a debug key as the publisher identity. Existing signature reference: docs/game/formal-1.53/signing-public.json; private identity is external and not recoverable from this repository.
+
+Godot project: app/godot. Editable sources: art/source. Packed runtime: app/src/main/assets/battle.pck. After changing Godot sources, use the exact Godot4.7.2 editor: `godot --headless --path app/godot --editor --import`, then `godot --headless --path app/godot --export-pack "Android data" ../src/main/assets/battle.pck`. Android host remains the original native simulation; do not replace it with a standalone Godot simulation. tools/build_godot190.py provides explicit toolchain arguments for complete scene export and a QA build.
+
+`testDebugUnitTest -PuiQa185` runs focused JVM tests. Formal194DeviceTest targets a release with `-PformalDevice185 assembleReleaseAndroidTest`; the test APK must use the same authorized signature. Run only on the selected test device. It writes a synthetic preference marker which upgradeKeepsSettings verifies/removes. It does not create player accounts or send mail.
+
+Do not execute historical site/deployment scripts as part of a build. No build command publishes a notification. Public distribution excludes operator credentials and raw QA captures.
+
+---
+## Historical build notes (version-specific; current instructions above take precedence)
+
 # 构建 / Build
 
-Android 8.0+；Java / C++ / GLES，未迁移引擎。四个 ABI：armeabi-v7a、arm64-v8a、x86、x86_64。
+Android 8.0+；Java / C++，经典2D保留GLES，1.90本地3D试玩嵌入Godot 4.7.2 Compatibility。默认四个 ABI：armeabi-v7a、arm64-v8a、x86、x86_64；本轮MuMu试玩包限定x86_64。
 
-本版使用 Gradle 8.9、Android Gradle Plugin 8.7.3、JDK 21、Android SDK 34、NDK 28.2.13676358。使用本机已有工具或自行在用户目录配置；无需修改系统全局环境变量。
+本版使用 Gradle 8.9、Android Gradle Plugin 8.7.3、JDK 21、Android compile SDK 35（target 34）、NDK 28.2.13676358。使用本机已有工具或自行在用户目录配置；无需修改系统全局环境变量。
+
+## 当前1.90 Godot本地试玩
+
+`app/godot` 是独立可编辑的场景工程，打开后没有Android原生插件时只显示资产预览，不是假装有战斗。实际战斗必须通过原Android宿主运行。维护者用Godot 4.7.2 CLI导入与导出Android数据PCK；不需要打开或修改用户其他Godot/Blender工程。
+
+```powershell
+python tools/build_godot190.py --godot "D:/Tools/Godot/4.7.2/Godot_v4.7.2-stable_win64_console.exe" --java-home "C:/Program Files/Microsoft/jdk-21.0.11.10-hotspot" --android-sdk "C:/Users/Administrator/AppData/Local/Android/Sdk" --abi x86_64 --label my-unique-build
+```
+
+脚本依次导出真实模型、导入Godot、检查静态地面与河流边界、导出PCK、构建独立QA APK。需要Python3、NumPy；构建路径按本机调整，label不得重复覆盖日志。可选`--abi all`或`arm64-v8a`只代表构建目标，不等于设备已验收。已归档的battle.pck可直接用于`gradlew.bat :app:assembleDebug -PgardenQa186 -PgodotQaAbi=x86_64`，修改Godot工程后必须重新导出PCK。
+
+场景编辑原件位于`art/source/garden-1.88`及`garden-1.89`；运行几何由同源meshes.bin转换为GLB，保持原碰撞/高度尺度。`tools/device_godot190.py`只操作已核实的MuMu名称2/index3/16480，包名为`com.xenris.liquidwarsos.haoke.garden186`。本次没有正式签名、发布、网站部署或生产账号操作。
 
 1. 将 `ANDROID_HOME` 指向 SDK，`JAVA_HOME` 指向 JDK；也可在不提交的 `local.properties` 设置 `sdk.dir`。
 2. Windows：`gradlew.bat assembleDebug assembleRelease lintVitalRelease`。Linux/macOS：`sh gradlew assembleDebug assembleRelease lintVitalRelease`。

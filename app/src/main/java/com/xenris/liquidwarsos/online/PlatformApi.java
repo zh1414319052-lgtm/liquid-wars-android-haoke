@@ -28,12 +28,16 @@ public final class PlatformApi {
         .followRedirects(false).build();
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final Context context;
+    public final String origin;
+    private final String storage;
     private volatile String token;
     public static final class ApiError extends IOException {public final int status;ApiError(int status,String message){super(message);this.status=status;}}
-    public PlatformApi(Context context) { this.context=context.getApplicationContext(); token=load(); }
+    public PlatformApi(Context context) { this.context=context.getApplicationContext();String target=ORIGIN;
+        if(BuildConfig.DEBUG){java.io.File marker=new java.io.File(this.context.getCacheDir(),"expedition-local-193");if(marker.isFile())try(java.io.FileInputStream in=new java.io.FileInputStream(marker)){byte[] bytes=new byte[64];int n=in.read(bytes);if(n>0&&new String(bytes,0,n,java.nio.charset.StandardCharsets.UTF_8).trim().equals("http://127.0.0.1:19380"))target="http://127.0.0.1:19380";}catch(IOException ignored){}}
+        origin=target;storage=BuildConfig.DEBUG&&new java.io.File(this.context.getCacheDir(),"guest193-public-fixture").isFile()?"platform-session-publicqa193":origin.equals(ORIGIN)?"platform-session":"platform-session-qa193";token=load(); }
     public boolean signedIn() { return token!=null&&!token.isEmpty(); }
     public JSONObject call(String method,String path,JSONObject body) throws Exception {
-        Request.Builder builder=new Request.Builder().url(ORIGIN+"/api"+path).header("User-Agent","Haoke-LiquidWars/"+BuildConfig.VERSION_NAME+" (Android)");
+        Request.Builder builder=new Request.Builder().url(origin+"/api"+path).header("User-Agent","Haoke-LiquidWars/"+BuildConfig.VERSION_NAME+" (Android)");
         if(signedIn())builder.header("Authorization","Bearer "+token);
         builder.method(method,method.equals("GET")?null:RequestBody.create(body==null?"{}":body.toString(),JSON));
         try(Response response=HTTP.newCall(builder.build()).execute()){
@@ -52,13 +56,22 @@ public final class PlatformApi {
     }
     public JSONObject hello() throws JSONException {return object("game_id",GAME,"protocol",StaticBits.VERSION_CODE,"build",BuildConfig.VERSION_CODE);}
     public void enter() throws Exception {call("POST","/online/enter",hello());}
-    public void save(String value) throws Exception {
+    public synchronized JSONObject ensurePlayer() throws Exception {
+        if(signedIn())try{JSONObject me=call("GET","/me",null);if(!me.isNull("user"))return me;clear();}
+        catch(ApiError e){if(e.status!=401||loadEncrypted(storage+"-guest").isEmpty())throw e;}
+        String store=storage+"-guest";String secret=loadEncrypted(store);
+        if(secret.isEmpty()){byte[] bytes=new byte[32];new java.security.SecureRandom().nextBytes(bytes);secret=Base64.encodeToString(bytes,Base64.URL_SAFE|Base64.NO_WRAP|Base64.NO_PADDING);saveEncrypted(store,secret);}
+        JSONObject result=call("POST","/auth/guest",object("installation_secret",secret));save(result.getString("access_token"));return result;
+    }
+    public void forgetGuest(){context.getSharedPreferences(storage+"-guest",0).edit().clear().commit();}
+    public void save(String value) throws Exception {saveEncrypted(storage,value);token=value;}
+    private void saveEncrypted(String name,String value) throws Exception {
         Cipher c=Cipher.getInstance("AES/GCM/NoPadding");c.init(Cipher.ENCRYPT_MODE,key());
         String encrypted=Base64.encodeToString(c.doFinal(value.getBytes(java.nio.charset.StandardCharsets.UTF_8)),Base64.NO_WRAP);
-        context.getSharedPreferences("platform-session",0).edit().putString("data",encrypted)
-            .putString("iv",Base64.encodeToString(c.getIV(),Base64.NO_WRAP)).commit();token=value;
+        context.getSharedPreferences(name,0).edit().putString("data",encrypted)
+            .putString("iv",Base64.encodeToString(c.getIV(),Base64.NO_WRAP)).commit();
     }
-    public void clear(){token="";context.getSharedPreferences("platform-session",0).edit().clear().apply();}
+    public void clear(){token="";context.getSharedPreferences(storage,0).edit().clear().apply();}
     private SecretKey key() throws Exception {
         KeyStore store=KeyStore.getInstance("AndroidKeyStore");store.load(null);
         String alias="haoke.platform.session";
@@ -69,9 +82,10 @@ public final class PlatformApi {
         }
         return ((KeyStore.SecretKeyEntry)store.getEntry(alias,null)).getSecretKey();
     }
-    private String load(){
+    private String load(){return loadEncrypted(storage);}
+    private String loadEncrypted(String name){
         try{
-            SharedPreferences p=context.getSharedPreferences("platform-session",0);String data=p.getString("data","");if(data.isEmpty())return "";
+            SharedPreferences p=context.getSharedPreferences(name,0);String data=p.getString("data","");if(data.isEmpty())return "";
             Cipher c=Cipher.getInstance("AES/GCM/NoPadding");c.init(Cipher.DECRYPT_MODE,key(),new GCMParameterSpec(128,Base64.decode(p.getString("iv",""),Base64.NO_WRAP)));
             return new String(c.doFinal(Base64.decode(data,Base64.NO_WRAP)),java.nio.charset.StandardCharsets.UTF_8);
         }catch(Exception e){return "";}

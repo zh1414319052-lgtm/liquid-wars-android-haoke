@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "state_guard.hpp"
 #include "../application/state.hpp"
+#include "../application/garden3d.hpp"
 #include <jni.h>
 std::mutex nativeStateMutex;
+static jintArray ints(JNIEnv* env,const std::vector<int>& v){auto a=env->NewIntArray(v.size());if(a)env->SetIntArrayRegion(a,0,v.size(),v.data());return a;}
 extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_configureOperations(JNIEnv*,jclass,jint mode){std::lock_guard<std::mutex> g(nativeStateMutex);if(state)state->operations->configure(*state,mode);}
-extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_operationsSnapshot(JNIEnv* env,jclass,jint viewer,jboolean all){std::lock_guard<std::mutex> g(nativeStateMutex);if(!state)return nullptr;auto v=state->operations->snapshot(*state,viewer,all);jintArray out=env->NewIntArray(v.size());if(out)env->SetIntArrayRegion(out,0,v.size(),v.data());return out;}
+extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_operationsSnapshot(JNIEnv* env,jclass,jint viewer,jboolean all){std::vector<int> cached;if(!all&&garden3d::hudSnapshot(1,cached))return cached.empty()?nullptr:ints(env,cached);std::lock_guard<std::mutex> g(nativeStateMutex);if(!state)return nullptr;return ints(env,state->operations->snapshot(*state,viewer,all));}
 extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_operationWinner(JNIEnv*,jclass){std::lock_guard<std::mutex> g(nativeStateMutex);return state?state->operations->winningTeam(*state):-1;}
 extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_operationScore(JNIEnv*,jclass,jint t){std::lock_guard<std::mutex> g(nativeStateMutex);return state&&t>=0&&t<6?state->operations->alliancePoints(*state,t):0;}
 extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_itemSnapshot(JNIEnv* env,jclass){
+    std::vector<int> cached;if(garden3d::hudSnapshot(0,cached))return cached.empty()?nullptr:ints(env,cached);
     std::lock_guard<std::mutex> guard(nativeStateMutex);
     if(!state)return nullptr;auto values=state->items->snapshot(*state);
     jintArray out=env->NewIntArray(values.size());if(out)env->SetIntArrayRegion(out,0,values.size(),values.data());return out;
@@ -19,9 +22,9 @@ extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_terrainRevision(JNI
     std::lock_guard<std::mutex> guard(nativeStateMutex);return state?state->map->revision():0;
 }
 
-extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_playTimeMillis(JNIEnv*,jclass){std::lock_guard<std::mutex> g(nativeStateMutex);return state?state->items->elapsed:0;}
+extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_playTimeMillis(JNIEnv*,jclass){std::vector<int> cached;if(garden3d::hudSnapshot(4,cached))return cached.empty()?0:cached[0];std::lock_guard<std::mutex> g(nativeStateMutex);return state?state->items->elapsed:0;}
 extern "C" jboolean Java_com_xenris_liquidwarsos_NativeInterface_areAllied(JNIEnv*,jclass,jint a,jint b){std::lock_guard<std::mutex> g(nativeStateMutex);return state&&a>=0&&a<6&&b>=0&&b<6&&state->alliances[a]==state->alliances[b];}
 extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_allianceScore(JNIEnv*,jclass,jint a){std::lock_guard<std::mutex> g(nativeStateMutex);if(!state||a<0||a>=6)return 0;int n=0;for(int t=0;t<6;t++)if(state->alliances[a]==state->alliances[t])n+=state->players[t].score;return n;}
 
 #include "../application/minimap_sight.hpp"
-extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_minimapSnapshot(JNIEnv* env,jclass,jboolean all){std::lock_guard<std::mutex> g(nativeStateMutex);if(!state)return nullptr;auto values=minimap_sight::snapshot(*state,all);jintArray out=env->NewIntArray(values.size());if(out)env->SetIntArrayRegion(out,0,values.size(),values.data());return out;}
+extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_minimapSnapshot(JNIEnv* env,jclass,jboolean all){std::vector<int> cached;if(!all&&garden3d::hudSnapshot(2,cached))return cached.empty()?nullptr:ints(env,cached);std::lock_guard<std::mutex> g(nativeStateMutex);if(!state)return nullptr;return ints(env,minimap_sight::snapshot(*state,all));}

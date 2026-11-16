@@ -14,7 +14,12 @@ public final class MatchIntroView extends View {
  public void showMillis(long ms){long old=remaining;remaining=Math.max(0,ms);if((old>0)==(remaining>0)&&MatchIntro.seconds(old)==MatchIntro.seconds(remaining))return;post(()->{setVisibility(remaining>0?VISIBLE:GONE);invalidate();});}
  @Override protected void onDraw(Canvas c){super.onDraw(c);if(remaining<=0||starts==null)return;
   MyGLSurfaceView surface=((View)getParent()).findViewById(R.id.mySurfaceView);float sw=surface.getWidth(),sh=surface.getHeight(),left=surface.getLeft(),top=surface.getTop();
-  for(int p=0;p<6;p++)if(spectator||p==team){float x=left+surface.camera.screenX(starts[p*2],sw),y=top+surface.camera.screenY(starts[p*2+1],sh);
+  if(surface.garden3D()&&!surface.godotReady){
+   paint.setStyle(Paint.Style.FILL);paint.setColor(0xff1f2629);c.drawRect(0,0,getWidth(),getHeight(),paint);
+   paint.setTextAlign(Paint.Align.CENTER);paint.setTextSize(20*dp);paint.setColor(0xffcce5d9);c.drawText(zh?"正在准备战场…":"Preparing battlefield…",getWidth()/2f,getHeight()/2f,paint);
+   return;
+  }
+  for(int p=0;p<starts.length/2;p++)if((spectator||p==team)&&starts[p*2]>=0){float x=left+surface.camera.screenX(starts[p*2],sw),y=top+surface.camera.screenY(starts[p*2+1],sh);
    paint.setColor(0xfff1f1de);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(5*dp);c.drawCircle(x,y,20*dp,paint);paint.setColor(TeamPalette.color(p));paint.setStrokeWidth(3*dp);c.drawCircle(x,y,24*dp,paint);paint.setStyle(Paint.Style.FILL);
    String label=spectator?Integer.toString(p+1):(zh?"你在这里":"YOU ARE HERE");paint.setTextSize(15*dp);paint.setTextAlign(Paint.Align.CENTER);float w=paint.measureText(label)+18*dp,lx=Math.max(w/2+4*dp,Math.min(getWidth()-w/2-4*dp,x)),ly=Math.max(29*dp,y-35*dp);
    paint.setColor(0xed172027);c.drawRoundRect(lx-w/2,ly-20*dp,lx+w/2,ly+6*dp,8*dp,8*dp,paint);paint.setColor(TeamPalette.color(p));c.drawText(label,lx,ly,paint);

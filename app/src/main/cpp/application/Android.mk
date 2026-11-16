@@ -8,6 +8,8 @@ MY_LOCAL_SRC_FILES := $(wildcard $(MY_LOCAL_PATH)/*.cpp)
 MY_LOCAL_SRC_FILES := $(filter-out $(MY_LOCAL_PATH)/visual_texture.cpp,$(MY_LOCAL_SRC_FILES))
 MY_LOCAL_SRC_FILES := $(filter-out $(MY_LOCAL_PATH)/ai_tactics.cpp,$(MY_LOCAL_SRC_FILES))
 MY_LOCAL_SRC_FILES := $(filter-out $(MY_LOCAL_PATH)/graphics.cpp,$(MY_LOCAL_SRC_FILES))
+MY_LOCAL_SRC_FILES := $(filter-out $(MY_LOCAL_PATH)/garden_render.cpp,$(MY_LOCAL_SRC_FILES))
+MY_LOCAL_SRC_FILES := $(filter-out $(MY_LOCAL_PATH)/garden_live.cpp,$(MY_LOCAL_SRC_FILES))
 LOCAL_SRC_FILES := $(subst cpp/, , $(MY_LOCAL_SRC_FILES))
 
 LOCAL_STATIC_LIBRARIES := aclib visual_quality ai_strategy visual_render
@@ -21,7 +23,7 @@ include $(BUILD_STATIC_LIBRARY)
 # Rendering remains separately optimized and independently batched.
 include $(CLEAR_VARS)
 LOCAL_MODULE := visual_render
-LOCAL_SRC_FILES := application/graphics.cpp
+LOCAL_SRC_FILES := application/graphics.cpp application/garden_live.cpp
 LOCAL_STATIC_LIBRARIES := aclib
 LOCAL_CPPFLAGS := -O2 -fno-fast-math -ffp-contract=off -Wall -Werror
 include $(BUILD_STATIC_LIBRARY)

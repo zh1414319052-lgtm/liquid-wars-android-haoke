@@ -52,8 +52,8 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     private final Object clockLock = new Object();
     private long elapsedPlayMillis;
     private long resumedAt;
-    private short[][] xs = new short[6][5];
-    private short[][] ys = new short[6][5];
+    private short[][] xs = new short[10][5];
+    private short[][] ys = new short[10][5];
     private Context context;
     private volatile boolean gameFinished;
     private volatile boolean lostGame;
@@ -66,6 +66,14 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     private volatile boolean introDone;
     private long introStartedActive=-1;
     private com.xenris.liquidwarsos.cloud.ModelGameSupport models;
+    private com.xenris.liquidwarsos.GardenSession gardenSession;
+    public boolean expedition(){return gardenSession!=null&&com.xenris.liquidwarsos.GardenSession.expeditionSeats>0;}
+    private com.xenris.liquidwarsos.online.ExpeditionNetwork expeditionNet;
+    private boolean onlineExpedition(){return getIntent().hasExtra("exp_room");}
+    private boolean proxy(){return onlineExpedition()&&!getIntent().getBooleanExtra("exp_host",false);}
+    private short[] startPositions(){if(!proxy())return NativeInterface.initialPositions();short[] p=new short[20];java.util.Arrays.fill(p,(short)-1);return p;}
+    public void networkEnded(String reason){if(gameFinished)return;gameFinished=true;int[] d=NativeInterface.expeditionSnapshot();showResult(d!=null&&d.length>10&&d[3]>=0?new com.xenris.liquidwarsos.ExpeditionSnapshot(d).ranking():reason,false);}
+    private boolean createGarden(){if(proxy()){NativeInterface.createExpeditionProxy(StaticBits.team,com.xenris.liquidwarsos.GardenSession.expeditionSeats);return true;}return NativeInterface.createExpeditionGame(StaticBits.team,com.xenris.liquidwarsos.GardenSession.expeditionSeats,StaticBits.seed);}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,8 +86,14 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
 
         context = this;
         spectator=getIntent().getBooleanExtra("spectator",false);
+        if(getIntent().getBooleanExtra(com.xenris.liquidwarsos.GardenSession.EXTRA,false))gardenSession=onlineExpedition()?new com.xenris.liquidwarsos.GardenSession(getIntent().getIntExtra("expedition_seats",6),getIntent().getIntExtra("exp_slot",0),getIntent().getIntExtra("exp_seed",1)):new com.xenris.liquidwarsos.GardenSession(getIntent().getIntExtra("expedition_seats",6));
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // Private local reproducibility fixture. Never accepted by online play.
+        if(com.xenris.liquidwarsos.BuildConfig.DEBUG&&expedition()&&!onlineExpedition())try{
+            java.io.File seedFile=new java.io.File(getCacheDir(),"expedition192-seed");
+            if(seedFile.isFile())try(java.io.BufferedReader r=new java.io.BufferedReader(new java.io.FileReader(seedFile))){StaticBits.seed=Integer.parseInt(r.readLine().trim());}
+        }catch(Exception ignored){}
         final int fullscreen = WindowManager.LayoutParams.FLAG_FULLSCREEN;
         final int keepOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
         getWindow().addFlags(fullscreen | keepOn);
@@ -90,17 +104,34 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         myGLSurfaceView.setSurfaceCallbacks(this);
 
         NativeInterface.init(getAssets());
-        NativeInterface.createGame(StaticBits.team, StaticBits.map, StaticBits.seed, StaticBits.dotsPerTeam);
-        Util.loadPlayerInitialPositions(xs, ys);
-        NativeInterface.configureAlliances(StaticBits.alliances);
-        NativeInterface.configureOperations(StaticBits.operationsMode);
+        if(gardenSession!=null){
+            if(!createGarden()){
+                NativeInterface.uninit();
+                android.widget.Toast.makeText(this,R.string.garden_unavailable,android.widget.Toast.LENGTH_LONG).show();finish();return;
+            }
+        }else NativeInterface.createGame(StaticBits.team, StaticBits.map, StaticBits.seed, StaticBits.dotsPerTeam);
+        if(!proxy())Util.loadPlayerInitialPositions(xs, ys);else for(int i=0;i<10;i++){java.util.Arrays.fill(xs[i],(short)-1);java.util.Arrays.fill(ys[i],(short)-1);}
+        // Guest owns a filtered presentation, not a second native simulation.
+        // Rules/alliance configuration belongs only to the authority.
+        if(!proxy()){
+            NativeInterface.configureAlliances(StaticBits.alliances);
+            NativeInterface.configureOperations(StaticBits.operationsMode);
+        }
 
-        models=new com.xenris.liquidwarsos.cloud.ModelGameSupport(this,spectator,spectator?0x3f:(0x3f & ~(1<<StaticBits.team)));
+        if(!expedition())models=new com.xenris.liquidwarsos.cloud.ModelGameSupport(this,spectator,spectator?0x3f:(0x3f & ~(1<<StaticBits.team)));
         intro=findViewById(R.id.match_intro);
-        intro.bind(StaticBits.team,spectator,NativeInterface.initialPositions());
+        intro.bind(StaticBits.team,spectator,startPositions());
+        if(onlineExpedition()){expeditionNet=new com.xenris.liquidwarsos.online.ExpeditionNetwork(this);expeditionNet.attach();}
         running = true;
         gameThread = new Thread(this, "Solo match");
         gameThread.start();
+        if(gardenSession!=null)myGLSurfaceView.postDelayed(new Runnable(){public void run(){
+            if(!running||isFinishing())return;
+            if(!resumed||!windowFocused){myGLSurfaceView.postDelayed(this,1000);return;}
+            if(!myGLSurfaceView.renderReady()){
+                android.widget.Toast.makeText(GameActivity.this,R.string.garden_unavailable,android.widget.Toast.LENGTH_LONG).show();finish();
+            }
+        }},20000);
         if((getApplicationInfo().flags&android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0
                 &&getIntent().getBooleanExtra("qa_ruins_ready",false))myGLSurfaceView.post(this::showRuinsReady);
     }
@@ -155,9 +186,11 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     }
 
     private void stopMatch() {
+        if(expeditionNet!=null){expeditionNet.close();expeditionNet=null;}
         running = false;
         if(models!=null)models.dispose();
         if (gameThread == null) {
+            if(gardenSession!=null)gardenSession.close();
             return;
         }
         // Finish native teardown before the setup screen can launch the next match.
@@ -170,6 +203,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
             }
         }
         gameThread = null;
+        if(gardenSession!=null)gardenSession.close();
         if (interrupted) {
             Thread.currentThread().interrupt();
         }
@@ -182,13 +216,18 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         while (running) {
             if (!paused && !gameFinished) {
                 if(!introDone){
-                    synchronized(xs){models.beforeInputs(aiController,xs,ys);}
+                    if(models!=null)synchronized(xs){models.beforeInputs(aiController,xs,ys);}
                     if(introStartedActive<0)introStartedActive=elapsedActiveMillis();
                     long warmup=com.xenris.liquidwarsos.MatchIntro.DURATION_MS-(elapsedActiveMillis()-introStartedActive);
                     if(warmup>0){intro.showMillis(warmup);SystemClock.sleep(20);continue;}
-                    introDone=true;intro.showMillis(0);models.beginPlay();
+                    introDone=true;intro.showMillis(0);if(models!=null)models.beginPlay();
                 }
                 stepGame();
+                if(expedition()){
+                    int[] facts=NativeInterface.expeditionSnapshot();
+                    if(facts.length>10&&facts[3]>=0&&!gameFinished){gameFinished=true;if(expeditionNet!=null)expeditionNet.finished();showResult(new com.xenris.liquidwarsos.ExpeditionSnapshot(facts).ranking(),false);}
+                    continue;
+                }
                 syncRewind();
                 final int timeDiff = elapsedPlaySeconds();
                 NativeInterface.setTimeSidebar((float) timeDiff / StaticBits.timeLimit);
@@ -249,7 +288,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
             if (!running || isFinishing() || isDestroyed() || leavingMatch
                     || (spectating && gameFinished)) return;
             if (dialog != null) dialog.dismiss();
-            dialog = MatchResultDialog.show(this, message, R.string.play_again, this::replayMatch,
+            dialog = MatchResultDialog.show(this, message, onlineExpedition()?R.string.exit_match:R.string.play_again, this::replayMatch,
                     R.string.exit_match, () -> {
                         if (leavingMatch) return;
                         leavingMatch = true;
@@ -259,6 +298,8 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     }
 
     private void replayMatch() {
+        if(onlineExpedition()){finish();return;}
+        if(gardenSession!=null){restartGardenMatch();return;}
         if (leavingMatch || !running || isFinishing()) return;
         leavingMatch = true;
         // Stop drawing and finish native teardown before another Activity creates state.
@@ -267,6 +308,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         StaticBits.newSeed();
         Intent next = new Intent(this, GameActivity.class);
         next.putExtra("spectator",spectator);
+        next.putExtra(com.xenris.liquidwarsos.GardenSession.EXTRA,gardenSession!=null);
         // Keep explicit debug QA guards across the real replay button. Normal
         // launches have no such extras; stored player/API settings never change.
         if((getApplicationInfo().flags&android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0){
@@ -277,6 +319,26 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         startActivity(next);
     }
 
+    private void restartGardenMatch(){
+        if(leavingMatch||!running)return;
+        if(dialog!=null){dialog.dismiss();dialog=null;}
+        stopMatch();
+        gardenSession=onlineExpedition()?new com.xenris.liquidwarsos.GardenSession(getIntent().getIntExtra("expedition_seats",6),getIntent().getIntExtra("exp_slot",0),getIntent().getIntExtra("exp_seed",1)):new com.xenris.liquidwarsos.GardenSession(getIntent().getIntExtra("expedition_seats",6));
+        NativeInterface.init(getAssets());
+        if(!createGarden()){finish();return;}
+        NativeInterface.configureAlliances(StaticBits.alliances);
+        NativeInterface.configureOperations(StaticBits.operationsMode);
+        synchronized(xs){orders.clear();Util.loadPlayerInitialPositions(xs,ys);}
+        gameFinished=false;lostGame=false;itemEpoch=0;introDone=false;introStartedActive=-1;
+        elapsedPlayMillis=0;resumedAt=SystemClock.elapsedRealtime();
+        models=expedition()?null:new com.xenris.liquidwarsos.cloud.ModelGameSupport(this,spectator,spectator?0x3f:(0x3f & ~(1<<StaticBits.team)));
+        intro.bind(StaticBits.team,spectator,startPositions());
+        ((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).resetControl();
+        ((com.xenris.liquidwarsos.ExpeditionOverlay)findViewById(R.id.expedition_overlay)).reset();
+        myGLSurfaceView.camera.id=-1;myGLSurfaceView.syncWorld();
+        running=true;gameThread=new Thread(this,"Solo match");gameThread.start();updatePauseState();
+    }
+
     private void updateAI() {
         if(gameFinished){models.close();return;}
         int mask=spectator?0x3f:(0x3f & ~(1<<StaticBits.team));
@@ -284,11 +346,12 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
     }
 
     private com.xenris.liquidwarsos.AiController aiController;
-    private final com.xenris.liquidwarsos.OrderQueue orders=new com.xenris.liquidwarsos.OrderQueue();
+    private final com.xenris.liquidwarsos.OrderQueue orders=new com.xenris.liquidwarsos.OrderQueue(10);
 
     private void syncRewind(){int[] d=NativeInterface.itemSnapshot();if(d==null||d.length<209||d[146]==itemEpoch)return;itemEpoch=d[146];lostGame=false;aiStartDelay=6;aiController=new com.xenris.liquidwarsos.AiController(StaticBits.aiDifficulty);synchronized(xs){orders.clear();Util.loadPlayerInitialPositions(xs,ys);}runOnUiThread(()->{com.xenris.liquidwarsos.ItemOverlay v=findViewById(R.id.item_overlay);if(v!=null)v.resetControl();if(dialog!=null){dialog.dismiss();dialog=null;}});}
 
     private void stepGame() {
+        if(proxy()){SystemClock.sleep(16);return;}
         setPlayerPositions();
         for (int i = 0; i < 10; i++) {
             long previousTime = System.nanoTime();
@@ -299,29 +362,42 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
 
     private void setPlayerPositions() {
         synchronized (xs) {
-            models.beforeInputs(aiController,xs,ys);
+            if(models!=null)models.beforeInputs(aiController,xs,ys);
             orders.apply(xs,ys);
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < (expedition()?10:6); i++) {
+                if(expedition()&&i!=StaticBits.team)continue;
                 NativeInterface.setPlayerPosition(i, xs[i], ys[i]);
             }
-            models.didApplyInputs();
+            if(models!=null)models.didApplyInputs();
         }
     }
 
-    @Override public void onControls(short[] x,short[] y){if(spectator||!running||gameFinished)return;synchronized(xs){orders.offer(StaticBits.team,x,y,xs,ys);}}
+    @Override public void onControls(short[] x,short[] y){if(spectator||!running||gameFinished)return;if(proxy()){if(expeditionNet!=null)expeditionNet.command(-1,3,0,0,x,y);return;}synchronized(xs){orders.offer(StaticBits.team,x,y,xs,ys);}}
 
     @Override
     public void onTouch(MotionEvent event) {
         if (spectator || !running || gameFinished) return;
         synchronized (xs) {
             int team = StaticBits.team;
-            orders.clear(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
+            orders.clear(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);if(proxy()&&expeditionNet!=null)expeditionNet.command(-1,3,0,0,xs[team],ys[team]);
         }
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK) && !gameFinished && !lostGame) {
+            requestLeaveMatch();
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    /** Shared pause/leave action, including embedded renderers that consume keys. */
+    public void requestLeaveMatch() {
+            com.xenris.liquidwarsos.ExpeditionOverlay expeditionUi=findViewById(R.id.expedition_overlay);
+            if(expeditionUi!=null&&expeditionUi.back())return;
+            if(gameFinished||lostGame){finish();return;}
             DialogInterface.OnClickListener clicker = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     finish();
@@ -336,10 +412,15 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
             dialog = builder.show();
             TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
             messageText.setGravity(Gravity.CENTER);
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
+            android.graphics.Typeface uiFont=android.graphics.Typeface.createFromAsset(getAssets(),"fonts/NotoSansSC-Intro.ttf");
+            messageText.setTypeface(uiFont);
+            messageText.setTextColor(0xffdce9e3);
+            if(dialog instanceof AlertDialog){AlertDialog alert=(AlertDialog)dialog;
+                alert.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(0xffa9d8c5);
+                alert.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(0xffefa897);
+                alert.getButton(DialogInterface.BUTTON_NEGATIVE).setTypeface(uiFont);
+                alert.getButton(DialogInterface.BUTTON_POSITIVE).setTypeface(uiFont);
+            }
     }
 
     @Override
@@ -349,8 +430,8 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         updatePauseState();
     }
 
-    private void updatePauseState() {
-        boolean shouldPause = !resumed || !windowFocused;
+    public void updatePauseState() {
+        boolean shouldPause = onlineExpedition()?(expeditionNet==null||!expeditionNet.ready()||!myGLSurfaceView.renderReady()):(!resumed || !windowFocused || (gardenSession!=null && !myGLSurfaceView.renderReady()));
         if(models!=null)models.pause(shouldPause);
         synchronized (clockLock) {
             if (paused == shouldPause) {

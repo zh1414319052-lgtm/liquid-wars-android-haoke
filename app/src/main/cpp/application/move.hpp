@@ -22,7 +22,7 @@
 
 class Move {
     private:
-        static void moveDotToward(Dot* dot, const Player* player);
+        static void moveDotToward(Dot* dot, const Player* player,bool allowContact=true);
         static void turnClockwise(int dx, int dy, int* x, int* y);
         static void turnAnticlockwise(int dx, int dy, int* x, int* y);
     public:

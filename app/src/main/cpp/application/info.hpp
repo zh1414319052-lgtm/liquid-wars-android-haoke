@@ -21,6 +21,8 @@
 #define WIDTH 800
 #define HEIGHT 480
 #define NUMBER_OF_TEAMS 6
+// Storage capacity is independent of the classic six-seat protocol.
+#define MAX_TEAMS 10
 #define TIMESTEP 8000
 #define AI_UPDATE_SPEED 30
 #define NUMBER_OF_MAPS 59

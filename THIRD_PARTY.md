@@ -13,3 +13,5 @@
 本轮核实了 behaviac、gdx-ai、MicroRTS，但没有复制或接入它们的运行时代码。实际方案为自行实现的局部态势评分、连续计划和网格寻路；固定核实提交及拒绝接入原因见 `docs/game/local-ai-1.79/RESEARCH.md`。
 
 No private signing identity, credentials, player data or paid API service is required to build the source. Existing optional model-provider code is retained but is not used by the offline AI or this test campaign.
+
+1.90 QA使用Godot Engine 4.7.2，MIT许可，Android依赖固定为`org.godotengine:godot:4.7.2.stable`。引擎许可证、第三方版权列表和对应Android接口源码jar位于`third_party/godot-4.7.2/`；APK内含`assets/licenses/Godot-MIT.txt`。来源：https://github.com/godotengine/godot/tree/4.7.2-stable 。Godot的MIT许可不改变本项目原有GPL-3.0-or-later许可。此次未引入外部付费模型、贴图或字体；HUD继续使用已归档SIL OFL1.1的Noto Sans SC。

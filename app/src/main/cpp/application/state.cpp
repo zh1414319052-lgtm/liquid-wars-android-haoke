@@ -18,10 +18,13 @@
 #include "state.hpp"
 #include "spawn.hpp"
 #include "map_catalog.hpp"
+#include "garden3d.hpp"
+#include <climits>
+#include "expedition.hpp"
 
 State* state;
 
-State::State(int team, int mapId, int seed, int dotsPerTeam) {
+State::State(int team, int mapId, int seed, int dotsPerTeam, bool garden,int expeditionSeats):garden3D(garden),teamCount(expeditionSeats?std::max(2,std::min(MAX_TEAMS,expeditionSeats)):NUMBER_OF_TEAMS),expeditionMode(garden&&expeditionSeats>0) {
     me = team;
 
     currentlyDrawing = false;
@@ -30,8 +33,8 @@ State::State(int team, int mapId, int seed, int dotsPerTeam) {
 
     this->dotsPerTeam = dotsPerTeam;
 
-    for(int i = 0; i < 6; i++)
-        players[i].score = dotsPerTeam;
+    for(int i = 0; i < MAX_TEAMS; i++)
+        players[i].score = i < teamCount ? dotsPerTeam : 0;
 
     dots.resize(NUMBER_OF_TEAMS*dotsPerTeam);
     points.resize(NUMBER_OF_TEAMS*dotsPerTeam*3);
@@ -47,17 +50,20 @@ State::State(int team, int mapId, int seed, int dotsPerTeam) {
 
     // Keep one existing AI RNG draw for random-map choice. Stable asset IDs
     // preserve explicit map+seed births/flips for every surviving map.
-    const int actualMap = mapId == -1 ? map_catalog::idAt(aiRandom->next() % NUMBER_OF_MAPS)
+    const int actualMap = garden3D ? garden3d::MAP_ID : mapId == -1 ? map_catalog::idAt(aiRandom->next() % NUMBER_OF_MAPS)
                                       : map_catalog::resolveExplicit(mapId);
-    map = new Map(actualMap, spawn::mapFlip(seed, actualMap));
+    map = new Map(actualMap, garden3D?0:spawn::mapFlip(seed, actualMap),garden3D);
 
     field.reset(map->width,map->height);
     placeTeams(seed, actualMap);
     items=new Items(seed,actualMap);
+    if(garden3D)items->nextWave=INT_MAX; // This local visual slice has no random items.
     operations=new Operations(*this);
+    if(expeditionMode)expedition=new Expedition(*this,seed);
 }
 
 State::~State() {
+    delete expedition;
     for(auto dot:dots)delete dot;
     delete items;
     delete operations;
@@ -67,5 +73,5 @@ State::~State() {
 }
 
 void State::placeTeams(int seed, int mapId) {
-    spawn::place(*this, seed, mapId);
+    if(garden3D)garden3d::place(*this,seed);else spawn::place(*this, seed, mapId);
 }

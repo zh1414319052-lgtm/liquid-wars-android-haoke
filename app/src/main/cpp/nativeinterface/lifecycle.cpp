@@ -18,6 +18,9 @@
 
 #include "lifecycle.hpp"
 #include "ai_targets.hpp"
+#include "expedition_jni.hpp"
+#include "../application/garden3d.hpp"
+#include "../application/state.hpp"
 
 extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_init(JNIEnv* env, jclass jobj, jobject am) {
     std::lock_guard<std::mutex> guard(nativeStateMutex);
@@ -37,15 +40,33 @@ extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_createGame(JNIEnv* 
     createGame(team, map, seed, dotsPerTeam);
 }
 
+extern "C" jboolean Java_com_xenris_liquidwarsos_NativeInterface_createGardenGame(JNIEnv*,jclass,jint seed){
+    std::lock_guard<std::mutex> guard(nativeStateMutex);
+    if(state||!garden3d::assetsValid())return JNI_FALSE;
+    resetAiTargets();state=new State(0,garden3d::MAP_ID,seed,garden3d::START,true);
+    garden3d::beginMatch();
+    garden3d::sampleStep();
+    if(state->players[0].score!=garden3d::START||state->players[2].score!=garden3d::START){delete state;state=nullptr;return JNI_FALSE;}return JNI_TRUE;
+}
+extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_gardenRenderStatus(JNIEnv*,jclass){
+    std::lock_guard<std::mutex> guard(nativeStateMutex);return garden3d::status();
+}
+extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_gardenPauseVisual(JNIEnv*,jclass,jboolean paused){std::lock_guard<std::mutex> g(nativeStateMutex);if(state&&state->garden3D)garden3d::pauseVisual(paused);}
+extern "C" jdoubleArray Java_com_xenris_liquidwarsos_NativeInterface_gardenDiagnostics(JNIEnv* env,jclass){std::lock_guard<std::mutex> g(nativeStateMutex);double data[12]={};garden3d::diagnostics(data);auto out=env->NewDoubleArray(12);env->SetDoubleArrayRegion(out,0,12,data);return out;}
+
 extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_destroyGame(JNIEnv* env, jclass jobj) {
     std::lock_guard<std::mutex> guard(nativeStateMutex);
     resetAiTargets();
+    clearExpeditionCommands();
+    garden3d::resetVisual();
     destroyGame();
 }
 
 extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_stepDots(JNIEnv* env, jclass jobj) {
     std::lock_guard<std::mutex> guard(nativeStateMutex);
+    drainExpeditionCommands();
     stepDots();
+    if(state&&state->garden3D)garden3d::sampleStep();
 }
 
 extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_setPlayerPosition(JNIEnv* env, jclass jobj, jint team, jshortArray jxa, jshortArray jya) {

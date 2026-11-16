@@ -26,7 +26,10 @@ public final class OnlineSession {
     private boolean showEmotes=true;
     private volatile String battleId="";
     public OnlineSession(PlatformApi api,String code,boolean host){
-        this.api=api;this.code=code;this.host=host;relay=new RelayTransport(api,code,host);
+        this(api,code,host,true);
+    }
+    public OnlineSession(PlatformApi api,String code,boolean host,boolean legacyRelay){
+        this.api=api;this.code=code;this.host=host;relay=legacyRelay?new RelayTransport(api,code,host):null;
         worker.scheduleWithFixedDelay(this::poll,1,3,TimeUnit.SECONDS);
     }
     private void poll(){
@@ -53,6 +56,9 @@ public final class OnlineSession {
     }
     private final Runnable hide=()->{ImageView image=bubble.get();if(image!=null)image.setVisibility(View.GONE);};
     public void attach(Activity activity){
+        attach(activity,false);
+    }
+    public void attach(Activity activity,boolean expedition){
         if(closed)return;
         FrameLayout content=activity.findViewById(android.R.id.content);
         LinearLayout holder=new LinearLayout(activity);holder.setOrientation(LinearLayout.VERTICAL);holder.setGravity(Gravity.END);
@@ -61,7 +67,7 @@ public final class OnlineSession {
         android.graphics.drawable.GradientDrawable background=new android.graphics.drawable.GradientDrawable();background.setColor(0xaa132b34);background.setCornerRadius(dp(activity,12));button.setBackground(background);
         button.setTypeface(font(activity));holder.addView(button,new LinearLayout.LayoutParams(dp(activity,64),dp(activity,48)));
         ImageView image=new ImageView(activity);image.setVisibility(View.GONE);holder.addView(image,new LinearLayout.LayoutParams(dp(activity,72),dp(activity,72)));bubble=new WeakReference<>(image);
-        FrameLayout.LayoutParams position=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.RIGHT);position.topMargin=dp(activity,64);position.rightMargin=dp(activity,8);content.addView(holder,position);
+        FrameLayout.LayoutParams position=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.RIGHT);position.topMargin=dp(activity,64);position.rightMargin=dp(activity,expedition?218:8);content.addView(holder,position);
         button.setOnClickListener(v->pick(activity));
         button.setOnLongClickListener(v->{showEmotes=!showEmotes;if(!showEmotes)image.setVisibility(View.GONE);Toast.makeText(activity,showEmotes?"已显示表情提示":"已隐藏表情提示",Toast.LENGTH_SHORT).show();return true;});
     }
@@ -80,7 +86,7 @@ public final class OnlineSession {
     public void beginBattle() throws Exception {battleId=api.call("POST","/online/rooms/"+code+"/battle-start",null).getString("battle_id");}
     public void ended(){String id=battleId;battleId="";if(host&&!closed&&!id.isEmpty())worker.execute(()->{try{api.call("POST","/online/rooms/"+code+"/battle-end",PlatformApi.object("battle_id",id));}catch(Exception ignored){}});}
     public synchronized void close(){
-        if(closed)return;closed=true;relay.close();bubble.clear();worker.shutdownNow();
+        if(closed)return;closed=true;if(relay!=null)relay.close();bubble.clear();worker.shutdownNow();
         if(active==this)active=null;
         new Thread(()->{try{api.call("POST","/rooms/"+code+"/leave",null);}catch(Exception ignored){}} ,"Leave online room").start();
     }

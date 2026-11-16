@@ -18,16 +18,18 @@
 #include "map.hpp"
 #include "visual_texture.hpp"
 #include "map_catalog.hpp"
+#include "garden3d.hpp"
 #include <cstdlib>
 #include <android/log.h>
 #include <algorithm>
 #include <utility>
 
-Map::Map(int mapID, int transform):flip(transform&3),width(map_catalog::width(mapID)),height(map_catalog::height(mapID)),id(mapID) {
+Map::Map(int mapID, int transform,bool garden):flip(transform&3),width(garden?garden3d::ARENA_WIDTH:map_catalog::width(mapID)),height(garden?garden3d::ARENA_HEIGHT:map_catalog::height(mapID)),id(mapID) {
     path = "maps/";
     std::stringstream ss;
     ss << mapID;
     path += ss.str();
+    if(garden)path="garden3d/arena";
 
     int pngDataSize;
     unsigned char* pngData = (unsigned char*)acAssets->getFile((path + "-map.png").data(), &pngDataSize);
@@ -43,6 +45,13 @@ Map::Map(int mapID, int transform):flip(transform&3),width(map_catalog::width(ma
     walls.resize(width*height);
     for(int y=0;y<height;y++)for(int x=0;x<width;x++)walls[y*width+x]=originalWall(x,y)?1:0;
     baseWalls=walls;
+    if(garden){int bytes=0;auto raw=acAssets->getFile("garden3d/phase-land.bin",&bytes);if(raw&&bytes==12+(width*height+7)/8&&!std::memcmp(raw,"LWL1",4))phaseLand.assign(raw+12,raw+bytes);free(raw);}
+}
+
+bool Map::phaseAllowed(int x,int y)const{
+    if(x<0||y<0||x>=width||y>=height)return false;
+    if(path!="garden3d/arena")return true;
+    int at=y*width+x;return !phaseLand.empty()&&(phaseLand[at/8]&(1<<(at%8)));
 }
 
 Map::~Map() {
@@ -56,7 +65,7 @@ void Map::loadTexture() {
     tiled=false;tileTextures.fill(0);glTextureID=0;
     ground.resize(width*height*3);
     tileColumns=2;tileRows=2;preparePatch();
-    if(id>=50&&loadTiles())return;
+    if(id>=50&&id<=59&&loadTiles())return;
     int pngSize = 0;
     unsigned char* png = acAssets->getFile((path + "-image.png").c_str(), &pngSize);
     unsigned char* decoded = NULL;
@@ -170,6 +179,12 @@ bool Map::originalWall(int x, int y) {
 }
 
 bool Map::isWall(int x,int y){return x<0||y<0||x>=width||y>=height||walls[y*width+x]!=0;}
+bool Map::temporaryObstacle(int x,int y,int radius,bool solid){
+ if(radius<1||radius>16||x-radius<1||y-radius<1||x+radius>=width-1||y+radius>=height-1)return false;
+ for(int yy=y-radius;yy<=y+radius;yy++)for(int xx=x-radius;xx<=x+radius;xx++)if((xx-x)*(xx-x)+(yy-y)*(yy-y)<=radius*radius&&baseWalls[yy*width+xx])return false;
+ for(int yy=y-radius;yy<=y+radius;yy++)for(int xx=x-radius;xx<=x+radius;xx++)if((xx-x)*(xx-x)+(yy-y)*(yy-y)<=radius*radius)walls[yy*width+xx]=solid?1:0;
+ terrainRevision++;return true;
+}
 bool Map::excavate(int x,int y){
     // Keep the external enclosure and both possible flipped score strips.
     if(x<16||x>=width-16||y<4||y>=height-4||!walls[y*width+x])return false;

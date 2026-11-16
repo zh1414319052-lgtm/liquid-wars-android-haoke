@@ -1,0 +1,10 @@
+{
+  "applicationId": "com.xenris.liquidwarsos.haoke",
+  "alias": "liquidwars-haoke-release",
+  "storeType": "PKCS12",
+  "keyAlgorithm": "RSA-4096",
+  "certificateSha256": "4CA5A614020E7B450A504FBF2FEC33242AD071D25443604A3B8DAE7C0801AEDE",
+  "keystoreFile": "liquidwars-haoke-release.p12",
+  "credentialFile": "credentials.dpapi",
+  "identityLookup": "%LOCALAPPDATA%/Haoke/AndroidSigning/liquidwars-release"
+}

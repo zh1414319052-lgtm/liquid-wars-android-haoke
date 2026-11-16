@@ -25,6 +25,7 @@
 #include <android/log.h>
 #include <mutex>
 #include "render_camera.hpp"
+#include "garden3d.hpp"
 
 namespace {
 std::mutex cameraMutex;
@@ -143,6 +144,8 @@ void onSurfaceCreated() {
     if(state == NULL)
         return;
 
+    if(state->garden3D){garden3d::surface();return;}
+
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glShadeModel(GL_SMOOTH);
 
@@ -154,7 +157,8 @@ void onSurfaceCreated() {
     capacity = 0;
     quadTeams.clear();
 
-    state->map->loadTexture();
+    // The 3D renderer owns its scenery; don't allocate a second unused 2D atlas.
+    if(state->garden3D)garden3d::surface();else state->map->loadTexture();
 }
 
 void onDrawFrame() {
@@ -166,6 +170,7 @@ void onDrawFrame() {
     cw=std::min(cw,2.f*state->map->width);ch=std::min(ch,2.f*state->map->height);
     cx=cw>state->map->width?(state->map->width-cw)/2:std::max(0.f,std::min(float(state->map->width)-cw,cx));
     cy=ch>state->map->height?(state->map->height-ch)/2:std::max(0.f,std::min(float(state->map->height)-ch,cy));
+    if(state->garden3D){garden3d::draw(cx,cy,cw,ch,drawSpectator);state->currentlyDrawing=false;return;}
     if(state->map->width>WIDTH)halfHeight=halfWidth*ch*state->displayWidth/(cw*std::max(1,state->displayHeight));
     acLib->glOrthogonal(cx,cx+cw,cy,cy+ch,-1,1);
 
@@ -231,6 +236,7 @@ void onSurfaceChanged(int width, int height) {
     glClearColor(visual::BACKGROUND[0]/255.f,visual::BACKGROUND[1]/255.f,visual::BACKGROUND[2]/255.f,1);
     state->displayWidth = width;
     state->displayHeight = height;
+    if(state->garden3D)return; // No GLES1 matrix/point calls in the garden context.
     acLib->glOrthogonal(0, WIDTH, 0, HEIGHT, -1, 1);
     float pointSize = (float)width/WIDTH;
     if((float)height/HEIGHT > pointSize)

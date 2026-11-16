@@ -6,13 +6,13 @@ import org.json.*;
 /** Facts reconstructed from an immutable native copy, never simulation inputs. */
 public final class ModelWorld {
  public static final int HEADER=217,MAX_PARTICLES=108000;
- public final int[] raw;private final boolean wide,huge;
- public int x(int v){return v&(huge?4095:wide?2047:1023);}public int y(int v){return (v>>>(huge?12:wide?11:10))&(wide?1023:511);}public int team(int v){return (v>>>(huge?22:wide?21:19))&7;}
+ public final int[] raw;private final boolean wide,huge,tall;
+ public int x(int v){return v&(huge?4095:wide?2047:1023);}public int y(int v){return (v>>>(huge?12:wide?11:10))&(tall?4095:wide?1023:511);}public int team(int v){return (v>>>(tall?24:huge?22:wide?21:19))&7;}
  public final int[][] population;
  public final int[] massX=new int[6],massY=new int[6],massRoom=new int[6],massCount=new int[6];
  public static boolean valid(int[] s){return s!=null&&s.length>=HEADER&&s[216]>=0&&s[216]<=MAX_PARTICLES&&s.length==HEADER+s[216];}
  public ModelWorld(int[] snapshot,ModelNavigation nav){
-  if(!valid(snapshot))throw new IllegalArgumentException("Snapshot dimensions");raw=snapshot;wide=nav.W>1024;huge=nav.W>2048;int cols=(nav.W+19)/20,rows=(nav.H+19)/20,binCount=cols*rows;
+  if(!valid(snapshot))throw new IllegalArgumentException("Snapshot dimensions");raw=snapshot;wide=nav.W>1024;huge=nav.W>2048||nav.H>1024;tall=nav.H>1024;int cols=(nav.W+19)/20,rows=(nav.H+19)/20,binCount=cols*rows;
   population=new int[6][nav.rooms.size()];int[][] bx=new int[6][binCount],by=new int[6][binCount],bins=new int[6][binCount];
   for(int i=HEADER;i<snapshot.length;i++){int v=snapshot[i],x=x(v),y=y(v),t=team(v);if(t>=6||x>=nav.W||y>=nav.H)throw new IllegalArgumentException("Particle bounds");int r=nav.roomAt(x,y);if(r>=0)population[t][r]++;int c=y/20*cols+x/20;bins[t][c]++;bx[t][c]+=x;by[t][c]+=y;}
   for(int t=0;t<6;t++){

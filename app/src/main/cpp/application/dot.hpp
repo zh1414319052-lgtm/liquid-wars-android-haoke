@@ -17,11 +17,14 @@
 
 #ifndef DOT_HPP
 #define DOT_HPP
+#include <cstdint>
 
 #define MAX_HEALTH 10
 
 class Dot {
     public:
+        // Cosmetic identity only; never serialized, hashed or used by simulation.
+        uint64_t visualId;
         unsigned short x;
         unsigned short y;
         unsigned char team;
@@ -29,6 +32,9 @@ class Dot {
         unsigned char damageQuarter; // Pending fractional contact damage, always 0..3.
         unsigned char armorCarry=0; // Exact half-quarter while a shield is active.
         unsigned char squad=0; // Stable tactical membership; captured units join main force.
+        uint16_t expeditionDamage=0; // Fractional thousandths, new mode only.
+        uint16_t expeditionSpeed=0; // Movement cadence, never simulation clock.
+        int freezeUntil=0,freezeImmuneUntil=0; // Local area effect, per real unit.
         Dot(unsigned short x, unsigned short y, unsigned char team);
         float getRed();
         float getGreen();

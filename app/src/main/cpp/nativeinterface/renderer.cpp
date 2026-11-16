@@ -20,11 +20,13 @@
 #include "../application/state.hpp"
 #include "../application/render_camera.hpp"
 #include "../application/state_hash.hpp"
+#include "../application/garden3d.hpp"
 
 extern "C" jlong Java_com_xenris_liquidwarsos_NativeInterface_stateHash(JNIEnv*,jclass){std::lock_guard<std::mutex> guard(nativeStateMutex);return state?jlong(simulationHash(*state)):0;}
 
 extern "C" void Java_com_xenris_liquidwarsos_NativeInterface_setCamera(JNIEnv*,jclass,jfloat x,jfloat y,jfloat w,jfloat h,jboolean all){setRenderCamera(x,y,w,h,all);}
 extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_sceneInfo(JNIEnv* env,jclass){
+    std::vector<int> remote;if(garden3d::remoteScene(remote)){auto a=env->NewIntArray(remote.size());env->SetIntArrayRegion(a,0,remote.size(),remote.data());return a;}
     std::lock_guard<std::mutex> guard(nativeStateMutex);if(!state)return nullptr;
     auto texture=state->map->textureInfo();jint values[]={state->map->width,state->map->height,state->map->id,state->map->transform(),state->birthX[state->me],state->birthY[state->me],texture[0],texture[1],texture[2],texture[3],texture[4]};
     jintArray out=env->NewIntArray(11);if(out)env->SetIntArrayRegion(out,0,11,values);return out;

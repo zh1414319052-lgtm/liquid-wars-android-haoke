@@ -1,0 +1,24 @@
+config_version=5
+
+[application]
+config/name="Liquid Wars · Godot battlefield"
+run/main_scene="res://battle.tscn"
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.12,0.15,0.16,1)
+
+[display]
+window/size/viewport_width=1560
+window/size/viewport_height=720
+window/handheld/orientation=0
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d=1
+environment/defaults/default_clear_color=Color(0.16,0.20,0.19,1)
+
+[audio]
+driver/driver="Dummy"

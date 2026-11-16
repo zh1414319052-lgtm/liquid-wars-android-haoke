@@ -1,3 +1,7 @@
+# 1.94 · 2026-11-16
+
+Formalizes the accepted 1.93 gameplay and Godot/HUD/devouring effects, retains publisher identity, adds English fallback for new HUD, protects Godot JNI/reflected methods from R8. Version64, protocol193. Client-update notification explicitly deferred.
+
 # 1.85 正式版 · 2026-11-14
 
 整合1.80–1.85的据点/分队路线、长按跟随、10秒道具、音效、弱化HUD、公网匹配/AI补位/表情、密码与验证码重置、联机UI、全面屏及系统分享。新增仅安全前台检查的签名更新。版本55，协议30，原发布证书。详细范围、证据与边界见 README 和 docs/game/formal-1.85/RELEASE.md。

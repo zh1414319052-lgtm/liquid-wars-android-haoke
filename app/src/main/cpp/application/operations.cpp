@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "operations.hpp"
 #include "state.hpp"
+#include "garden3d.hpp"
 #include <algorithm>
 #include <climits>
 #include <cmath>
 #include <queue>
+#include <cstring>
 namespace {int sq(int x){return x*x;}constexpr int INF=INT_MAX/4;}
-Operations::Operations(State& s){epoch=s.items->epoch;generation.fill(epoch*256);}
-void Operations::reset(State& s){int saved=mode;*this=Operations(s);mode=saved;for(auto d:s.dots)d->squad=0;if(mode){build(s);locateSites(s);}stats(s);}
-void Operations::configure(State& s,int m){mode=m==1?1:0;reset(s);}
+Operations::Operations(State& s){teamCount=s.teamCount;epoch=s.items->epoch;generation.fill(epoch*256);}
+void Operations::reset(State& s){int saved=mode;*this=Operations(s);mode=saved;for(auto d:s.dots)d->squad=0;if(mode){build(s);if(mode==1)locateSites(s);}stats(s);}
+void Operations::configure(State& s,int m){if(s.expedition&&mode==2)return;mode=s.expeditionMode?2:(m==1?1:0);reset(s);}
 bool Operations::clear(const State& s,int x,int y,int tx,int ty)const{
  int n=std::max(std::abs(tx-x),std::abs(ty-y));int px=x,py=y;
  for(int i=0;i<=n;i++){int xx=n?x+(tx-x)*i/n:x,yy=n?y+(ty-y)*i/n:y;
@@ -42,14 +44,15 @@ void Operations::flow(State& s,Route& r){
  for(size_t at=0;at<q.size();at++){int n=q[at];for(int k=0;k<4;k++)if(nodes[n].edges&(1u<<k)){int j=n+delta[k];if(r.distance[j]==INF){r.distance[j]=r.distance[n]+GRID;q.push_back(j);}}}
  r.flowHash=1469598103934665603ull;for(int v:r.distance){r.flowHash^=uint32_t(v);r.flowHash*=1099511628211ull;}r.status=MOVING;
 }
-void Operations::direct(int t){if(t<0||t>=6)return;for(auto& r:routes[t])r=Route{};staged[t].clear();stagingGroup[t]=-1;feedback[t]=0;}
+void Operations::direct(int t){if(t<0||t>=teamCount)return;for(auto& r:routes[t])r=Route{};staged[t].clear();stagingGroup[t]=-1;feedback[t]=0;}
 void Operations::clearTeam(State& s,int t){direct(t);generation[t]++;split[t]=false;for(auto d:s.dots)if(d->team==t)d->squad=0;}
 bool Operations::command(State& s,int t,const short* x,const short* y){
- if(x[0]!=-5)return false;if(t<0||t>=6)return true;
+ if(x[0]!=-5)return false;if(t<0||t>=teamCount)return true;
  if(y[1]!=generation[t]||x[1]<=0||x[1]==lastPacket[t])return true;lastPacket[t]=x[1];
- if(s.players[t].score<=0)return true;int op=y[0]/4,g=y[0]%4;if(op<BEGIN||op>FOLLOW||g<0)return true;
+ if(s.players[t].score<=0)return true;int op=y[0]/4,g=y[0]%4;if(op<BEGIN||op>8||g<0)return true;
  // Direct guiding uses the same movement/contact rules as fingers, with squad ownership.
  // It is atomic and cheap: never rebuild a navigation field for every touch move.
+ if(op==8){s.items->activate(s,t,x[1],x[2]);return true;}
  if(op==FOLLOW){
   if(x[2]<0||y[2]<0||x[2]>=s.map->width||y[2]>=s.map->height){feedback[t]=INVALID;return true;}
   staged[t].clear();stagingGroup[t]=-1;feedback[t]=0;
@@ -77,7 +80,7 @@ void Operations::stats(State& s){
  for(auto d:s.dots){int k=split[d->team]?std::min(2,int(d->squad)):0;auto& g=groups[d->team][k];g.count++;g.x+=d->x;g.y+=d->y;}
  for(auto& row:groups)for(auto& g:row)if(g.count){g.x/=g.count;g.y/=g.count;}
  // Representatives are actual floor occupants, never an average inside a wall.
- std::array<std::array<int,3>,6> best;for(auto& row:best)row.fill(INF);
+ std::array<std::array<int,3>,MAX_TEAMS> best;for(auto& row:best)row.fill(INF);
  auto centers=groups;for(auto d:s.dots){int k=split[d->team]?std::min(2,int(d->squad)):0;auto c=centers[d->team][k];int v=sq(d->x-c.x)+sq(d->y-c.y);if(v<best[d->team][k]){best[d->team][k]=v;groups[d->team][k].x=d->x;groups[d->team][k].y=d->y;}}
 }
 bool Operations::target(const State& s,const Dot& d,int& x,int& y)const{
@@ -95,9 +98,11 @@ bool Operations::target(const State& s,const Dot& d,int& x,int& y)const{
 void Operations::locateSites(State& s){
  sites.clear();if(nodes.empty())return;int count=0;for(const auto& n:nodes)count=std::max(count,n.component+1);std::vector<int> sizes(count);for(auto n:nodes)if(n.component>=0)sizes[n.component]++;if(sizes.empty())return;int component=int(std::max_element(sizes.begin(),sizes.end())-sizes.begin());
  std::vector<Point> anchors=s.map->width>800?std::vector<Point>{{s.map->width/4,s.map->height/4},{s.map->width*3/4,s.map->height/4},{s.map->width/2,s.map->height/2},{s.map->width/4,s.map->height*3/4},{s.map->width*3/4,s.map->height*3/4}}:std::vector<Point>{{s.map->width/4,s.map->height/2},{s.map->width/2,s.map->height/2},{s.map->width*3/4,s.map->height/2}};
+ if(s.garden3D){anchors.clear();int bytes=0;auto raw=acAssets->getFile("garden3d/sites.bin",&bytes);
+  if(raw&&bytes==28&&!std::memcmp(raw,"LWO1",4))for(int i=0;i<5;i++){int16_t x,y;std::memcpy(&x,raw+8+i*4,2);std::memcpy(&y,raw+10+i*4,2);anchors.push_back({x,y});}free(raw);}
  for(auto a:anchors){int best=-1,value=INF;for(int i=0;i<int(nodes.size());i++){auto n=nodes[i];if(n.component!=component)continue;bool valid=true;for(auto p:sites)if(sq(p.x-n.x)+sq(p.y-n.y)<sq(RADIUS*3)){valid=false;break;}if(!valid)continue;
    for(int dx:{-8,0,8})for(int dy:{-8,0,8})if(s.map->isWall(n.x+dx,n.y+dy))valid=false;if(!valid)continue;
-   int score=sq(n.x-a.x)+sq(n.y-a.y);for(int t=0;t<6;t++)if(sq(n.x-s.birthX[t])+sq(n.y-s.birthY[t])<sq(64))score+=50000;if(score<value){value=score;best=i;}}
+   int score=sq(n.x-a.x)+sq(n.y-a.y);for(int t=0;t<teamCount;t++)if(sq(n.x-s.birthX[t])+sq(n.y-s.birthY[t])<sq(64))score+=50000;if(score<value){value=score;best=i;}}
   if(best>=0){Site p;p.x=nodes[best].x;p.y=nodes[best].y;sites.push_back(p);}}
 }
 int Operations::spawn(State& s,Site& p,int amount){
@@ -111,10 +116,10 @@ int Operations::spawn(State& s,Site& p,int amount){
 }
 void Operations::economy(State& s){
  int need=std::max(6,std::min(24,s.dotsPerTeam/40));
- for(auto& p:sites){std::array<int,6> presence{};for(auto d:s.dots)if(sq(int(d->x)-p.x)+sq(int(d->y)-p.y)<=RADIUS*RADIUS&&!s.items->active(d->team,Items::FREEZE)&&clear(s,d->x,d->y,p.x,p.y))presence[d->team]++;
-  if(p.owner>=0&&s.players[p.owner].score==0){int successor=-1;for(int t=0;t<6;t++)if(s.alliances[t]==s.alliances[p.owner]&&s.players[t].score>0){successor=t;break;}p.owner=successor;p.claim=-1;p.progress=0;}
-  int claimant=-1,largest=0;for(int t=0;t<6;t++)if(presence[t]>largest){largest=presence[t];claimant=t;}
-  int friendly=0,hostile=0;if(claimant>=0)for(int t=0;t<6;t++){if(s.allied(t,claimant))friendly+=presence[t];else hostile+=presence[t];}
+ for(auto& p:sites){std::array<int,MAX_TEAMS> presence{};for(auto d:s.dots)if(sq(int(d->x)-p.x)+sq(int(d->y)-p.y)<=RADIUS*RADIUS&&!s.items->active(d->team,Items::FREEZE)&&clear(s,d->x,d->y,p.x,p.y))presence[d->team]++;
+  if(p.owner>=0&&s.players[p.owner].score==0){int successor=-1;for(int t=0;t<teamCount;t++)if(s.alliances[t]==s.alliances[p.owner]&&s.players[t].score>0){successor=t;break;}p.owner=successor;p.claim=-1;p.progress=0;}
+  int claimant=-1,largest=0;for(int t=0;t<teamCount;t++)if(presence[t]>largest){largest=presence[t];claimant=t;}
+  int friendly=0,hostile=0;if(claimant>=0)for(int t=0;t<teamCount;t++){if(s.allied(t,claimant))friendly+=presence[t];else hostile+=presence[t];}
   p.contested=hostile>=3;
   if(claimant>=0&&friendly>=need&&!p.contested){
    if(p.owner>=0&&s.alliances[p.owner]==s.alliances[claimant]){p.claim=-1;p.progress=0;}
@@ -129,22 +134,36 @@ void Operations::step(State& s){
  if(s.items->warmup>0)return;clock+=7;bool active=mode!=0;for(auto& row:routes)for(auto& r:row)active|=r.enabled;if(!active){if(clock%140==0)stats(s);return;}
  bool needsNav=mode!=0;for(auto& row:routes)for(auto& r:row)needsNav|=r.enabled&&!r.hold&&!r.tracking;
  if(needsNav&&(nodes.empty()||terrain!=s.map->revision()||wave!=s.items->wave||(s.items->hasPickups()&&clock-builtAt>=1000)))build(s);
- if(clock%70==0){stats(s);if(mode)economy(s);
-  for(int t=0;t<6;t++){if(s.players[t].score<=0){direct(t);continue;}for(int k=0;k<GROUPS;k++){auto& r=routes[t][k];auto g=groups[t][k];if(!r.enabled||r.hold||r.points.empty()||!g.count)continue;if(!r.tracking&&r.version!=navVersion)flow(s,r);auto p=r.points[r.at];int near=0;int radius=std::max(18,std::min(55,int(std::sqrt(float(g.count)))*2));for(auto d:s.dots)if(d->team==t&&(split[t]?std::min(2,int(d->squad)):0)==k&&sq(int(d->x)-p.x)+sq(int(d->y)-p.y)<radius*radius)near++;
+ if(clock%70==0){stats(s);if(mode==1)economy(s);
+  for(int t=0;t<teamCount;t++){if(s.players[t].score<=0){direct(t);continue;}for(int k=0;k<GROUPS;k++){auto& r=routes[t][k];auto g=groups[t][k];if(!r.enabled||r.hold||r.points.empty()||!g.count)continue;if(!r.tracking&&r.version!=navVersion)flow(s,r);auto p=r.points[r.at];int near=0;int radius=std::max(18,std::min(55,int(std::sqrt(float(g.count)))*2));for(auto d:s.dots)if(d->team==t&&(split[t]?std::min(2,int(d->squad)):0)==k&&sq(int(d->x)-p.x)+sq(int(d->y)-p.y)<radius*radius)near++;
     if(near*100>=g.count*60){if(r.at+1<int(r.points.size())){r.at++;flow(s,r);}else r.status=ARRIVED;}else if(r.tracking)r.status=MOVING;else {int n=nodeAt(s,g.x,g.y);if(n<0||r.goal<0||r.distance[n]==INF)r.status=BLOCKED;else r.status=MOVING;}
   }}
  }
 }
-int Operations::alliancePoints(const State& s,int t)const{int score=0;for(int i=0;i<6;i++)if(s.alliances[i]==s.alliances[t])score+=points[i];return score;}
-int Operations::winningTeam(const State& s)const{if(!mode)return -1;for(int t=0;t<6;t++)if(s.players[t].score>0&&alliancePoints(s,t)>=WIN_SCORE)return t;return -1;}
+int Operations::alliancePoints(const State& s,int t)const{int score=0;for(int i=0;i<teamCount;i++)if(s.alliances[i]==s.alliances[t])score+=points[i];return score;}
+int Operations::winningTeam(const State& s)const{if(mode!=1)return -1;for(int t=0;t<teamCount;t++)if(s.players[t].score>0&&alliancePoints(s,t)>=WIN_SCORE)return t;return -1;}
 std::vector<int> Operations::snapshot(const State& s,int viewer,bool all)const{
- std::vector<int> out{0x4c574f50,mode,clock,s.items->epoch,WIN_SCORE,int(sites.size()),winningTeam(s)};for(int p:points)out.push_back(p);
+ std::vector<int> out{s.expeditionMode?0x4c574f32:0x4c574f50,mode,clock,s.items->epoch,s.expeditionMode?teamCount:WIN_SCORE,int(sites.size()),winningTeam(s)};for(int t=0;t<teamCount;t++)out.push_back(points[t]);
  for(auto p:sites)for(int v:{p.x,p.y,p.owner,p.claim,p.progress,p.contested,p.born,p.pulseAt})out.push_back(v);
  // Orders and subgroup positions are private; observer may inspect everyone.
- for(int t=0;t<6;t++){bool visible=all||t==viewer;out.push_back(visible?int(split[t]):0);out.push_back(visible?feedback[t]:0);out.push_back(visible?lastPacket[t]:0);out.push_back(visible?generation[t]:0);for(int k=0;k<GROUPS;k++){auto g=groups[t][k];const auto& r=routes[t][k];for(int v:{visible?g.count:0,visible?g.x:-1,visible?g.y:-1,visible?int(r.enabled):0,visible?int(r.hold):0,visible?r.status:0,visible?r.at:0,visible?int(r.points.size()):0})out.push_back(v);if(visible)for(auto p:r.points){out.push_back(p.x);out.push_back(p.y);}}}return out;
+ for(int t=0;t<teamCount;t++){bool visible=all||t==viewer;out.push_back(visible?int(split[t]):0);out.push_back(visible?feedback[t]:0);out.push_back(visible?lastPacket[t]:0);out.push_back(visible?generation[t]:0);for(int k=0;k<GROUPS;k++){auto g=groups[t][k];const auto& r=routes[t][k];for(int v:{visible?g.count:0,visible?g.x:-1,visible?g.y:-1,visible?int(r.enabled):0,visible?int(r.hold):0,visible?r.status:0,visible?r.at:0,visible?int(r.points.size()):0})out.push_back(v);if(visible)for(auto p:r.points){out.push_back(p.x);out.push_back(p.y);}}}return out;
 }
 uint64_t Operations::hash()const{
  uint64_t h=1469598103934665603ull;auto mix=[&](int v){h^=uint32_t(v);h*=1099511628211ull;};mix(mode);mix(clock);mix(epoch);mix(terrain);mix(wave);mix(builtAt);mix(navVersion);mix(revision);mix(int(navHash));mix(int(navHash>>32));
  for(auto p:sites)for(int v:{p.x,p.y,p.owner,p.claim,p.progress,p.contested,p.spawnAt,p.scoreAt,p.born,p.pulseAt})mix(v);
- for(int t=0;t<6;t++){for(int v:{int(split[t]),lastPacket[t],feedback[t],points[t],stagingGroup[t],generation[t]})mix(v);mix(int(staged[t].size()));for(auto p:staged[t]){mix(p.x);mix(p.y);}for(const auto& r:routes[t]){mix(int(r.flowHash));mix(int(r.flowHash>>32));for(int v:{int(r.enabled),int(r.hold),int(r.tracking),r.at,r.status,r.version,r.goal,int(r.points.size())})mix(v);for(auto p:r.points){mix(p.x);mix(p.y);}}}return h;
+ for(int t=0;t<teamCount;t++){for(int v:{int(split[t]),lastPacket[t],feedback[t],points[t],stagingGroup[t],generation[t]})mix(v);mix(int(staged[t].size()));for(auto p:staged[t]){mix(p.x);mix(p.y);}for(const auto& r:routes[t]){mix(int(r.flowHash));mix(int(r.flowHash>>32));for(int v:{int(r.enabled),int(r.hold),int(r.tracking),r.at,r.status,r.version,r.goal,int(r.points.size())})mix(v);for(auto p:r.points){mix(p.x);mix(p.y);}}}return h;
+}
+
+bool Operations::order(State& s,int t,int g,int x,int y){
+ if(t<0||t>=teamCount||g<0||g>3||s.map->isWall(x,y))return false;
+ if(nodes.empty()||terrain!=s.map->revision())build(s);
+ int n=nodeAt(s,x,y);if(n<0)return false;
+ for(int k=0;k<GROUPS;k++)if(g==3||g==k){auto& r=routes[t][k];r=Route{};r.enabled=true;r.points.push_back({x,y});flow(s,r);}return true;
+}
+std::vector<int> Operations::travelDistances(State& s,int x,int y){
+ if(nodes.empty()||terrain!=s.map->revision())build(s);
+ Route r;r.points.push_back({x,y});flow(s,r);return r.distance;
+}
+int Operations::travelDistanceAt(const State& s,const std::vector<int>& values,int x,int y)const{
+ int n=nodeAt(s,x,y);return n>=0&&n<int(values.size())&&values[n]<INF?values[n]:-1;
 }
