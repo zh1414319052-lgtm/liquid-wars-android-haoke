@@ -1,0 +1,20 @@
+<resources>
+    <string name="menu_choose_mode">选择模式</string>
+    <string name="menu_classic_desc">经典粒子战场</string>
+    <string name="menu_garden_title">3D模式</string>
+    <string name="menu_garden_desc">仍在优化中</string>
+    <string name="menu_large_desc">更大的战场</string>
+    <string name="menu_spectate_desc">观察电脑交锋</string>
+    <string name="menu_local_version">本地游玩 · %1$s</string>
+    <string name="notes_entry">更新说明</string>
+    <string name="notes_title">本次更新 · %1$s</string>
+    <string name="notes_close">关闭</string>
+    <string name="notes_first_only">本版本首次启动时显示，可从主菜单“更新说明”再次查看。</string>
+    <string name="notes_changes">本次调整</string>
+    <string name="notes_changes_body">• 重新设计主菜单，模式分组、按钮与底栏统一对齐。\n• 新增“支持游戏”入口，赞赏用于持续开发及未来服务器预算；目前尚未开通公网联机。\n• 取消粒子互相吞噬的声音，保留黑洞和道具音效。</string>
+    <string name="notes_tips">道具使用技巧 · 经典与3D通用</string>
+    <string name="notes_freeze">时间冻结：点击后冻结所有敌方行动10秒，无需指定目标。</string>
+    <string name="notes_cleanse">净化：被冻住也能使用，立即解除自己的冻结，并解除黑洞引力。建议留一个应急。</string>
+    <string name="notes_blackhole">黑洞：在地图中心持续10秒，连自己也会被吸引；越近引力越强，障碍仍会阻挡。注意远离中心，必要时使用净化。</string>
+    <string name="notes_stock">主动道具每种最多积累10个，每次使用消耗1个。提前拾取，按需使用。</string>
+</resources>

@@ -49,7 +49,7 @@ final class LargeMapHud {
    label(c,com.xenris.liquidwarsos.BattleText.t("战术地图","Tactical map"),w/2,32,14,0xffe4f0df);
    int count=items().teleportReady()?4:3;String[] labels={com.xenris.liquidwarsos.BattleText.t("查看","View"),com.xenris.liquidwarsos.BattleText.t("定位镜头","Camera"),com.xenris.liquidwarsos.BattleText.t("下达命令","Orders"),com.xenris.liquidwarsos.BattleText.t("传送落点","Teleport")};
    if(tab>=count)tab=0;for(int i=0;i<count;i++){float xx=w/2-count*54+i*108;box(c,xx,h-69,102,29,tab==i?0xff3c6658:0xff223f46);label(c,labels[i],xx+51,h-49,12,0xffe1eadb);}
-   label(c,tab==3?com.xenris.liquidwarsos.BattleText.t("点合法地面传送 · 无效落点保留道具","Tap valid ground · Invalid destinations retain the item"):com.xenris.liquidwarsos.BattleText.t("冰晶=冻结  菱形=净化  方点=自动道具  圆点=据点 · 双指缩放 / 拖动查看","Ice=freeze  Diamond=cleanse  Square=auto item  Circle=outpost · Pinch / drag to view"),w/2,h-22,10,0xffd6e4d3);
+   label(c,tab==3?com.xenris.liquidwarsos.BattleText.t("点合法地面传送 · 无效落点保留道具","Tap valid ground · Invalid destinations retain the item"):com.xenris.liquidwarsos.BattleText.t("冰晶=冻结  菱形=净化  紫涡=黑洞  方点=自动道具  圆点=据点 · 双指缩放 / 拖动查看","Ice=freeze  Diamond=cleanse  Violet=black hole  Square=auto item  Circle=outpost · Pinch / drag to view"),w/2,h-22,10,0xffd6e4d3);
   }c.restore();
  }
  private void drawMap(Canvas c,RectF frame,boolean large){WorldCamera cam=cam();RectF r=image(frame,large);box(c,frame.left-3,frame.top-3,frame.width()+6,frame.height()+6,0xf0193035);c.save();c.clipRect(frame);
@@ -58,8 +58,9 @@ final class LargeMapHud {
   int[] sight=items().minimapFacts();if(sight!=null&&sight.length>=5)for(int k=0;k<sight[4];k++){int b=5+k*4;if(b+3>=sight.length)break;dot(c,x(sight[b+1],r),y(sight[b+2],r),large?2.5f:1.2f,TeamPalette.color(sight[b]));}
   int[] data=items().facts();for(int k=0;k<SnapshotItems.slots(data);k++){int b=SnapshotItems.offset(data,k),kind=data[b];if(kind<0)continue;float xx=x(data[b+1],r),yy=y(data[b+2],r),radius=large?5:3;dot(c,xx,yy,radius+1,0xff193238);paint.setColor(kind==20?0xff77ddff:kind==21?0xffffe5b0:0xfff4f5e4);paint.setStrokeWidth(1.4f);
    if(kind==20){for(int a=0;a<3;a++){double t=a*Math.PI/3;c.drawLine(xx-(float)Math.cos(t)*radius,yy-(float)Math.sin(t)*radius,xx+(float)Math.cos(t)*radius,yy+(float)Math.sin(t)*radius,paint);}}
-   else if(kind==21){Path q=new Path();q.moveTo(xx,yy-radius);q.lineTo(xx+radius,yy);q.lineTo(xx,yy+radius);q.lineTo(xx-radius,yy);q.close();c.drawPath(q,paint);}else c.drawRect(xx-radius*.7f,yy-radius*.7f,xx+radius*.7f,yy+radius*.7f,paint);
+   else if(kind==BlackHoleVisual.CLASSIC_PICKUP) slots.holeMarker(c,xx,yy,radius);else if(kind==21){Path q=new Path();q.moveTo(xx,yy-radius);q.lineTo(xx+radius,yy);q.lineTo(xx,yy+radius);q.lineTo(xx-radius,yy);q.close();c.drawPath(q,paint);}else c.drawRect(xx-radius*.7f,yy-radius*.7f,xx+radius*.7f,yy+radius*.7f,paint);
   }
+  if(slots.holeUntil>0&&data!=null&&slots.holeUntil>data[0])slots.holeMarker(c,x(cam.width/2,r),y(cam.height/2,r),large?8:6);
   OperationsSnapshot ops=orders().facts();if(ops!=null){for(int k=0;k<ops.sites();k++){int b=ops.site(k);dot(c,x(ops.raw[b],r),y(ops.raw[b+1],r),large?6:4,ops.raw[b+2]<0?0xffecd6a1:TeamPalette.color(ops.raw[b+2]));if(large)label(c,""+(k+1),x(ops.raw[b],r),y(ops.raw[b+1],r)+3,8,0xff193238);}
    for(int g=0;g<3;g++){int b=ops.group(StaticBits.team,g);if(ops.raw[b]>0){dot(c,x(ops.raw[b+1],r),y(ops.raw[b+2],r),large?6:3.5f,TeamPalette.color(StaticBits.team));if(large)label(c,""+(char)('A'+g),x(ops.raw[b+1],r),y(ops.raw[b+2],r)+3,8,Color.WHITE);}}
   }
@@ -77,7 +78,7 @@ final class LargeMapHud {
   if(action==MotionEvent.ACTION_POINTER_DOWN){moved=true;if(expanded&&e.getPointerCount()>1)pinch=(float)Math.hypot(e.getX(0)-e.getX(1),e.getY(0)-e.getY(1));return true;}
   if(action==MotionEvent.ACTION_MOVE){if(Math.hypot(x-downX,y-downY)>6)moved=true;if(expanded&&hit==50){if(e.getPointerCount()>1){float n=(float)Math.hypot(e.getX(0)-e.getX(1),e.getY(0)-e.getY(1));if(pinch>0)zoom=Math.max(1,Math.min(4,zoom*n/pinch));pinch=n;}else{dx+=x-lastX;dy+=y-lastY;}RectF f=frame();dx=Math.max(-f.width()*(zoom-1)/2,Math.min(f.width()*(zoom-1)/2,dx));dy=Math.max(-f.height()*(zoom-1)/2,Math.min(f.height()*(zoom-1)/2,dy));}lastX=x;lastY=y;view.invalidate();return true;}
   if(action!=MotionEvent.ACTION_UP)return true;int clicked=hit;hit=-1;if(moved||clicked!=target(x,y))return true;view.performClick();
-  if(clicked<2)orders().activeItem(clicked);
+  if(clicked<ActiveSlots.COUNT)orders().activeItem(clicked);
   else if(clicked==30)cam().toggle(cam().left+cam().viewWidth/2,cam().bottom+cam().viewHeight/2);
   else if(clicked==31)cam().detailToggle();else if(clicked==32)surface().audio().toggle();else if(clicked==33)items().showFrameOptions();else if(clicked==34)items().showGuide();
   else if(clicked==40){orders().cancelForModal();expanded=true;tab=items().teleportReady()?3:0;}

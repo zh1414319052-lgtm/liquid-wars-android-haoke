@@ -14,6 +14,15 @@ public final class GodotBattlePlugin extends GodotPlugin {
     private int preparedFrames;
     public GodotBattlePlugin(Godot engine,MyGLSurfaceView surface){super(engine);this.surface=surface;}
     @Override public String getPluginName(){return "LiquidBattle";}
+    /** Actual display pixels; Godot's render target can be supersampled. */
+    @UsedByGodot public int[] displaySize(){return new int[]{surface.getWidth(),surface.getHeight()};}
+    /** Immutable native birth, not a cursor; bounded polling also covers replay. */
+    @UsedByGodot public int[] sampleOrigin(){
+        int[] info=NativeInterface.sceneInfo();
+        if(info==null||info.length<6||info[2]!=1001||info[4]<0||info[5]<0)
+            return new int[0];
+        return new int[]{info[4],info[5]};
+    }
     @UsedByGodot public float[] frame(){
         float[] c=surface.godotCamera();
         surface.godotFrame();

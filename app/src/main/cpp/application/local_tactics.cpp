@@ -179,7 +179,7 @@ std::array<short,60> LocalTactics::plan(const State& s,unsigned mask,int level){
    for(int side=0;side<2;side++){float sign=side?1.f:-1.f;int x=int(tx-sign*(ty-oy)/d*spread),y=int(ty+sign*(tx-ox)/d*spread);if(clear(s,ox,oy,x,y)){out[team*10+side+1]=short(x);out[team*10+side+6]=short(y);}}
   }
   int use=-1;
-  if(s.items->stock[team][1]>0&&s.items->ready[team][1]<=now&&s.items->active(team,Items::FREEZE))use=1;
+  if(s.items->stock[team][1]>0&&s.items->ready[team][1]<=now&&(s.items->active(team,Items::FREEZE)||s.items->pulling(team)))use=1;
   else if(s.items->stock[team][0]>0&&s.items->ready[team][0]<=now&&!s.items->active(team,Items::FREEZE)&&nearestEnemy<120)use=0;
   if(use>=0){for(int k=0;k<10;k++)out[team*10+k]=-1;out[team*10]=-5;out[team*10+5]=35;out[team*10+1]=short(now/7%30000+1);out[team*10+6]=short(s.operations->generation[team]);out[team*10+2]=short(use);continue;}
   int kind=s.items->pending[team],target=-1;float value=-1;

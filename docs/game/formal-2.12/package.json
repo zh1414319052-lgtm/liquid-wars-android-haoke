@@ -1,0 +1,9 @@
+{
+  "version": "2.12",
+  "versionCode": 85,
+  "applicationId": "com.xenris.liquidwarsos.haoke",
+  "certificateSha256": "4ca5a614020e7b450a504fbf2fec33242ad071d25443604a3b8dae7c0801aede",
+  "apkSha256": "77eb6b1b9cc422c561f2ae96c71cd3485c0bc54e00fdc06cef28758443a7aca4",
+  "bytes": 673949555,
+  "debuggable": false
+}

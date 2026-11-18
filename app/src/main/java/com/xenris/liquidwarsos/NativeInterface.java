@@ -61,6 +61,8 @@ public class NativeInterface {
     public static native void configureAlliances(int[] groups);
     public static native int teamScore(int p);
     public static native int totalParticles();
+    public static native boolean blackHoleActive();
+    public static native int[] audioSnapshot(int viewer,boolean spectator);
     public static native int playTimeMillis();
     public static native boolean areAllied(int a,int b);
     public static native int allianceScore(int team);

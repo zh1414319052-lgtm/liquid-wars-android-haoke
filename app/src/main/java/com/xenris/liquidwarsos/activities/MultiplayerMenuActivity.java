@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.text.InputType;
 import com.xenris.liquidwarsos.R;
 import com.xenris.liquidwarsos.StaticBits;
+import com.xenris.liquidwarsos.net.LanPeer;
 import com.xenris.liquidwarsos.server.LanRoom;
 import com.xenris.liquidwarsos.server.ServerFinder;
 import java.util.ArrayList;
@@ -159,6 +160,15 @@ public class MultiplayerMenuActivity extends LocalizedActivity {
         manualDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(button -> {
             String ip = input.getText().toString().trim();
             if (!validIpv4(ip)) { input.setError(getString(R.string.lan_invalid_ip)); return; }
+            try {
+                if (!LanPeer.isOnLink(LanPeer.parse(ip))) {
+                    input.setError(getString(R.string.lan_ip_outside_network));
+                    return;
+                }
+            } catch (java.io.IOException unavailable) {
+                input.setError(getString(R.string.lan_ip_outside_network));
+                return;
+            }
             lastManualIp = ip;
             manualDialog.dismiss();
             join(new LanRoom(ip, ip, StaticBits.PORT_NUMBER));

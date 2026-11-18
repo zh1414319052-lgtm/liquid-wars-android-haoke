@@ -47,7 +47,6 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
     private int retries;
     private int myID = 0;
     private Client roomClient;
-    private com.xenris.liquidwarsos.online.OnlineSession online;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,12 +67,7 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
         setTextView(R.id.client_game_textview, getString(R.string.connecting_to, serverName));
         int port = extras.getInt("port", StaticBits.PORT_NUMBER);
         if (port < 1 || port > 65535) port = StaticBits.PORT_NUMBER;
-        if(extras.getBoolean("online",false)){
-            online=com.xenris.liquidwarsos.online.OnlineSession.active;
-            if(online==null||online.host){finish();return;}
-            roomClient=new Client(this,"cleanbizai.com",online.relay.connector());
-            online.attach(this);
-        } else if (extras.getBoolean(BluetoothTransport.EXTRA_MODE, false)) {
+        if (extras.getBoolean(BluetoothTransport.EXTRA_MODE, false)) {
             if (!BluetoothAccess.has(this, BluetoothPermissions.Action.CONNECT)) {
                 toast(getString(R.string.bt_permission_denied), Toast.LENGTH_LONG);
                 finish();return;
@@ -89,7 +83,6 @@ public class ClientGameSetupActivity extends LocalizedActivity implements Client
     public void onDestroy() {
         super.onDestroy();
         if (roomClient != null) roomClient.destroy();
-        if(online!=null)online.close();
     }
 
     private void refreshMapImage() {

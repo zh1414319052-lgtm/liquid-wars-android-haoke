@@ -17,12 +17,14 @@ public final class MenuUpdateHost implements HaokeUpdateUi.Host {
     private final HaokeUpdateUi updates;
     private final LobbyUi skin;
     private boolean resumed;
+    private boolean blocked;
     public MenuUpdateHost(Activity activity,boolean automatic){this.activity=activity;this.automatic=automatic;skin=new LobbyUi(activity);updates=new HaokeUpdateUi(activity,this);}
     public void resume(){resumed=true;updates.resume();}
     public void pause(){resumed=false;updates.pause();}
     public void close(){updates.close();}
     public void focus(boolean focused){if(focused&&resumed)updates.refresh();}
-    public boolean isSafeForUpdates(boolean manual){return resumed&&activity.hasWindowFocus()&&(automatic||manual);}
+    public void setBlocked(boolean value){if(blocked!=value){blocked=value;if(resumed)updates.refresh();}}
+    public boolean isSafeForUpdates(boolean manual){return !blocked&&resumed&&activity.hasWindowFocus()&&(automatic||manual);}
     public void onDialogShown(AlertDialog dialog){
         TextView message=dialog.findViewById(android.R.id.message);
         if(message!=null)message.setTypeface(android.graphics.Typeface.createFromAsset(activity.getAssets(),"fonts/NotoSansSC-Lobby400.ttf"));

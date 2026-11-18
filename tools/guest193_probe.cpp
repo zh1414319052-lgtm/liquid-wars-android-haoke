@@ -5,10 +5,45 @@
 #include "application/garden3d.hpp"
 #include <jni.h>
 #include <algorithm>
+extern "C" JNIEXPORT void JNICALL Java_com_xenris_liquidwarsos_Audio206ProbeTest_expeditionFixture(JNIEnv*,jclass,jint mode){
+ std::lock_guard<std::mutex> guard(nativeStateMutex);if(!state||!state->expedition)return;auto& s=*state;auto& i=*s.items;
+ if(mode==0){i.warmup=0;s.expedition->loot.clear();s.expedition->nextLoot=INT32_MAX;for(auto& seat:s.expedition->seats)seat.bot=false;}
+ if(mode==1){Dot* a=nullptr;Dot* d=nullptr;for(auto dot:s.dots){if(dot->team==0)a=dot;if(dot->team==1)d=dot;}if(a&&d){d->health=1;for(int n=0;n<20&&d->team==1;n++)i.contact(s,*d,*a);}}
+ if(mode==2){i.grant(s,0,Items::ACTIVE_BLACK_HOLE,0,0);i.activate(s,0,1,Items::BLACK_HOLE_SLOT);}
+}
 extern "C" JNIEXPORT void JNICALL Java_com_xenris_liquidwarsos_Classic193VisualTest_fixture(JNIEnv*,jclass,jint mode){
  std::lock_guard<std::mutex> guard(nativeStateMutex);if(!state||state->expedition)return;auto& s=*state;auto& i=*s.items;
  if(mode==0){i.stock[0]={2,2};i.ready[0]={0,0};i.nextWave=INT32_MAX;for(int t=0;t<6;t++){i.until[t].fill(0);i.immunity[t]=0;s.alliances[t]=t;}}
- else{i.thaw(s,1,0);i.freezeEnemies(s,1,Items::FREEZE_MS);}
+ else if(mode==1){i.thaw(s,1,0);i.freezeEnemies(s,1,Items::FREEZE_MS);}
+ else if(mode==3){
+  Dot* attacker=nullptr;Dot* defender=nullptr;
+  for(auto d:s.dots){if(d->team==0)attacker=d;if(d->team==1)defender=d;}
+  if(attacker&&defender){defender->health=1;for(int n=0;n<20&&defender->team==1;n++)i.contact(s,*defender,*attacker);}
+ }
+ else {
+  i.stock[0]={0,1,2};i.ready[0].fill(0);i.nextWave=i.elapsed+14000;
+  // Isolate suction from AI combat. Freeze does not block black-hole attraction.
+  for(int t=1;t<s.teamCount;t++)i.until[t][Items::FREEZE]=i.elapsed+20000;
+  i.until[0][Items::INVINCIBLE]=i.elapsed+20000;
+  for(int t=0;t<s.teamCount;t++){s.operations->clearTeam(s,t);s.players[t].x[0]=s.players[t].y[0]=-2;}
+  // Give the test time to tap Cleanse before the caster reaches the core.
+  int x=s.map->width/2,y=s.map->height/2;
+  for(int dx=340;dx>=260;dx-=10)if(!s.map->isWall(x+dx,y)){
+   i.grant(s,0,Items::TELEPORT,x,y);
+   if(i.command(s,0,i.nonce[0],x+dx,y))break;
+  }
+  for(int dx=-15;dx<=15;dx++)for(int dy=-15;dy<=15;dy++){
+   int d2=dx*dx+dy*dy;
+   if(d2<49||d2>225||(dx+dy)%3!=0||s.map->isWall(x+dx,y+dy)||s.field[x+dx][y+dy])continue;
+   auto* dot=new Dot(x+dx,y+dy,0);s.dots.push_back(dot);s.field[dot->x][dot->y]=dot;++s.players[0].score;
+  }
+  s.points.resize(s.dots.size()*3);s.colours.resize(s.dots.size()*4);
+  // Keep absorption witnesses still during the new warning interval. The real
+  // player remains free to steer; this is only the instrumented test fixture.
+  // All teams idle: otherwise the real bots can finish this fixture's battle
+  // while the UI test waits for the slower warning/ramp, freezing its clock.
+  for(int t=0;t<s.teamCount;t++)for(auto& route:s.operations->routes[t]){route=Operations::Route{};route.enabled=route.hold=true;}
+ }
 }
 extern "C" JNIEXPORT jintArray JNICALL Java_com_xenris_liquidwarsos_Guest193VisualTest_fixture(JNIEnv* env,jclass,jint mode){
  std::lock_guard<std::mutex> guard(nativeStateMutex);if(!state||!state->expedition)return nullptr;auto& s=*state;auto& e=*s.expedition;

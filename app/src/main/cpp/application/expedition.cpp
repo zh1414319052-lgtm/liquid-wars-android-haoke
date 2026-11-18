@@ -10,7 +10,7 @@ namespace {
 using namespace expedition_balance;
 int sq(int n){return n*n;}
 int dist(int x,int y,int xx,int yy){return sq(x-xx)+sq(y-yy);}
-constexpr int CYCLE=expedition_balance::ReconWindowMs,COIN=Expedition::ITEMS,POPULATION_MULTIPLIER=expedition_balance::MaxPopulationMultiplier;
+constexpr int CYCLE=expedition_balance::ReconWindowMs,COIN=Expedition::COIN_KIND,POPULATION_MULTIPLIER=expedition_balance::MaxPopulationMultiplier;
 
 constexpr auto prices=expedition_balance::UpgradePrice;
 }
@@ -91,7 +91,7 @@ void Expedition::spawnLoot(State& s,bool refreshCoins){
   for(int attempt=0;count<target&&attempt<4&&int(loot.size())<s.teamCount*LootPerSeat;attempt++){
    int x=0,y=0;if(!spot(s,x,y,Items::PICKUP_RADIUS+2,48,sector))break;
    bool separate=true;for(const auto& p:loot)if(dist(x,y,p.x,p.y)<sq(30)){separate=false;break;}if(!separate)continue;
-   int kind=COIN;if(category==1){kind=int(random(ITEMS));if(random(3)==0)kind=AUTO_BASE+int(random(Items::COUNT));if(kind==AUTO_BASE+Items::RESET&&s.items->resetSpawned)kind=AUTO_BASE+Items::CAUSAL;if(kind==AUTO_BASE+Items::RESET)s.items->resetSpawned=true;}
+   int kind=COIN;if(category==1){int slot=int(random(ITEMS));kind=slot==BLACK_HOLE?BLACK_HOLE_LOOT:slot;if(random(3)==0)kind=AUTO_BASE+int(random(Items::COUNT));if(kind==AUTO_BASE+Items::RESET&&s.items->resetSpawned)kind=AUTO_BASE+Items::CAUSAL;if(kind==AUTO_BASE+Items::RESET)s.items->resetSpawned=true;}
    loot.push_back({++sequence,kind,x,y,clock});count++;
   }
  }
@@ -170,7 +170,8 @@ void Expedition::end(State& s){
  if(cutoff>=0)return;
  bool collectedItem=false;
  for(auto it=loot.begin();it!=loot.end();){
-  Items::Pickup pickup;pickup.kind=it->kind==COIN?Items::DOUBLE:it->kind<ITEMS?Items::COUNT+it->kind:it->kind-AUTO_BASE;
+  int slot=activeSlotForLoot(it->kind);
+  Items::Pickup pickup;pickup.kind=it->kind==COIN?Items::DOUBLE:slot>=0?Items::COUNT+slot:it->kind-AUTO_BASE;
   pickup.x=it->x;pickup.y=it->y;pickup.hp=it->hp;pickup.damage=it->damage;
   int winner=s.items->devour(s,pickup);it->hp=pickup.hp;it->eater=pickup.eater;it->damage=pickup.damage;
   if(winner<0){++it;continue;}
@@ -179,17 +180,17 @@ void Expedition::end(State& s){
   else{collectedItem=true;s.items->grant(s,winner,pickup.kind,pickup.x,pickup.y);if(s.items->rewindPending)return;}
  }
  if(collectedItem&&std::none_of(loot.begin(),loot.end(),[](const Loot& p){return p.kind!=COIN;}))spawnLoot(s,false);
- int alive=0;for(int t=0;t<s.teamCount;t++)alive+=s.players[t].score>0;if(alive<=1)finish(s);
+ int alive=0;for(int t=0;t<s.teamCount;t++)alive+=s.players[t].score>0;if(alive==0||(alive==1&&!s.items->blackHoleActive()))finish(s);
 }
 void Expedition::finish(State& s){if(cutoff>=0)return;cutoff=clock;for(int t=0;t<s.teamCount;t++)finalCounts[t]=s.players[t].score;}
 void Expedition::bots(State& s){
  for(int t=0;t<s.teamCount;t++){
   auto& seat=seats[t];if(!seat.bot||s.players[t].score<=0)continue;
-  if(s.items->stock[t][CLEANSE]&&s.items->active(t,Items::FREEZE))command(s,t,seat.lastCommand+1,CLEANSE,3,0,0);
+  if(s.items->stock[t][CLEANSE]&&(s.items->active(t,Items::FREEZE)||s.items->pulling(t)))command(s,t,seat.lastCommand+1,CLEANSE,3,0,0);
   if(seat.coins>=40){int eq=seat.shoes<=seat.armor?0:1;purchase(s,t,seat.lastCommand+1,eq);}
   // AI uses the same public pickups/sites and sensed opponents as players.
   auto own=s.operations->groups[t][0];if(!own.count)continue;int tx=own.x,ty=own.y,best=0x3fffffff;
-  for(auto p:loot){if(p.kind<ITEMS&&s.items->stock[t][p.kind]>=Items::STOCK_CAP)continue;int v=dist(own.x,own.y,p.x,p.y);if(v<best){best=v;tx=p.x;ty=p.y;}}
+  for(auto p:loot){int slot=activeSlotForLoot(p.kind);if(slot>=0&&s.items->stock[t][slot]>=Items::STOCK_CAP)continue;int v=dist(own.x,own.y,p.x,p.y);if(v<best){best=v;tx=p.x;ty=p.y;}}
   for(auto p:s.operations->sites){int v=dist(own.x,own.y,p.x,p.y)/2;if(v<best){best=v;tx=p.x;ty=p.y;}}
   for(int enemy=0;enemy<s.teamCount;enemy++)if(!s.allied(t,enemy)&&s.players[enemy].score>0&&!s.items->concealedFrom(s,t,enemy)){Operations::Group p;int closest=INT32_MAX;for(auto d:s.dots)if(d->team==enemy){int distance=dist(own.x,own.y,d->x,d->y);if(distance<closest&&(enemyVisible(s,t,d->x,d->y,true)||enemyVisible(s,t,d->x,d->y))){closest=distance;p={1,d->x,d->y};}}if(!p.count)continue;
    if(dist(own.x,own.y,p.x,p.y)<sq(70)&&s.items->stock[t][FREEZE])command(s,t,seat.lastCommand+1,FREEZE,3,p.x,p.y);
@@ -220,7 +221,7 @@ std::vector<int> Expedition::snapshot(const State& s,int viewer,bool authority)c
   if(!seen)eater=-1;out[base+13+index]=p.hp|((eater+1)<<11)|(p.eater>=0?1<<15:0);out[base+21+index]=p.id;
  }
  // Last visible event per team uses the remaining reserved padding (17,18,25,26).
- for(const auto& event:s.items->events){if(event.team<0||event.team>=s.teamCount||event.kind<0||event.kind>21||clock-event.at>2200)continue;
+ for(const auto& event:s.items->events){if(event.team<0||event.team>=s.teamCount||event.kind<0||event.kind>=Items::COUNT+Items::ACTIVE_COUNT||clock-event.at>2200)continue;
   int x=event.x,y=event.y;if(x==0&&y==0){auto own=s.operations->groups[event.team][0];x=own.x;y=own.y;}
   if(!authority&&(s.items->concealedFrom(s,viewer,event.team)||(event.team!=viewer&&!enemyVisible(s,viewer,x,y))))continue;
   if(event.target>=0&&event.target!=viewer&&!authority&&!enemyVisible(s,viewer,x,y))continue;
@@ -231,6 +232,7 @@ std::vector<int> Expedition::snapshot(const State& s,int viewer,bool authority)c
  for(auto o:obstacles){bool seen=authority||obstacleVisible(s,viewer,o);for(int v:{o.id,o.x,o.y,o.radius,seen?o.hp:120,seen?o.wardUntil:0,seen?o.owner:-1,int(o.removed)})out.push_back(v);}
  for(auto z:anchors)if(visible(z.owner,z.x,z.y))for(int v:{z.owner,z.x,z.y,z.until})out.push_back(v);
  for(auto c:chills)if(visible(c.owner,c.x,c.y))for(int v:{c.owner,c.x,c.y,c.at})out.push_back(v);
+ s.items->appendBlackHoleFacts(out,viewer);
  return out;
 }
 uint64_t Expedition::hash(const State& s)const{

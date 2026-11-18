@@ -10,13 +10,25 @@ class State;
 class Items {
 public:
  enum Kind { DOUBLE, QUARRY, FREEZE, TELEPORT, RESET, PHASE, INVINCIBLE, DEATH, FRIEND, ANTIGROW, ROCKSEAL, THAW, ANCHOR, CAUSAL, PHASENAIL, SHATTER, WARD, LIBERTY, INVISIBLE, REVEAL, COUNT };
- static constexpr int ACTIVE_FREEZE=20,ACTIVE_CLEANSE=21,STOCK_CAP=10;
+ static constexpr int ACTIVE_FREEZE=20,ACTIVE_CLEANSE=21,ACTIVE_BLACK_HOLE=22,ACTIVE_COUNT=3,STOCK_CAP=10;
+ static constexpr int BLACK_HOLE_SLOT=2,BLACK_HOLE_MS=10000,BLACK_HOLE_RADIUS=6;
+ static constexpr int BLACK_HOLE_WARNING_MS=1500,BLACK_HOLE_RAMP_MS=1000;
+ static constexpr int BLACK_HOLE_FACTS=0x4c574248;
  static constexpr int FREEZE_MS=10000,FREEZE_COOLDOWN=30000,CLEANSE_MS=6000,CLEANSE_COOLDOWN=8000,THAW_GRACE=5000;
- std::array<std::array<int,2>,MAX_TEAMS> stock{},ready{};
+ std::array<std::array<int,ACTIVE_COUNT>,MAX_TEAMS> stock{},ready{};
+ int holeStart=0,holeUntil=0,holeAbsorbed=0,lastHoleAbsorb=-1;
+ std::array<bool,MAX_TEAMS> holeExempt{};
+ // Read-only presentation counters. Never used by rules or simulation RNG.
+ std::array<int,MAX_TEAMS> audioCaptures{};
+ std::vector<int> audioSnapshot(const State&,int viewer,bool all=false)const;
+ bool blackHoleActive()const{return holeUntil>elapsed;}
+ bool pulling(int team)const{return blackHoleActive()&&!holeExempt[team];}
+ bool pull(State&,Dot&); // Returns true when the particle entered the core and was removed.
+ void appendBlackHoleFacts(std::vector<int>&,int viewer)const;
  std::array<int,MAX_TEAMS> immunity{},activeSerial{},activeResult{};
  std::array<std::deque<int>,MAX_TEAMS> activeSeen;
  bool rewindPending=false;
- bool pickupAllowed(int team,int kind)const{return kind<COUNT||stock[team][kind-COUNT]<STOCK_CAP;}
+ bool pickupAllowed(int team,int kind)const{return kind>=0&&(kind<COUNT||(kind<COUNT+ACTIVE_COUNT&&stock[team][kind-COUNT]<STOCK_CAP));}
  int activate(State&,int team,int serial,int kind);
  void freezeEnemies(State&,int team,int duration);
  void thaw(State&,int team,int duration);
@@ -59,6 +71,7 @@ private:
  std::vector<Dot> boot;std::array<Player,MAX_TEAMS> bootPlayers;std::array<int,MAX_TEAMS> bootAlliances{};std::array<bool,COUNT> previousKinds{};
  unsigned bootMove=0,bootAI=0,bootItems=0;int bootNext=0;bool captured=false;bool suppressResetWave=false;
  void deathStrike(State&,int target);
+ void resetPullOffsets(State&,int team=-1);
  void emit(int kind,int team,int x,int y,int amount=0,int target=-1,int stage=0);
  void spawnPair(State&);void collect(State&);void quarry(State&,int team);
  int relocate(State&,int team,int x,int y);void exitPhase(State&,int team);

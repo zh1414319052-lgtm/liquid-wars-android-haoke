@@ -47,6 +47,7 @@ void Items::rewind(State& s){
  truceA=truceB=-1;truceUntil=0;quarryBudget.fill(0);deathOwner.fill(-1);events.clear();s.points.resize(s.dots.size()*3,0);s.colours.resize(s.dots.size()*4,1);
  s.operations->reset(s);
  stock={};ready={};immunity={};activeSerial={};activeResult={};activeSeen={};rewindPending=false;
+ holeStart=holeUntil=holeAbsorbed=0;lastHoleAbsorb=-1;holeExempt.fill(false);audioCaptures.fill(0);
  if(s.expedition){auto bots=s.expedition->seats;delete s.expedition;s.expedition=new Expedition(s,int(randomState));for(int t=0;t<s.teamCount;t++)s.expedition->seats[t].bot=bots[t].bot;}
 
 }
@@ -68,7 +69,7 @@ void Items::spawnPair(State& s){
  if(count%2){std::vector<int> defensive;for(int k:counter)if(!previousKinds[k]&&!current[k]&&(k!=CAUSAL||!resetSpawned))defensive.push_back(k);int kind=defensive[bounded(unsigned(defensive.size()))];kinds.push_back(kind);current[kind]=true;}
  for(int k=0;k<count;k++){int p=positions[k],kind=kinds[k];if(kind==RESET)resetSpawned=true;pickups[k]={kind,p%W,p/W};}
  // Keep automatic waves; one third of new pickups are stored actives.
- for(int k=0;k<count;k++)if(bounded(3)==0)pickups[k].kind=COUNT+int(bounded(2));
+ for(int k=0;k<count;k++)if(bounded(3)==0)pickups[k].kind=COUNT+int(bounded(ACTIVE_COUNT));
  previousKinds=current;suppressResetWave=false;wave++;
 }
 bool Items::concealedFrom(const State& s,int viewer,int team)const{return enabled&&active(team,INVISIBLE)&&!s.allied(viewer,team)&&!protectedBy(s,viewer,REVEAL);}
@@ -85,6 +86,7 @@ void Items::begin(State& s){
  if(rewindPending){rewind(s);return;}
  if(!enabled)return;capture(s);if(warmup>0){warmup=std::max(0,warmup-STEP_MS);return;}
  if(s.expedition){s.expedition->begin(s);if(s.expedition->cutoff>=0)return;}else elapsed+=STEP_MS;
+ if(holeUntil&&holeUntil<=elapsed){resetPullOffsets(s);holeStart=holeUntil=holeAbsorbed=0;lastHoleAbsorb=-1;holeExempt.fill(false);}
  for(int t=0;t<s.teamCount;t++){
   if(until[t][PHASE]&&until[t][PHASE]<=elapsed){exitPhase(s,t);until[t][PHASE]=0;}
   if(until[t][DEATH]&&until[t][DEATH]<=elapsed)deathStrike(s,t);
@@ -99,14 +101,70 @@ void Items::begin(State& s){
  }
 }
 int Items::moves(const State& s,Dot& d)const{if(enabled&&(warmup>0||active(d.team,FREEZE)))return 0;return s.expedition?s.expedition->moves(s,d):1;}
+
+bool Items::pull(State& s,Dot& d){
+ const int pullAge=elapsed-holeStart-BLACK_HOLE_WARNING_MS;
+ if(pullAge<=0)return false; // Visible warning: no suction or core deaths yet.
+ const int cx=s.map->width/2,cy=s.map->height/2;
+ const int dx=cx-int(d.x),dy=cy-int(d.y);
+ const auto open=[&](int x,int y){return !s.map->isWall(x,y)&&!blockedByPickup(x,y)&&(!s.expedition||!s.expedition->blockedByLoot(x,y));};
+ const auto inCore=[&](){return square(cx-d.x)+square(cy-d.y)<=square(BLACK_HOLE_RADIUS)&&open(d.x,d.y);};
+ const auto absorb=[&](){
+  s.field[d.x][d.y]=nullptr;--s.players[d.team].score;
+  ++holeAbsorbed;lastHoleAbsorb=elapsed;
+  delete &d;return true;
+ };
+ if(inCore())return absorb();
+
+ // Fixed point keeps attraction identical on LAN peers and across CPU architectures.
+ const int major=std::max(std::abs(dx),std::abs(dy));
+ if(!major)return false;
+ const int distance=major+3*std::min(std::abs(dx),std::abs(dy))/8;
+ const int falloff=std::max(32,std::max(s.map->width,s.map->height)/8);
+ const int fullSpeed=(64+512*falloff/(falloff+distance))*2/5;
+ const int speed=fullSpeed*std::min(BLACK_HOLE_RAMP_MS,pullAge)/BLACK_HOLE_RAMP_MS;
+ const int fx=d.pullX+dx*speed/major,fy=d.pullY+dy*speed/major;
+ const int mx=std::clamp(fx/256,std::min(0,dx),std::max(0,dx));
+ const int my=std::clamp(fy/256,std::min(0,dy),std::max(0,dy));
+ d.pullX=fx%256;d.pullY=fy%256;
+ // Check each traversed cell, even when the near-core pull moves two cells per tick.
+ // Slide along a blocker when one axis is open. Never squeeze through a diagonal corner.
+ const auto move=[&](int x,int y){
+  if((x==d.x&&y==d.y)||!open(x,y)||s.field[x][y])return false;
+  if(x!=d.x&&y!=d.y&&(!open(d.x,y)||!open(x,d.y)))return false;
+  s.field[d.x][d.y]=nullptr;d.x=x;d.y=y;s.field[x][y]=&d;return true;
+ };
+ const int steps=std::max(std::abs(mx),std::abs(my));
+ for(int sub=1;sub<=steps;sub++){
+  int x=d.x+mx*sub/steps-mx*(sub-1)/steps,y=d.y+my*sub/steps-my*(sub-1)/steps;
+  if(!move(x,y)&&x!=d.x&&y!=d.y){
+   if(std::abs(dx)>=std::abs(dy)){if(!move(x,d.y))move(d.x,y);}
+   else if(!move(d.x,y))move(x,d.y);
+  }
+  if(inCore())return absorb();
+ }
+ return false;
+}
+
+void Items::resetPullOffsets(State& s,int team){
+ for(auto* dot:s.dots)if(team<0||dot->team==team)dot->pullX=dot->pullY=0;
+}
 void Items::contact(State& s,Dot& defender,Dot& attacker){
  if(active(attacker.team,FREEZE))return;
  if(s.allied(defender.team,attacker.team))return;
  // Hostile contact reveals both forces, even when a shield absorbs the hit.
  // Rendering, minimap and both AI observers read this same authoritative effect.
  if(enabled){until[defender.team][INVISIBLE]=0;until[attacker.team][INVISIBLE]=0;if(active(defender.team,INVINCIBLE))return;}
- if(s.expedition){s.expedition->contact(s,defender,attacker);return;}
- int before=defender.team;combat::contact(defender,attacker.team,s.players);if(defender.team!=before)defender.squad=attacker.squad;
+ int before=defender.team;
+ if(s.expedition)s.expedition->contact(s,defender,attacker);
+ else combat::contact(defender,attacker.team,s.players);
+ if(defender.team!=before){defender.squad=attacker.squad;++audioCaptures[attacker.team];++audioCaptures[before];}
+}
+
+std::vector<int> Items::audioSnapshot(const State& s,int viewer,bool all)const{
+ int captures=0;
+ for(int t=0;t<s.teamCount;t++)if(all||t==viewer)captures+=audioCaptures[t];
+ return {epoch,elapsed,holeStart,holeUntil,all?captures/2:captures,s.expedition&&s.expedition->cutoff>=0?1:0};
 }
 int Items::grow(State& s,int team,int count){const int W=s.map->width;if(team<0||team>=s.teamCount||s.players[team].score==0||opposed(s,team,ANTIGROW))return 0;if(s.expedition)count=std::min({count,s.dotsPerTeam*2-s.players[team].score,s.teamCount*s.dotsPerTeam*2-int(s.dots.size())});count=std::max(0,std::min(count,MAX_PARTICLES-int(s.dots.size())));if(!count)return 0;auto cells=area(s,team,count);s.dots.reserve(s.dots.size()+cells.size());for(int p:cells){Dot* d=new Dot(p%W,p/W,team);s.field[d->x][d->y]=d;s.dots.push_back(d);s.players[team].score++;}return int(cells.size());}
 int Items::relocate(State& s,int team,int x,int y){const int W=s.map->width;
@@ -144,7 +202,7 @@ void Items::quarry(State& s,int team){if(s.expedition)return;const int W=s.map->
 }
 
 void Items::grant(State& s,int team,int kind,int x,int y){
- if(team<0||team>=s.teamCount||kind<0||kind>=COUNT+2||s.players[team].score<=0)return;
+ if(team<0||team>=s.teamCount||kind<0||kind>=COUNT+ACTIVE_COUNT||s.players[team].score<=0)return;
  if(kind>=COUNT){if(stock[team][kind-COUNT]<STOCK_CAP){stock[team][kind-COUNT]++;emit(kind,team,x,y,1);}return;}
  capture(s);int amount=0;
  switch(kind){
@@ -228,7 +286,7 @@ void Items::thaw(State& s,int team,int duration){
  for(auto d:s.dots)if(d->team==team){d->freezeUntil=0;d->freezeImmuneUntil=immunity[team];}
 }
 int Items::activate(State& s,int team,int serial,int kind){
- if(team<0||team>=s.teamCount||kind<0||kind>=2)return Expedition::INVALID;
+ if(team<0||team>=s.teamCount||kind<0||kind>=ACTIVE_COUNT)return Expedition::INVALID;
  auto& seen=activeSeen[team];if(std::find(seen.begin(),seen.end(),serial)!=seen.end())return Expedition::STALE;
  seen.push_back(serial);if(seen.size()>256)seen.pop_front();
  activeSerial[team]=serial;
@@ -236,17 +294,30 @@ int Items::activate(State& s,int team,int serial,int kind){
  if(s.players[team].score<=0||(s.expedition&&s.expedition->cutoff>=0))return result(Expedition::FINISHED);
  if(!stock[team][kind])return result(Expedition::EMPTY);
  if(ready[team][kind]>elapsed)return result(Expedition::COOLDOWN);
- if(kind==0){if(active(team,FREEZE))return result(Expedition::BLOCKED);freezeEnemies(s,team,FREEZE_MS);}
- else thaw(s,team,CLEANSE_MS); // Preventive use is valid and consumes one.
- stock[team][kind]--;ready[team][kind]=elapsed+(kind==0?FREEZE_COOLDOWN:CLEANSE_COOLDOWN);
- emit(COUNT+kind,team,0,0,0,-1,2);return result(Expedition::OK);
+ int x=0,y=0,cooldown=0;
+ if(kind==0){if(active(team,FREEZE))return result(Expedition::BLOCKED);freezeEnemies(s,team,FREEZE_MS);cooldown=FREEZE_COOLDOWN;}
+ else if(kind==1){
+  thaw(s,team,CLEANSE_MS);
+  if(pulling(team)){holeExempt[team]=true;resetPullOffsets(s,team);}
+  cooldown=CLEANSE_COOLDOWN;
+ }else{
+  if(active(team,FREEZE)||blackHoleActive()||warmup>0)return result(Expedition::BLOCKED);
+  holeStart=elapsed;holeUntil=elapsed+BLACK_HOLE_MS;holeAbsorbed=0;lastHoleAbsorb=-1;holeExempt.fill(false);
+  x=s.map->width/2;y=s.map->height/2;
+ }
+ stock[team][kind]--;ready[team][kind]=elapsed+cooldown;
+ emit(COUNT+kind,team,x,y,0,-1,2);return result(Expedition::OK);
+}
+void Items::appendBlackHoleFacts(std::vector<int>& out,int viewer)const{
+ out.insert(out.end(),{BLACK_HOLE_FACTS,holeStart,holeUntil,viewer>=0?stock[viewer][BLACK_HOLE_SLOT]:0,
+                       viewer>=0&&holeExempt[viewer]?1:0,holeAbsorbed,lastHoleAbsorb});
 }
 std::vector<int> Items::activeSnapshot(const State& s,int viewer)const{
  std::vector<int> out{0x4c574131,elapsed,s.teamCount};
  for(int t=0;t<s.teamCount;t++){
   bool own=viewer<0||viewer==t;
-  for(int v:{stock[t][0],stock[t][1],ready[t][0],ready[t][1],until[t][FREEZE],immunity[t],activeSerial[t],activeResult[t]})out.push_back(own?v:0);
- }return out;
+  for(int v:{stock[t][0],stock[t][1],ready[t][0],ready[t][1],until[t][FREEZE],immunity[t],activeSerial[t],activeResult[t],stock[t][BLACK_HOLE_SLOT],int(holeExempt[t])})out.push_back(own?v:0);
+ }appendBlackHoleFacts(out,viewer);return out;
 }
 std::vector<int> Items::snapshot(const State& s)const{const int W=s.map->width,H=s.map->height;[[maybe_unused]] const int N=W*H;
  std::vector<int> out={elapsed,nextWave,wave,int(s.dots.size()),MAX_PARTICLES,s.map->revision(),last.serial,last.kind,last.team,last.x,last.y,last.amount,last.at,s.players[0].score,s.players[1].score,s.players[2].score,s.players[3].score,s.players[4].score,s.players[5].score};

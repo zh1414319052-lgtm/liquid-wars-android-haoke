@@ -24,8 +24,8 @@ struct Mesh {GLuint vbo=0;int count=0,kind=0;float lo[3]{},hi[3]{};};
 struct Point {float x=0,y=0;int at=0;};
 struct Track {std::array<Point,12> p{};int size=0,seen=0,team=-1;};
 struct PresentedDot {Point a,b;std::array<Point,11> path{};float r=0,jx=0,jy=0,color[3]{},code=0;bool concealed=false;};
-struct PresentedHud {int clock=0;std::array<std::vector<int>,4> facts;};
-struct PresentedState {std::vector<PresentedDot> dots;std::vector<float> sites,props;std::shared_ptr<const PresentedHud> hud;int clock=0,epoch=0,own=0,viewer=0,seats=0,birthX=0,birthY=0,total=0;double sampled=0;bool warmup=false,remote=false;};
+struct PresentedHud {int clock=0;std::array<std::vector<int>,5> facts;};
+struct PresentedState {std::vector<PresentedDot> dots;std::vector<float> sites,props;std::shared_ptr<const PresentedHud> hud;int clock=0,epoch=0,own=0,viewer=0,seats=0,birthX=0,birthY=0,total=0,gravityMask=0;double sampled=0;bool warmup=false,remote=false;};
 struct ArmyVfx {double x=0,y=0;int count=0,mask=0;float minx=1e9f,miny=1e9f,maxx=-1e9f,maxy=-1e9f;
  void add(float px,float py,int effects){x+=px;y+=py;count++;mask|=effects;minx=std::min(minx,px);miny=std::min(miny,py);maxx=std::max(maxx,px);maxy=std::max(maxy,py);}};
 void appendArmyVfx(PresentedState& frame,const std::array<ArmyVfx,MAX_TEAMS>& armies,const std::vector<int>& exp){
@@ -102,14 +102,16 @@ void beginMatch(){resetVisual();ready=0;presentationActive=true;}
 bool hudSnapshot(int kind,std::vector<int>& out){
  if(!presentationActive)return false;
  std::shared_ptr<const PresentedState> p;{std::lock_guard<std::mutex> lock(presentationMutex);p=presentation;}
- if(p){if(kind==4)out={p->clock};else if(p->hud&&kind>=0&&kind<4)out=p->hud->facts[kind];}
+ if(p){if(kind==4)out={p->clock};else if(p->hud&&kind==5)out=p->hud->facts[4];else if(p->hud&&kind>=0&&kind<4)out=p->hud->facts[kind];}
  return true;
 }
 void sampleStep(){
  if(!state||!state->garden3D)return;int time=state->items->elapsed;
  if(epoch!=state->items->epoch||time<lastClock){history.clear();epoch=state->items->epoch;resets++;}lastClock=time;sampledAt=now();sequence++;
  for(auto d:state->dots){auto& t=history[d->visualId];Point p{float(d->x)+.5f,float(d->y)+.5f,time};
-  if(t.team!=d->team||(t.size&&(std::abs(p.x-t.p[t.size-1].x)>1.01f||std::abs(p.y-t.p[t.size-1].y)>1.01f)))t.size=0;
+  const bool pulled=state->items->pulling(d->team);
+  const float maxStep=pulled?2.01f:1.01f;
+  if(t.team!=d->team||(t.size&&(std::abs(p.x-t.p[t.size-1].x)>maxStep||std::abs(p.y-t.p[t.size-1].y)>maxStep)))t.size=0;
   if(t.size){auto a=t.p[t.size-1];if(int(a.x)!=int(p.x)&&int(a.y)!=int(p.y)&&(state->map->isWall(int(a.x),int(p.y))||state->map->isWall(int(p.x),int(a.y))))t.size=0;}
   if(t.size&&t.p[t.size-1].at==time)t.p[t.size-1]=p;else{if(t.size==12){for(int k=1;k<12;k++)t.p[k-1]=t.p[k];t.size=11;}t.p[t.size++]=p;}t.seen=sequence;t.team=d->team;
  }
@@ -118,6 +120,7 @@ void sampleStep(){
  // the simulation mutex, navigation rebuild or AI. The short swap is independent
  // of cameras; all real units are retained at their original size and quality.
  auto frame=std::make_shared<PresentedState>();frame->clock=time;frame->epoch=epoch;frame->sampled=sampledAt;frame->warmup=state->items->warmup>0;frame->own=state->players[state->me].score;
+ for(int team=0;team<state->teamCount;team++)if(state->items->pulling(team))frame->gravityMask|=1<<team;
  {std::lock_guard<std::mutex> lock(presentationMutex);if(presentation)frame->hud=presentation->hud;}
  if(!frame->hud||time-frame->hud->clock>=70||time<frame->hud->clock){
   auto hud=std::make_shared<PresentedHud>();hud->clock=time;
@@ -125,6 +128,7 @@ void sampleStep(){
   hud->facts[1]=state->operations->snapshot(*state,state->me,false);
   hud->facts[2]=minimap_sight::snapshot(*state,false);
   if(state->expedition)hud->facts[3]=state->expedition->snapshot(*state,state->me);
+  hud->facts[4]=state->items->audioSnapshot(*state,state->me);
   frame->hud=std::move(hud);
  }
  if(state->expedition)state->expedition->refreshSight(*state);
@@ -141,7 +145,7 @@ void sampleStep(){
  for(const auto& site:state->operations->sites){float record[]={float(site.x)+.5f,float(site.y)+.5f,float(site.owner),float(site.progress),float(site.contested),float(site.born),float(state->operations->clock-site.pulseAt)};frame->sites.insert(frame->sites.end(),record,record+7);}
  if(state->expedition){auto& e=*state->expedition;
   auto prop=[&](int type,int id,int x,int y,float scale,int owner,float status,float progress){float record[]={float(type),float(id),float(x)+.5f,float(y)+.5f,scale,float(owner),status,progress};frame->props.insert(frame->props.end(),record,record+8);};
-  for(const auto& p:e.loot){int eater=p.eater;if(eater!=state->me&&(eater<0||!e.enemyVisible(*state,state->me,p.x,p.y)))eater=-1;prop(p.kind==2?8:p.kind<2?p.kind:20+p.kind-3,p.id,p.x,p.y,p.kind==2?3.f:3.6f,eater,p.eater>=0?1:0,p.hp/float(Items::PICKUP_HP));}
+  for(const auto& p:e.loot){if(p.kind==Expedition::BLACK_HOLE_LOOT)continue;int eater=p.eater;if(eater!=state->me&&(eater<0||!e.enemyVisible(*state,state->me,p.x,p.y)))eater=-1;prop(p.kind==2?8:p.kind<2?p.kind:20+p.kind-3,p.id,p.x,p.y,p.kind==2?3.f:3.6f,eater,p.eater>=0?1:0,p.hp/float(Items::PICKUP_HP));}
   for(auto o:e.obstacles)if(!o.removed){bool visible=e.obstacleVisible(*state,state->me,o);prop(o.id%2?13:14,o.id,o.x,o.y,4.f,-1,visible&&o.wardUntil>e.clock?1:0,visible?o.hp/120.f:1.f);}
   for(size_t i=0;i<state->operations->sites.size();i++){auto p=state->operations->sites[i];prop(11+i,-1-int(i),p.x,p.y,7.f,p.owner,float(p.contested),p.progress/4000.f);}
  }
@@ -164,7 +168,7 @@ std::vector<float> godotFrame(float x,float y,float w,float h,bool spectator){
  envTime=std::max(0.0,(frame->clock+phase-(frame->remote?70:0))/1000.);
  std::vector<float> out(16,0);out.reserve(16+frame->dots.size()*16+frame->sites.size()/7*8);
  out[1]=float(envTime);out[2]=float(frame->epoch);out[3]=frame->sites.size()/7;out[11]=float(locked-requested);out[13]=float(frame->own);out[15]=float(frame->remote?frame->total:frame->dots.size());out[14]=float(frame->props.size()/8);
- out[4]=x;out[5]=y;out[6]=w;out[7]=h;out[8]=1;
+ out[4]=x;out[5]=y;out[6]=w;out[7]=h;out[8]=float(frame->gravityMask); // Presentation-only mask; no hidden positions.
  visibleCount=0;
  for(const auto& d:frame->dots){
   Point p{d.a.x+(d.b.x-d.a.x)*phase/7,d.a.y+(d.b.y-d.a.y)*phase/7,0};
@@ -194,7 +198,7 @@ std::vector<int> networkFrame(int viewer){
  for(const auto* data:{&ops,&exp,&mini})out.insert(out.end(),data->begin(),data->end());
  int count=0;
  for(auto d:s.dots){if(s.items->concealedFrom(s,viewer,d->team)||(d->team!=viewer&&!e.enemyVisible(s,viewer,d->x,d->y)))continue;count++;
-  out.push_back(int(d->visualId));out.push_back(int(d->visualId>>32));out.push_back(d->team);int effects=0;for(int k=0;k<Items::COUNT;k++)if(s.items->active(d->team,k))effects|=1<<k;if(s.items->immunity[d->team]>e.clock)effects|=1<<21;out.push_back(d->health|(effects<<8));
+  out.push_back(int(d->visualId));out.push_back(int(d->visualId>>32));out.push_back(d->team);int effects=0;for(int k=0;k<Items::COUNT;k++)if(s.items->active(d->team,k))effects|=1<<k;if(s.items->immunity[d->team]>e.clock)effects|=1<<21;if(s.items->pulling(d->team))effects|=1<<22;out.push_back(d->health|(effects<<8));
   for(int i=0;i<=10;i++){auto p=position(*d,float(e.clock-70+i*7));int x=int(p.x*64),y=int(p.y*64);out.push_back(x);out.push_back(y);}
  }
  out[12]=count;return out;
@@ -217,7 +221,8 @@ bool acceptNetworkFrame(const std::vector<int>& in){
  auto& ops=hud->facts[1];auto& exp=hud->facts[3];auto& mini=hud->facts[2];
  if(ops.size()<size_t(7+in[4])||ops[0]!=0x4c574f32||ops[4]!=in[4]||ops[5]!=2||exp.size()<size_t(11+in[4]*63)||exp[0]!=193||exp[4]!=in[4]||mini.size()<5||mini[0]!=0x4c575349||mini[4]<0||mini.size()!=size_t(5+mini[4]*4))return false;
  for(int k:{7,8,9,10})if(exp[k]<0||exp[k]>(k==7||k==8?40:10))return false;
- if(exp.size()!=size_t(11+in[4]*63+exp[7]*5+exp[8]*8+(exp[9]+exp[10])*4))return false;
+ const size_t expeditionTail=11+in[4]*63+exp[7]*5+exp[8]*8+(exp[9]+exp[10])*4;
+ if(exp.size()!=expeditionTail+7||exp[expeditionTail]!=Items::BLACK_HOLE_FACTS)return false;
  size_t opAt=7+in[4]+16;
  for(int t=0;t<in[4];t++){opAt+=4;for(int g=0;g<3;g++){if(opAt+8>ops.size()||ops[opAt+7]<0||ops[opAt+7]>24)return false;opAt+=8+ops[opAt+7]*2;}}
  if(opAt!=ops.size())return false;
@@ -225,10 +230,10 @@ bool acceptNetworkFrame(const std::vector<int>& in){
  auto prop=[&](int kind,int id,int x,int y,float scale,int owner,float status,float progress){const float p[]={float(kind),float(id),float(x)+.5f,float(y)+.5f,scale,float(owner),status,progress};frame->props.insert(frame->props.end(),p,p+8);};
  for(int i=0;i<2;i++){int at=7+in[4]+i*8;const float p[]={float(ops[at])+.5f,float(ops[at+1])+.5f,float(ops[at+2]),float(ops[at+4]),float(ops[at+5]),float(ops[at+6]),float(in[2]-ops[at+7])};frame->sites.insert(frame->sites.end(),p,p+7);prop(11+i,-1-i,ops[at],ops[at+1],7,ops[at+2],ops[at+5],ops[at+4]/4000.f);}
  int lootAt=11+in[4]*63;
- for(int i=0;i<exp[7];i++){int b=lootAt+i*5;if(exp[b+1]<0||exp[b+1]>22)return false;
+ for(int i=0;i<exp[7];i++){int b=lootAt+i*5;if(exp[b+1]<0||exp[b+1]>Expedition::BLACK_HOLE_LOOT)return false;
   int hp=Items::PICKUP_HP,eater=-1,active=0,base=11+(i/4)*63,index=i%4;
   if(exp[base+42]==0x4c485031){int packed=exp[base+13+index];hp=packed&2047;eater=((packed>>11)&15)-1;active=(packed>>15)&1;if(exp[base+21+index]!=exp[b]||packed<0||packed>65535||hp>Items::PICKUP_HP||eater>=in[4])return false;}
-  prop(exp[b+1]==2?8:exp[b+1]<2?exp[b+1]:20+exp[b+1]-3,exp[b],exp[b+2],exp[b+3],exp[b+1]==2?3.f:3.6f,eater,active,hp/float(Items::PICKUP_HP));}
+  if(exp[b+1]!=Expedition::BLACK_HOLE_LOOT)prop(exp[b+1]==2?8:exp[b+1]<2?exp[b+1]:20+exp[b+1]-3,exp[b],exp[b+2],exp[b+3],exp[b+1]==2?3.f:3.6f,eater,active,hp/float(Items::PICKUP_HP));}
  for(int i=0;i<exp[8];i++){int b=lootAt+exp[7]*5+i*8;if(!exp[b+7])prop(exp[b]%2?13:14,exp[b],exp[b+1],exp[b+2],4,-1,exp[b+5]>in[2]?1:0,exp[b+4]/120.f);}
  std::array<ArmyVfx,MAX_TEAMS> armies{};frame->dots.reserve(in[12]);
  for(int n=0;n<in[12];n++){int at=int(tail)+n*26,team=in[at+2],health=in[at+3]&255,effects=in[at+3]>>8;if(team<0||team>=in[4]||health<1||health>10)return false;uint64_t id=uint32_t(in[at])|(uint64_t(uint32_t(in[at+1]))<<32),hash=id*0x9e3779b97f4a7c15ull;PresentedDot dot;
@@ -237,6 +242,7 @@ bool acceptNetworkFrame(const std::vector<int>& in){
   if(effects&(1<<Items::PHASE)){dot.color[0]=210/255.f;dot.color[1]=170/255.f;dot.color[2]=1;}
   if(effects&(1<<Items::INVINCIBLE)){dot.color[0]=1;dot.color[1]=245/255.f;dot.color[2]=155/255.f;}
   dot.code=(team+(effects&(1<<Items::INVISIBLE)?.144f:.32f))/16.f;
+  if(effects&(1<<22))frame->gravityMask|=1<<team;
   for(int i=0;i<=10;i++){int x=in[at+4+i*2],y=in[at+5+i*2];if(x<0||y<0||x>=ARENA_WIDTH*64||y>=ARENA_HEIGHT*64)return false;dot.path[i]={x/64.f,y/64.f,0};}
   frame->dots.push_back(dot);armies[team].add(dot.path[10].x,dot.path[10].y,effects);
  }

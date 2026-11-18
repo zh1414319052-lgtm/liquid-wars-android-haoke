@@ -3,6 +3,7 @@ package com.xenris.liquidwarsos;
 
 /** UI-only camera. Player intent supplies bounded look-ahead; the real army supplies travel. */
 public final class WorldCamera {
+ private static final float GARDEN_WIDE_WIDTH=560f,GARDEN_DETAIL_WIDTH=200f;
  public int width=800,height=480,id=-1,flip;
  public float left,bottom,viewWidth=800,viewHeight=480;
  public boolean overview=true,following=true;
@@ -26,7 +27,9 @@ public final class WorldCamera {
  public void focus(float x,float y){goalX=x;goalY=y;resetSmoothing();place(x,y);}
  private void place(float x,float y){
   if(!large()){viewWidth=width;viewHeight=height;left=bottom=0;return;}
-  viewWidth=overview?Math.max(width,height*aspect):Math.min(id==1001&&(width<=800||width>=3264)?(width>=3264&&detail?200:400):(detail?400:800),width);
+  float followWidth=id==1001&&width>=3264?(detail?GARDEN_DETAIL_WIDTH:GARDEN_WIDE_WIDTH):
+      id==1001&&width<=800?400:(detail?400:800);
+  viewWidth=overview?Math.max(width,height*aspect):Math.min(followWidth,width);
   viewHeight=overview?Math.max(height,width/aspect):Math.min(height,viewWidth/aspect);
   left=overview?(width-viewWidth)/2:clamp(x-viewWidth/2,0,width-viewWidth);
   bottom=overview?(height-viewHeight)/2:clamp(y-viewHeight/2,0,height-viewHeight);

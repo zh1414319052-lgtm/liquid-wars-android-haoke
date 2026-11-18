@@ -24,12 +24,20 @@ void Move::stepDots() {
     if(state->expedition&&state->expedition->cutoff>=0)return;
     state->operations->step(*state);
     const size_t count=state->dots.size();
+    size_t survivors=0;
+    const bool gravity=state->items->blackHoleActive();
     for(size_t i = 0; i < count; i++) {
         Dot* dot = state->dots[i];
+        if(gravity&&state->items->pulling(dot->team)&&state->items->elapsed-state->items->holeStart>Items::BLACK_HOLE_WARNING_MS){
+            if(!state->items->pull(*state,*dot))state->dots[survivors++]=dot;
+            continue;
+        }
+        state->dots[survivors++]=dot;
         const Player* player = &state->players[dot->team];
         const int moves=state->items->moves(*state,*dot);
         for(int n=0;n<moves;n++)moveDotToward(dot, player,n==0);
     }
+    if(survivors!=count)state->dots.resize(survivors);
     state->items->end(*state);
 }
 

@@ -3,21 +3,27 @@ package com.xenris.liquidwarsos;
 
 /** Versioned, viewer-filtered authority facts, never a second game simulation. */
 public final class ExpeditionSnapshot {
- public static final int ITEMS=2,STRIDE=63;
+ public static final int ITEMS=3,STRIDE=63;
+ static final int BLACK_HOLE_LOOT=23;
  public final int[] raw;
  public final int teams,time,duration,cutoff,recon,reconRemaining,loot,obstacles,anchors,chills;
  public final int lootBase,obstacleBase,anchorBase,chillBase;
+ final int holeStart,holeUntil,holeStock,holeAbsorbed,lastHoleAbsorb;
+ final boolean holeExempt;
  public ExpeditionSnapshot(int[] d){
   if(d==null||d.length<11||d[0]!=193||d[4]<2||d[4]>10)throw new IllegalArgumentException("Expedition header");
   raw=d;time=d[1];duration=d[2];cutoff=d[3];teams=d[4];recon=d[5];reconRemaining=d[6];loot=d[7];obstacles=d[8];anchors=d[9];chills=d[10];
   if(loot<0||loot>40||obstacles<0||obstacles>40||anchors<0||anchors>10||chills<0||chills>10)throw new IllegalArgumentException("Expedition bounds");
   lootBase=11+teams*STRIDE;obstacleBase=lootBase+loot*5;anchorBase=obstacleBase+obstacles*8;chillBase=anchorBase+anchors*4;
-  if(chillBase+chills*4!=d.length)throw new IllegalArgumentException("Expedition tail");
+  int tail=chillBase+chills*4;
+ if(tail+7!=d.length||d[tail]!=BlackHoleVisual.FACTS)throw new IllegalArgumentException("Expedition tail");
+  holeStart=d[tail+1];holeUntil=d[tail+2];holeStock=d[tail+3];holeExempt=d[tail+4]!=0;
+ holeAbsorbed=d[tail+5];lastHoleAbsorb=d[tail+6];
  }
  public int seat(int t){return 11+t*STRIDE;}
  public int count(int t){return raw[seat(t)];}
- public int bag(int t,int k){return raw[seat(t)+11+k];}
- public int cooldown(int t,int k){return Math.max(0,raw[seat(t)+19+k]-time);}
+ public int bag(int t,int k){return k==ActiveSlots.BLACK_HOLE?holeStock:raw[seat(t)+11+k];}
+ public int cooldown(int t,int k){return k==ActiveSlots.BLACK_HOLE?Math.max(0,holeUntil-time):Math.max(0,raw[seat(t)+19+k]-time);}
  public String ranking(){
   Integer[] order=new Integer[teams];for(int i=0;i<teams;i++)order[i]=i;
   java.util.Arrays.sort(order,(a,b)->Integer.compare(raw[seat(b)+1],raw[seat(a)+1]));

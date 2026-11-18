@@ -4,6 +4,7 @@ package com.xenris.liquidwarsos.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -28,9 +29,16 @@ public final class TcpTransport {
                 server.bind(new InetSocketAddress(port));
                 return new GameTransport.Listener() {
                     @Override public GameTransport.Connection accept() throws IOException {
-                        Socket socket = server.accept();
-                        try { return wrap(socket); }
-                        catch (IOException failed) { GameTransport.close(socket); throw failed; }
+                        while (true) {
+                            Socket socket = server.accept();
+                            try {
+                                if (LanPeer.isOnLink(socket.getInetAddress())) return wrap(socket);
+                            } catch (IOException failed) {
+                                GameTransport.close(socket);
+                                throw failed;
+                            }
+                            GameTransport.close(socket);
+                        }
                     }
                     @Override public void close() throws IOException { server.close(); }
                 };
@@ -45,13 +53,20 @@ public final class TcpTransport {
         private boolean closed;
         public Connector(String address, int port) { this.address = address; this.port = port; }
         @Override public GameTransport.Connection connect() throws IOException {
+            InetAddress peer = LanPeer.parse(address);
+            if (!LanPeer.isOnLink(peer)) throw new IOException("Peer is outside the local network");
             Socket pending = new Socket();
             synchronized (this) {
                 if (closed) { pending.close(); throw new IOException("Connection cancelled"); }
                 socket = pending;
             }
-            pending.connect(new InetSocketAddress(address, port), 3000);
-            return wrap(pending);
+            try {
+                pending.connect(new InetSocketAddress(peer, port), 3000);
+                return wrap(pending);
+            } catch (IOException failure) {
+                GameTransport.close(pending);
+                throw failure;
+            }
         }
         @Override public synchronized void close() throws IOException {
             closed = true;

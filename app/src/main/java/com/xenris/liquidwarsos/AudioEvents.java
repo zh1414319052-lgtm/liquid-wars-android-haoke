@@ -4,14 +4,17 @@ import java.util.Arrays;
 import com.xenris.liquidwarsos.cloud.SnapshotItems;
 /** Read-only presentation event detector. It never consumes simulation RNG or writes state. */
 public final class AudioEvents {
- public static final int ORDER=0,ROUTE=1,DEVOUR=2,ITEM=3,CAPTURE=4,PRODUCE=5,ALERT=6,REWIND=7,COUNT=8;
- public static final String[] FILES={"order","route","devour","item","capture","produce","alert","rewind"};
+ public static final int ORDER=0,ROUTE=1,DEVOUR=2,ITEM=3,CAPTURE=4,PRODUCE=5,ALERT=6,REWIND=7,SWALLOW=8,COUNT=9;
+ // Keep historical event indices stable; army-to-army conversion is now silent.
+ public static final int ENABLED_COUNT=8;
+ public static boolean enabled(int sound){return sound>=0&&sound<COUNT&&sound!=SWALLOW;}
+ public static final String[] FILES={"order","route","devour","item","capture","produce","alert","rewind","swallow"};
  private int epoch=-1,time=-1,serial,siteCount,lastOrder;private final int[] hp=new int[6],damage=new int[6],key=new int[6],owner=new int[5],born=new int[5],contest=new int[5];
  private final long[] played=new long[COUNT];private long lastAny=-10000;
- private static final long[] GAP={100,180,650,300,650,1500,1800,1200};
+ private static final long[] GAP={100,180,650,300,650,1500,1800,1200,3000};
  public AudioEvents(){reset();}
  public void reset(){epoch=-1;time=-1;serial=0;siteCount=-1;Arrays.fill(played,-10000);lastAny=-10000;}
- public boolean allow(int sound,long now){if(sound<0||sound>=COUNT||now-played[sound]<GAP[sound]||now-lastAny<65)return false;played[sound]=now;lastAny=now;return true;}
+ public boolean allow(int sound,long now){if(!enabled(sound)||now-played[sound]<GAP[sound]||now-lastAny<65)return false;played[sound]=now;lastAny=now;return true;}
  public int observe(int[] s,OperationsSnapshot o,int viewer,boolean spectator){
   if(s==null||s.length<209||viewer<0||viewer>=6)return -1;
   boolean initial=epoch<0,reset=!initial&&(epoch!=s[146]||s[0]<time),baseline=initial||reset;int candidate=-1;

@@ -15,6 +15,7 @@
         android:layout_height="wrap_content" />
     <com.xenris.liquidwarsos.ItemOverlay android:id="@+id/item_overlay" android:layout_width="match_parent" android:layout_height="match_parent" />
     <com.xenris.liquidwarsos.TacticalOverlay android:id="@+id/tactical_overlay" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <com.xenris.liquidwarsos.JoystickOverlay android:id="@+id/joystick_overlay" android:layout_width="match_parent" android:layout_height="match_parent" />
     <com.xenris.liquidwarsos.ExpeditionOverlay android:id="@+id/expedition_overlay" android:layout_width="match_parent" android:layout_height="match_parent" />
     <com.xenris.liquidwarsos.MatchIntroView android:id="@+id/match_intro" android:layout_width="match_parent" android:layout_height="match_parent" />
     </FrameLayout>

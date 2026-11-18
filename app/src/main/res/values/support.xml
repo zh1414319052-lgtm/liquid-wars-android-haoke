@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_game">Support the game</string>
+    <string name="support_back">Back</string>
+    <string name="support_tagline">Enjoy the game? Support is optional</string>
+    <string name="support_purpose_heading">How support is used</string>
+    <string name="support_purpose">Tips will support continued development and maintenance of Liquid Wars, and help build a budget for future server costs.\n\nPublic online multiplayer is currently unavailable because funding is limited and server costs are high. It may become available when funding and technical conditions allow. Availability and timing will be announced if plans become concrete.</string>
+    <string name="support_voluntary_heading">Entirely optional</string>
+    <string name="support_voluntary">Choose an amount within your means. Playing does not require a tip. Tips grant no coins, items, ranking benefits, priority, or other game privileges.\n\nSupport is for users aged 18 or over with full legal capacity. Minors should not send tips.</string>
+    <string name="support_notice_heading">About tipping</string>
+    <string name="support_notice">This is a voluntary personal tip to the developer, not charitable fundraising. No charitable donation receipt or tax deduction certificate is provided.\n\nReview the recipient, amount, and platform rules in WeChat before deciding. The game does not charge you automatically or confirm payment. Contact the developer about mistaken payments, payments by minors, or other concerns for assistance under applicable law. Your statutory rights remain unaffected.</string>
+    <string name="support_contact">Contact: 1414319052@qq.com</string>
+    <string name="support_contact_label">Developer contact email</string>
+    <string name="support_copy_email">Copy contact email</string>
+    <string name="support_email_copied">Contact email copied</string>
+    <string name="support_code_title">WeChat appreciation code</string>
+    <string name="support_code_description">User-provided WeChat appreciation code for Mr. Zhang. Tap to enlarge.</string>
+    <string name="support_code_hint">Tap to enlarge · Save and open in WeChat\nVerify the recipient in WeChat</string>
+    <string name="support_save">Save original code</string>
+    <string name="support_close">Close</string>
+    <string name="support_saved">Original code saved</string>
+    <string name="support_save_error">Could not save. Choose a writable location and try again.</string>
+    <string name="support_picker_error">File picker unavailable. You can take a screenshot and open it in WeChat.</string>
+    <string name="support_image_error">Code unavailable. Please contact the developer.</string>
+    <string name="qa_app_name">Liquid Wars · Playtest</string>
+</resources>

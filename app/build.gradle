@@ -21,11 +21,11 @@ android {
     namespace "com.xenris.liquidwarsos"
     defaultConfig {
         applicationId "com.xenris.liquidwarsos.haoke"
-        manifestPlaceholders = [appLabel: project.hasProperty('gardenQa186') ? '液态战争 · 3D试玩' : '@string/app_name']
+        manifestPlaceholders = [appLabel: project.hasProperty('gardenQa186') ? '@string/qa_app_name' : '@string/app_name']
         minSdk 26
         targetSdk 34
-        versionName "1.94"
-        versionCode 64
+        versionName "2.12"
+        versionCode 85
         resValue "string", "ui_version", versionName
         resourceConfigurations += ["en", "zh", "b+zh+Hant"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -47,6 +47,7 @@ android {
             multiDexEnabled true
         }
         debug {
+            versionNameSuffix "-QA"
             jniDebuggable true
             renderscriptDebuggable true
             minifyEnabled false
@@ -82,7 +83,6 @@ dependencies {
     testImplementation "org.json:json:20240303"
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.robolectric:robolectric:4.14.1"
-    implementation "com.squareup.okhttp3:okhttp:4.12.0"
     androidTestImplementation "androidx.test.ext:junit:1.2.1"
     androidTestImplementation "androidx.test:runner:1.6.2"
     implementation "androidx.browser:browser:1.7.0"

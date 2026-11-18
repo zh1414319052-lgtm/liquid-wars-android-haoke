@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_game">支持游戏</string>
+    <string name="support_back">返回</string>
+    <string name="support_tagline">喜欢这款游戏，可以自愿支持</string>
+    <string name="support_purpose_heading">款项用途</string>
+    <string name="support_purpose">赞赏款将用于支持作者持续开发、维护《液态战争》，并为未来的服务器费用积累预算。\n\n目前因资金有限、服务器成本较高，暂未开通公网联机。后续资金与技术条件具备时，可能开放公网联机；是否开通及具体时间以实际公告为准。</string>
+    <string name="support_voluntary_heading">自愿参与，不影响游玩</string>
+    <string name="support_voluntary">金额自行决定，请量力而行。不赞赏也能正常游玩；赞赏不会获得金币、道具、排名、优先权或其他游戏权益。\n\n仅限已满18周岁且具备完全民事行为能力的用户自愿支持。未成年人请勿赞赏。</string>
+    <string name="support_notice_heading">赞赏说明</string>
+    <string name="support_notice">这是对开发者的个人自愿赞赏，不是公益慈善募捐，不提供公益捐赠票据或抵税凭证。\n\n请在微信中核对收款人、金额及平台规则后自行决定。游戏不会自动扣款或确认支付结果。误付、未成年人付款或其他疑问，可联系作者依法协助处理；不影响你的法定权利。</string>
+    <string name="support_contact">联系作者：1414319052@qq.com</string>
+    <string name="support_contact_label">作者联系邮箱</string>
+    <string name="support_copy_email">复制联系邮箱</string>
+    <string name="support_email_copied">联系邮箱已复制</string>
+    <string name="support_code_title">微信赞赏码</string>
+    <string name="support_code_description">用户提供的张先生微信赞赏码，点击放大</string>
+    <string name="support_code_hint">点图放大 · 保存后可在微信中识别\n收款人以微信实际页面为准</string>
+    <string name="support_save">保存赞赏码原图</string>
+    <string name="support_close">关闭</string>
+    <string name="support_saved">赞赏码原图已保存</string>
+    <string name="support_save_error">保存失败，请选择可写入的位置后重试</string>
+    <string name="support_picker_error">无法打开文件选择器，可截图后在微信中识别</string>
+    <string name="support_image_error">赞赏码暂时无法显示，请联系作者</string>
+    <string name="qa_app_name">液态战争 · 试玩版</string>
+</resources>

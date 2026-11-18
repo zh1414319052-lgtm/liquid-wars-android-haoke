@@ -1,12 +1,13 @@
 extends Node3D
 ## Scene, shading and presentation only. All units/orders/rules come from C++.
-const TEAM_COLORS = [Color(0.008,0.40,0.27),Color(0.08,0.23,0.65),
-    Color(0.80,0.14,0.065),Color(0.70,0.67,0.52),Color(0.72,0.38,0.025),Color(0.33,0.10,0.5),Color(.7,.18,.34),Color(.18,.30,.4),Color(.32,.5,.08),Color(.45,.22,.1)]
+const TEAM_COLORS = ExpeditionPalette.COLORS
 var props := ExpeditionProps.new()
 var effects := BattleVfx.new()
 var bridge: Object
 var particles: MultiMesh
 var particle_node: MultiMeshInstance3D
+var gravity_node: MultiMeshInstance3D
+var gravity_material: ShaderMaterial
 var river_material: ShaderMaterial
 var site_nodes: Array[MeshInstance3D] = []
 var site_materials: Array[StandardMaterial3D] = []
@@ -19,7 +20,14 @@ var daylight: Environment
 var terrain_material: ShaderMaterial
 var foliage_material: ShaderMaterial
 var particle_material: ShaderMaterial
+var particle_display_scale := -1.0
+var particle_viewport_size := Vector2.ZERO
+var particle_camera_width := -1.0
 var reference_190 := false
+var sample_bound := false
+var sample_origin := Vector2(-5000,-5000)
+var sample_probe_age := 0.0
+var groves: Node3D
 var perf_rows := PackedStringArray()
 var perf_previous_us := 0
 @onready var camera: Camera3D = $Camera
@@ -40,13 +48,22 @@ func _ready() -> void:
     river_material = ShaderMaterial.new()
     river_material.shader = preload("res://river.gdshader")
     terrain_material = ShaderMaterial.new()
-    terrain_material.shader = preload("res://surface.gdshader")
+    terrain_material.shader = preload("res://grove_surface.gdshader")
     foliage_material = ShaderMaterial.new()
-    foliage_material.shader = preload("res://surface.gdshader")
+    foliage_material.shader = preload("res://grove_surface.gdshader")
     foliage_material.set_shader_parameter("foliage",true)
+    for mat in [terrain_material,foliage_material]:
+        mat.set_shader_parameter("terrain_zones",preload("res://assets/grove198/terrain-zones.png"))
+        mat.set_shader_parameter("chalk_soil",preload("res://assets/grove198/chalk-soil.png"))
+        mat.set_shader_parameter("broadleaf",preload("res://assets/grove198/broadleaf-albedo.png"))
+        mat.set_shader_parameter("material_fields",preload("res://assets/stone197/material-fields.png"))
     _bind_river($Mainland)
+    groves=preload("res://assets/grove198/groves.glb").instantiate()
+    groves.name="SoftBroadleafGroves"
+    add_child(groves)
+    _bind_groves(groves)
     var sphere := PlaneMesh.new()
-    # Classic sprite: 5px body plus .9px gutter. Visible radius stays unchanged.
+    # Classic sprite: 5px body plus .9px gutter; size is bounded below at runtime.
     sphere.size = Vector2(2.72, 2.72)
     particle_material = ShaderMaterial.new()
     particle_material.shader = preload("res://particles.gdshader")
@@ -63,9 +80,21 @@ func _ready() -> void:
     particles.custom_aabb = AABB(Vector3(-2,-2,-2050),Vector3(3268,128,2052))
     particle_node = MultiMeshInstance3D.new()
     particle_node.multimesh = particles
-    # Shared instanced geometry receives and casts real contact shadows.
-    particle_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+    # The classic atlas already contains a soft contact shadow. Tiny coplanar
+    # cutout casters added an unstable second shadow; use its continuous coverage.
+    # Units still receive the scene's shadows and retain depth tests/occlusion.
+    particle_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     add_child(particle_node)
+    # Shares the same instance transforms/buffer; one extra draw, no per-dot nodes.
+    gravity_material=ShaderMaterial.new()
+    gravity_material.shader=preload("res://gravity.gdshader")
+    gravity_material.render_priority=-1
+    gravity_node=MultiMeshInstance3D.new()
+    gravity_node.multimesh=particles
+    gravity_node.material_override=gravity_material
+    gravity_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    gravity_node.visible=false
+    add_child(gravity_node)
     add_child(props)
     add_child(effects)
     _set_reference(false)
@@ -82,11 +111,31 @@ func _bind_river(node: Node) -> void:
         node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     elif node is MeshInstance3D:
         node.material_override = foliage_material if str(node.name).begins_with("StaticFoliage") else terrain_material
+        if str(node.name).begins_with("StaticFoliage"):
+            node.visible=false
     for child in node.get_children():
         _bind_river(child)
 
+func _bind_groves(node: Node) -> void:
+    if node is MeshInstance3D:
+        node.material_override=foliage_material
+    for child in node.get_children():
+        _bind_groves(child)
+
+func _set_sample_origin(origin: Vector2) -> void:
+    # Immutable per match; recreation reads native birth again, never the camera.
+    for mat in [terrain_material,foliage_material]:
+        mat.set_shader_parameter("sample_origin",origin)
+        mat.set_shader_parameter("sample_enabled",true)
+    sample_bound=true
+    sample_origin=origin
+    print("LW_STONE_SAMPLE origin=",origin," radius=490x350 static=1")
+
 func _set_reference(enabled: bool) -> void:
     reference_190 = enabled
+    if is_instance_valid(groves):groves.visible=not enabled
+    for node in $Mainland.get_children():
+        if str(node.name).begins_with("StaticFoliage"):node.visible=enabled
     for mat in [terrain_material,foliage_material,particle_material,river_material]:
         mat.set_shader_parameter("reference_190",enabled)
     daylight.ambient_light_color = Color(0.78,0.87,0.90) if enabled else Color(0.87,0.94,1.0)
@@ -111,6 +160,34 @@ func _create_site() -> void:
     site_nodes.append(node)
     site_materials.append(material)
 
+func _particle_scale(world_width: float, pixels: Vector2) -> float:
+    if world_width <= 0 or pixels.x <= 0 or pixels.y <= 0:
+        return 0.75
+    # Match graphics.cpp body sizing after classic GameViewport's 2.2 fit.
+    # Use physical render pixels, not the 1560x720 canvas stretch coordinates.
+    var classic_width := minf(pixels.x,pixels.y*2.2)
+    var classic_body := maxf(2.25,classic_width/800.0*1.28+0.70)
+    var body := 2.72*0.45*(5.0/6.8)*pixels.x/world_width
+    return minf(0.75,classic_body/body)
+
+func _update_particle_scale(world_width: float) -> void:
+    var render_pixels := get_viewport().get_texture().get_size()
+    if render_pixels==particle_viewport_size and is_equal_approx(world_width,particle_camera_width):
+        return
+    # Android may render above the native screen resolution. The classic size
+    # limit is in display pixels, independent of supersampling/canvas stretch.
+    var display: PackedInt32Array=bridge.displaySize()
+    if display.size()!=2 or display[0]<=0 or display[1]<=0:
+        return
+    var pixels := Vector2(display[0],display[1])
+    particle_viewport_size=render_pixels
+    particle_camera_width=world_width
+    var scale_factor := _particle_scale(world_width,pixels)
+    if not is_equal_approx(scale_factor,particle_display_scale):
+        particle_display_scale=scale_factor
+        particle_material.set_shader_parameter("display_scale",scale_factor)
+        print("LW_PARTICLE_SIZE world_width=",world_width," pixels=",pixels," scale=",scale_factor)
+
 func _process(delta: float) -> void:
     if not is_instance_valid(bridge):
         return
@@ -119,6 +196,7 @@ func _process(delta: float) -> void:
     var bridge_us := Time.get_ticks_usec()
     if frame.size() < 16:
         particles.visible_instance_count = 0
+        gravity_node.visible=false
         return
     var count := int(frame[0])
     var sites := int(frame[3])
@@ -126,6 +204,16 @@ func _process(delta: float) -> void:
     if frame.size() != 16 + count * 16 + sites * 8 + int(frame[14])*10:
         push_error("Invalid native presentation frame")
         return
+    sample_probe_age+=delta
+    # Replay reuses this Godot scene. Poll immutable sceneInfo at most once/sec
+    # after binding, so a new birth is picked up without tracking a moving cursor.
+    if (not sample_bound or sample_probe_age>=1.0) and frame[1] >= 0.0 and count > 0:
+        sample_probe_age=0.0
+        var origin: PackedInt32Array=bridge.sampleOrigin()
+        if origin.size()==2:
+            var next_origin:=Vector2(origin[0],origin[1])
+            if not sample_bound or sample_origin!=next_origin:
+                _set_sample_origin(next_origin)
     # Reserved presentation header only; release hosts always leave this zero.
     if reference_190 != (frame[10] > 0.5):
         _set_reference(frame[10] > 0.5)
@@ -138,9 +226,13 @@ func _process(delta: float) -> void:
         transforms.resize(capacity*16)
         particles.buffer = transforms
     particles.visible_instance_count = count
+    gravity_node.visible=int(frame[8])!=0 and count>0
+    gravity_material.set_shader_parameter("affected_mask",int(frame[8]))
+    gravity_material.set_shader_parameter("pixel_world",frame[7]/maxf(1.0,get_viewport().get_visible_rect().size.y))
     var submitted_us := Time.get_ticks_usec()
     camera.position = Vector3(frame[4]+frame[6]*0.5,250,-frame[5]-frame[7]*0.5)
     camera.size = frame[7]
+    _update_particle_scale(frame[6])
     river_material.set_shader_parameter("game_time",frame[1])
     while site_nodes.size() < sites:
         _create_site()

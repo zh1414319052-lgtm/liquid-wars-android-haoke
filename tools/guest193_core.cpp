@@ -30,7 +30,7 @@ int main(int argc,char** argv){try{
   auto hash=simulationHash(*s);i.stock[1][1]++;check(hash!=simulationHash(*s),"inventory affects consistency hash");
   int clock=i.elapsed;step(*s,3);check(i.elapsed>clock,"frozen opponents do not stop game clock");
   if(s->expedition){auto snap=s->expedition->snapshot(*s,1);check(snap[0]==193&&snap[11+11]==0,"protocol and private stock");
-   check(snap.size()==size_t(11+s->teamCount*63+snap[7]*5+snap[8]*8),"snapshot exact structure");
+   check(snap.size()==size_t(11+s->teamCount*63+snap[7]*5+snap[8]*8+(snap[9]+snap[10])*4+7),"snapshot exact structure");
    i.grant(*s,1,Items::DOUBLE,0,0);check(s->players[1].score>1000,"classic growth in expedition");
    i.grant(*s,1,Items::RESET,0,0);check(i.rewindPending,"expedition rewind deferred outside loot iterator");i.begin(*s);
    check(s->expedition->clock==0&&i.stock[0][0]==0&&s->players[1].score==1000,"rewind resets authority consistently");

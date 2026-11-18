@@ -13,7 +13,7 @@ final class BattleEffects {
  void ring(Canvas c,float x,float y,float r,int color,float alpha,float stroke){p.setShader(null);p.setColor(color);p.setAlpha((int)(255*Math.max(0,Math.min(1,alpha))));p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(stroke*dp);c.drawCircle(x,y,Math.max(1,r),p);}
  void glow(Canvas c,float x,float y,float r,int color,float alpha){p.setStyle(Paint.Style.FILL);p.setAlpha(255);p.setShader(new RadialGradient(x,y,Math.max(1,r),new int[]{(color&0xffffff)|((int)(Math.min(1,alpha)*190)<<24),color&0xffffff},null,Shader.TileMode.CLAMP));c.drawCircle(x,y,r,p);p.setShader(null);}
  void polygon(Canvas c,float x,float y,float r,int sides,float angle,int color,float alpha){path.reset();for(int i=0;i<=sides;i++){double a=angle+i*2*Math.PI/sides;float xx=x+(float)Math.cos(a)*r,yy=y+(float)Math.sin(a)*r;if(i==0)path.moveTo(xx,yy);else path.lineTo(xx,yy);}p.setShader(null);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.5f*dp);p.setColor(color);p.setAlpha((int)(255*alpha));c.drawPath(path,p);}
- void devour(Canvas c,int kind,float cx,float cy,float rx,float ry,int hp,int maxHp,int leader,boolean eating,int[] state){if(kind>=20)kind=kind==20?2:11;
+ void devour(Canvas c,int kind,float cx,float cy,float rx,float ry,int hp,int maxHp,int leader,boolean eating,int[] state){if(kind>=20)kind=kind==20?2:kind==21?11:5;
   float remaining=Math.max(0,Math.min(1,hp/(float)Math.max(1,maxHp))),damage=1-remaining;int color=leader>=0&&leader<6?TeamPalette.color(leader):COLOR[kind];
 
   if(damage>0){for(int j=0;j<5;j++){double a=j*2.399+kind*.7;float xx=cx+(float)Math.cos(a)*rx*.72f,yy=cy+(float)Math.sin(a)*ry*.72f;line(c,color,.28f+damage*.3f,.7f,xx,yy,xx+(float)Math.cos(a)*damage*3*dp,yy+(float)Math.sin(a)*damage*3*dp);}}

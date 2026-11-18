@@ -46,14 +46,18 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
     private volatile boolean running;
     private int itemEpoch;
     private int aiStartDelay=6;
-    private int gameStep = 0;
-    private int[] clientLags = new int[6];
+    private volatile int gameStep = 0;
+    private final java.util.concurrent.atomic.AtomicIntegerArray clientSteps = new java.util.concurrent.atomic.AtomicIntegerArray(6);
+    private final java.util.concurrent.atomic.AtomicLongArray clientSeen = new java.util.concurrent.atomic.AtomicLongArray(6);
+    private final java.util.concurrent.atomic.AtomicLongArray clientProgress = new java.util.concurrent.atomic.AtomicLongArray(6);
+    private long statsAt,waitMillis;
+    private int statsStep,lastTimeDiff=-1;
     private PlayerHistory playerHistory = new PlayerHistory();
-    private int playerWithMissedStepsId = -1;
+    private volatile int playerWithMissedStepsId = -1;
     private int playerWithMissedStepsStep = 0;
     private short[][] xs = new short[6][5];
     private short[][] ys = new short[6][5];
-    private boolean[] ready = new boolean[6];
+    private final java.util.concurrent.atomic.AtomicIntegerArray ready = new java.util.concurrent.atomic.AtomicIntegerArray(6);
     private Context context;
     private volatile boolean gameFinished;
     private volatile boolean lostGame;
@@ -78,15 +82,13 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         getWindow().addFlags(fullscreen | keepOn);
 
         setContentView(R.layout.game);
-        if(com.xenris.liquidwarsos.online.OnlineSession.active!=null)com.xenris.liquidwarsos.online.OnlineSession.active.attach(this);
         com.xenris.liquidwarsos.GameWindow.apply(this);
         myGLSurfaceView = (MyGLSurfaceView)findViewById(R.id.mySurfaceView);
         myGLSurfaceView.setSurfaceCallbacks(this);
 
         createReadyList();
 
-        for(int i = 0; i < clientLags.length; i++)
-            clientLags[i] = 0;
+        for(int i = 0; i < 6; i++)clientSteps.set(i,0);
 
         NativeInterface.init(getAssets());
         NativeInterface.createGame(StaticBits.team, StaticBits.map, StaticBits.seed, StaticBits.dotsPerTeam);
@@ -150,7 +152,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
             synchronized (xs) {
                 models.beforeInputs(aiController,xs,ys);
                 if(!frozen&&!com.xenris.liquidwarsos.MatchIntro.warming(gameStep))orders.apply(xs,ys);
-                playerHistory.savePlayerPositions(xs, ys);
+                if(!frozen)playerHistory.savePlayerPositions(xs, ys);
             }
             if(!frozen) {
                 boolean warming=com.xenris.liquidwarsos.MatchIntro.warming(gameStep);
@@ -160,7 +162,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
                 if(!warming){
                 final int timeDiff = NativeInterface.playTimeMillis()/1000;
                 if(!gameFinished) {
-                    StaticBits.server.sendToAll(StaticBits.TIME_DIFF, timeDiff);
+                    if(timeDiff!=lastTimeDiff){StaticBits.server.sendToAll(StaticBits.TIME_DIFF,timeDiff);lastTimeDiff=timeDiff;}
                     NativeInterface.setTimeSidebar((float)timeDiff/(float)StaticBits.timeLimit);
                 }
                 checkTimeout(timeDiff);
@@ -217,6 +219,12 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
 
     private void checkForWinner() {
         if (gameFinished) return;
+        if (NativeInterface.totalParticles() == 0) {
+            gameFinished = true;
+            showResult(com.xenris.liquidwarsos.BattleText.t("全场粒子已消失 · 平局", "All particles lost · Draw"), false);
+            return;
+        }
+        if (NativeInterface.blackHoleActive()) return;
         for (int i = 0; i < 6; i++) {
             if (com.xenris.liquidwarsos.OperationMode.wins(i)) {
                 gameFinished = true;
@@ -268,7 +276,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
 
         int countdown = 10;
         while(running) {
-            if(ready[0] && ready[1] && ready[2] && ready[3] && ready[4] && ready[5])
+            if(ready.get(0)==1 && ready.get(1)==1 && ready.get(2)==1 && ready.get(3)==1 && ready.get(4)==1 && ready.get(5)==1)
                 break;
             if(countdown-- < 0) {
                 StaticBits.server.sendToAll(StaticBits.CLIENT_READY_QUERY, 0);
@@ -281,9 +289,9 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
     private void createReadyList() {
         for(int i = 0; i < 6; i++) {
             if((StaticBits.teams[i] == StaticBits.AI_PLAYER) || (StaticBits.teams[i] == 0))
-                ready[i] = true;
+                ready.set(i,1);
             else
-                ready[i] = false;
+                ready.set(i,0);
         }
 
     }
@@ -303,30 +311,37 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
             return;
         data[0] = StaticBits.STEP_GAME;
         data[1] = StaticBits.FAST_STEP;
-        for(int i = playerWithMissedStepsStep; i <= gameStep; i++) {
-            data[2] = i;
-            playerHistory.serialiseHistoricalPlayerState(gameStep - i, data, 3);
-            StaticBits.server.sendToOne(playerWithMissedStepsId, data.length, data);
+        int peer=playerWithMissedStepsId,first=playerWithMissedStepsStep;
+        int last=gameStep-1;
+        if(first<0||first>last||last-first>=playerHistory.MAX_HISTORY){
+            StaticBits.server.disconnectPeer(peer);playerWithMissedStepsId=-1;return;
+        }
+        for(int i=first;i<=last;i++){
+            data[2]=i;
+            playerHistory.serialiseHistoricalPlayerState(last-i,data,3);
+            StaticBits.server.sendToOne(peer,data.length,data);
         }
         playerWithMissedStepsId = -1;
     }
 
     private void waitForSlowClients() {
-        if(playerWithMissedStepsId != -1)
-            return;
-        int biggestIndex = 0;
-        int biggestValue = 0;
-        for(int i = 0; i < 6; i++) {
-            if(clientLags[i] > biggestValue) {
-                biggestIndex = i;
-                biggestValue = clientLags[i];
+        long now=android.os.SystemClock.elapsedRealtime();
+        int window=com.xenris.liquidwarsos.net.ClassicStepBuffer.hostWindow(0);
+        int worst=0;
+        for(int p=0;p<6;p++){
+            int id=StaticBits.teams[p];if(id<=0)continue;
+            long seen=clientSeen.get(p);if(seen==0)continue;
+            int lag=Math.max(0,gameStep-clientSteps.get(p));worst=Math.max(worst,lag);
+            if(com.xenris.liquidwarsos.net.ClassicStepBuffer.shouldDisconnect(lag,now-seen,now-clientProgress.get(p))){
+                android.util.Log.w("LWLanPerf","Disconnect unresponsive peer team="+p+" lag="+lag);
+                StaticBits.server.disconnectPeer(id);clientSeen.set(p,0);
             }
         }
-        biggestValue = biggestValue*biggestValue*biggestValue;
-        for(int i = 0; i < biggestValue; i++) {
-            try { Thread.sleep(1); } catch (InterruptedException ie) { }
-            if(!running || clientLags[biggestIndex] < 4)
-                break;
+        int delay=com.xenris.liquidwarsos.net.ClassicStepBuffer.hostDelayMs(worst,window);
+        if(delay>0&&running){android.os.SystemClock.sleep(delay);waitMillis+=delay;}
+        if(now-statsAt>=5000){
+            if(statsAt!=0)android.util.Log.i("LWLanPerf","host steps="+(gameStep-statsStep)+" wallMs="+(now-statsAt)+" waitMs="+waitMillis+" lag="+worst+" window="+window+" simMs="+NativeInterface.playTimeMillis());
+            statsAt=now;statsStep=gameStep;waitMillis=0;
         }
     }
 
@@ -400,6 +415,7 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
 
     @Override
     public void onClientMessageReceived(int id, int argc, int[] args) {
+        if(args.length<2)return;
         if(args[0] == StaticBits.RESEND_STEPS) {
             if(playerWithMissedStepsId == -1)
                 noteMissedSteps(id, args[1]);
@@ -415,14 +431,14 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         } else if(args[0] == StaticBits.CLIENT_CURRENT_GAMESTEP) {
             final int p = clientIdToPlayerNumber(id);
             final int clientGameStep = args[1];
-            clientLags[p] = gameStep - clientGameStep;
+            if(p>=0&&p<6&&clientGameStep>=-1&&clientGameStep<=gameStep){long now=android.os.SystemClock.elapsedRealtime();if(clientSeen.get(p)==0||clientGameStep>clientSteps.get(p))clientProgress.set(p,now);clientSteps.set(p,clientGameStep);clientSeen.set(p,now);}
         } else if(args[0] == StaticBits.CLIENT_READY) {
             final int p = clientIdToPlayerNumber(id);
-            ready[p] = true;
+            if(p>=0&&p<6)ready.set(p,1);
         } else if(args[0] == StaticBits.CLIENT_EXIT) {
             final int p = clientIdToPlayerNumber(id);
             if((p >= 0) && (p < 6))
-                clientLags[p] = 0;
+                clientSeen.set(p,0);
         }
     }
 
@@ -434,9 +450,9 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
     public void onClientDisconnected(int id) {
         final int p = clientIdToPlayerNumber(id);
         if((p >= 0) && (p < 6))
-            clientLags[p] = 0;
+            clientSeen.set(p,0);
         StaticBits.multiplayerGameSetupActivity.onClientDisconnected(id);
-        if (p >= 0 && p < ready.length) ready[p] = true;
+        if (p >= 0 && p < ready.length()) ready.set(p,1);
     }
 
     private void noteMissedSteps(int id, int step) {

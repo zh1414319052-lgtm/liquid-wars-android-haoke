@@ -1,0 +1,24 @@
+<resources>
+    <item type="id" name="menu_single"/><item type="id" name="menu_large"/>
+    <item type="id" name="menu_spectate"/><item type="id" name="menu_wifi"/>
+    <item type="id" name="menu_bluetooth"/><item type="id" name="menu_notes"/>
+    <item type="id" name="menu_help"/><item type="id" name="notes_close"/>
+    <string name="menu_choose_mode">Choose a mode</string>
+    <string name="menu_classic_desc">Classic particle battles</string>
+    <string name="menu_garden_title">3D mode</string>
+    <string name="menu_garden_desc">Still being improved</string>
+    <string name="menu_large_desc">A larger battlefield</string>
+    <string name="menu_spectate_desc">Watch AI armies compete</string>
+    <string name="menu_local_version">Local play · %1$s</string>
+    <string name="notes_entry">What’s new</string>
+    <string name="notes_title">What’s new · %1$s</string>
+    <string name="notes_close">Close</string>
+    <string name="notes_first_only">Shown once for this version. Reopen from “What’s new”.</string>
+    <string name="notes_changes">This update</string>
+    <string name="notes_changes_body">• A redesigned, aligned main menu with grouped game modes.\n• Support the game from the menu; contributions support development and a possible future server budget. Public online play is currently unavailable.\n• Particle combat sounds are removed. Black hole and item sounds remain.</string>
+    <string name="notes_tips">Item tips · classic and 3D</string>
+    <string name="notes_freeze">Freeze — tap to freeze every enemy for 10 seconds. No target selection needed.</string>
+    <string name="notes_cleanse">Cleanse — works even while frozen. Immediately unfreezes your army and removes black hole attraction.</string>
+    <string name="notes_blackhole">Black hole — appears at the map center for 10 seconds and attracts everyone, including you. Nearby units are pulled faster; obstacles still block them. Use Cleanse to escape the pull.</string>
+    <string name="notes_stock">Each active item stacks up to 10. Each use consumes one. Collect them before you need them.</string>
+</resources>

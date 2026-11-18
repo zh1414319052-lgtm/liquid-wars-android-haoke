@@ -11,4 +11,5 @@
     <string name="lan_invalid_ip">請輸入有效的 IPv4 地址，例如 192.168.1.10</string>
     <string name="lan_host_failed">房間未能開啟，請返回後重新建立。</string>
     <string name="lan_host_status">房間：%1$s · %2$d/6 人\n同 Wi-Fi 的其他手機可點房間加入。備用手動 IP：%3$s</string>
+    <string name="lan_ip_outside_network">請輸入同一區域網路內的 IP 位址。</string>
 </resources>

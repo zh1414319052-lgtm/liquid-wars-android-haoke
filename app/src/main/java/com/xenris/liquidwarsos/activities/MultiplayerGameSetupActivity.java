@@ -68,7 +68,6 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
     private boolean roomVisible;
     private volatile boolean startingMatch;
     private boolean bluetoothRoom;
-    private com.xenris.liquidwarsos.online.OnlineSession online;
     private boolean offerVisibility;
     private Server roomServer;
     private static final int VISIBLE_REQUEST = 61, VISIBLE_PERMISSION = 62;
@@ -82,19 +81,13 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.multi_game_setup);
         StaticBits.init();
-        if(getIntent().getBooleanExtra("online",false))StaticBits.operationsMode=getIntent().getIntExtra("onlineMode",0);
         refreshMapImage();
         initSpinners();
         initButtons();
         com.xenris.liquidwarsos.OperationMode.bind(this,true,()->{if(roomServer!=null)roomServer.sendToAll(StaticBits.SET_OPERATIONS_MODE,StaticBits.operationsMode);});
         com.xenris.liquidwarsos.ui.DifficultyPicker.bind(this, true, this::difficultyChanged);
         bluetoothRoom = getIntent().getBooleanExtra(BluetoothTransport.EXTRA_MODE, false);
-        if(getIntent().getBooleanExtra("online",false)) {
-            online=com.xenris.liquidwarsos.online.OnlineSession.active;
-            if(online==null||!online.host){finish();return;}
-            roomServer=new Server(this,online.relay.listener());
-            online.attach(this);
-        } else if (bluetoothRoom) {
+        if (bluetoothRoom) {
             if (!BluetoothAccess.has(this, BluetoothPermissions.Action.HOST)) {
                 toast(getString(R.string.bt_permission_denied), Toast.LENGTH_LONG);
                 finish();
@@ -121,7 +114,6 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
         difficultyChanged();
         roomVisible = true;
         startingMatch = false;
-        if(online!=null)online.ended();
         StaticBits.newSeed();
         if(StaticBits.gameWasDisconnected) {
             if(StaticBits.client != null)
@@ -151,7 +143,7 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
     private void updateRoomAdvertisement() {
         if (isFinishing() || isDestroyed() || StaticBits.multiplayerGameSetupActivity != this) return;
         findViewById(R.id.start_button).setEnabled(!startingMatch && roomReady());
-        if (online==null && !bluetoothRoom && roomVisible && !startingMatch && roomServer != null
+        if (!bluetoothRoom && roomVisible && !startingMatch && roomServer != null
                 && roomServer.isAccepting() && roomServer.connectedClientCount() < roomServer.clientCapacity())
             ServerFinder.share(context, StaticBits.PORT_NUMBER + 1, roomName());
         else ServerFinder.stopSharing();
@@ -201,7 +193,6 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
     public void onDestroy() {
         super.onDestroy();
         if (roomServer != null) roomServer.destroy();
-        if(online!=null)online.close();
         ServerFinder.stopSharing();
     }
 
@@ -274,14 +265,6 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
             return;
         }
         startingMatch = true;
-        if(online!=null){
-            updateRoomAdvertisement();
-            new Thread(()->{
-                try{online.beginBattle();runOnUiThread(()->{if(!isFinishing()&&!isDestroyed())beginMatch();});}
-                catch(Exception error){runOnUiThread(()->{startingMatch=false;updateRoomAdvertisement();toast(error.getMessage(),Toast.LENGTH_LONG);});}
-            },"Authorize online battle").start();
-            return;
-        }
         beginMatch();
     }
 
@@ -444,9 +427,7 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
                 String ip = NetInfo.getIPAddress(context);
                 if (isFinishing() || isDestroyed()) return;
                 int players = roomServer == null ? 1 : roomServer.connectedClientCount() + 1;
-                if(online!=null){
-                    tv.setText("公网房间 "+online.code+" · 真人 "+players+" / 电脑 "+(6-players)+"\n房主选择地图和规则后开始 · 长按表情按钮隐藏提示");
-                } else if (bluetoothRoom) {
+                if (bluetoothRoom) {
                     String deviceName = getString(R.string.bt_unknown_device);
                     try {
                         BluetoothAdapter adapter = BluetoothAccess.adapter(context);

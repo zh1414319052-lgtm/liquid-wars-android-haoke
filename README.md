@@ -1,27 +1,21 @@
 # 液态战争重制版 · Haoke Liquid Wars OS
 
-Android **1.94 / versionCode 64**，GPL-3.0-or-later。原发布包名与证书不变；Java/C++ 模拟、GLES经典场景、Godot 4.7.2三维远征。Android8+，四ABI。
+Android **2.12 / versionCode 85**，GPL-3.0-or-later。沿用正式包名和发布证书，Android 8.0+，支持 ARM64、ARM32、x86、x86_64。
 
-[软件下载详情](https://www.haoke.org/software/f2a585b84fbf5b85?platform=android) · [构建](BUILDING.md) · [来源与许可证](THIRD_PARTY.md)
+[下载详情](https://www.haoke.org/software/f2a585b84fbf5b85?platform=android) · [构建](BUILDING.md) · [许可](THIRD_PARTY.md) · [本版验证](docs/game/formal-2.12/RELEASE.md)
 
-本版整合已验收试玩：Godot十倍新大陆、默认远景400格、经典2D粒子、仅动态河流；游客直接匹配及可选邮箱登录；经典最多6席、远征2–10席，不足60秒电脑补齐；两种主动道具可积累至各10个，全体敌人冻结10秒，受冻仍可净化。保留自动道具、金币与装备、占点和分队。
+本版保留原版粒子核心和后续玩法，重新设计并对齐主菜单。每个新版本首次进入主菜单显示一次本地更新内容及道具技巧，可立即关闭、从底栏主动重看。新增主菜单「支持游戏」，自愿赞赏用于继续开发维护和未来服务器预算；移除粒子互相吞噬音效，黑洞声音及其他音效保留。
 
-紧凑半透明HUD，大地图/3D相同按钮布局及可展开小地图；3D整轮道具吃完才刷新下一轮，金币单独刷新。道具与金币使用真实接触吞噬进度，最快约2.1秒，状态驱动吞噬碎粒、冻结、净化与产兵反馈。默认跟随及用户选择会保存。
+经典、大地图与 Godot 3D 模式保留；3D 仍在优化中。点击、路线、长按跟随、松手续行、分队、摇杆指挥点、AI、据点、金币装备保持。冻结所有敌方 10 秒；净化在被冻时可用，并可解除黑洞吸引。黑洞在地图中心持续 10 秒，影响自己，障碍阻挡不变。主动道具各最多 10 个。
 
-对应源码公开不等于新安装包已经上传网盘。**站长自行上传APK；客户端更新通知本次暂不发布**，原稳定更新feed保持不变。源码和素材由此仓库及v1.94的配套资源附件组成，不含管理员凭据、签名私钥或玩家数据。
+**公网账号与公网匹配已移除**；经典模式保留 Wi-Fi 局域网和蓝牙，3D 使用本地 AI。以后是否开放公网功能及时间以实际公告为准。
 
-公网服务 cleanbizai.com负责账号和匹配中继；软件详情/下载与签名更新在haoke.org。房主模拟、服务端中继；没有房主迁移、战斗断线续局或中途加入。游戏交流群1136036532。
+安装包由作者上传至原网盘入口。**2.12 客户端更新通知暂未发布，等待作者上传后另行授权**；源码公开不表示网盘文件已经更新。当前源码与 v2.12 的 resources.zip 共同提供构建材料和可编辑素材，在仓库根目录解压资源包恢复 art/。历史已停用的用户音轨不是构建依赖，未随公开资源包分发；本地维护原件保留且不重定许可。
 
-## Source and build
+## English
 
-Checkout tag v1.94 and extract the matching `liquidwars-1.94-resources.zip` at the repository root. It contains actual editable artwork; runtime data is in Git, not links or placeholders. Follow BUILDING.md. Signing keys remain outside source; self-builds cannot replace the publisher's installed app without the same signing identity.
+Version 2.12 (85) retains the original particle core and the existing classic, large-map and Godot 3D modes. The main menu now uses aligned cards. Local release notes and item tips appear once per installed version and can be dismissed or reopened. Optional support funds ongoing development and a possible future server budget. Particle-versus-particle swallowing audio is removed; black-hole and other audio remain.
 
-The Android release preserves the original gameplay and publisher identity. Guest matchmaking is available without email; classic supports up to six seats and expedition up to ten, with AI fill after 60 seconds. Signed client-update publication is deliberately deferred until the owner uploads the installer and requests notification. This repository distributes corresponding source, not the APK.
+Public matchmaking and accounts remain removed. Classic modes retain local Wi-Fi/Bluetooth; 3D uses local AI and remains under refinement. The official Android package and signing certificate are unchanged. Client update notification is deliberately withheld until the author uploads the APK and authorizes notification. See the release report for actual tests and untested devices.
 
-Validation scope and limitations are recorded in `docs/game/formal-1.94/RELEASE.md`. Simulator checks are not physical-device performance or ten-human-player validation.
-
-Original copyright (C) 2013 Henry Shepperd and contributors; [upstream](https://github.com/xenris/liquid-wars-android). Haoke modifications retain GPL-3.0-or-later and attribution. Noto Sans SC uses SIL OFL 1.1. Other dependencies and original art retain their included licenses.
-
-APK: 630769374 bytes; SHA-256 `8267e898e889034d02ae328a9aa3e6d01b0dc2812e3c483f65545a91ad564e4d`. Publisher certificate `4CA5A614020E7B450A504FBF2FEC33242AD071D25443604A3B8DAE7C0801AEDE`.
-
-Final validation: 43 JVM tests, four-ABI release/R8 + lint; MuMu2 signed-package update checks, classic battle, pause/resume, in-place upgrade and Godot six-seat local-AI scene passed. ARM device, ten human connections and prolonged load remain unverified.
+Copyright (C) 2013 Henry Shepperd and contributors; [upstream](https://github.com/xenris/liquid-wars-android). Original GPL notices remain. Noto Sans SC: SIL OFL 1.1. Godot: MIT. User-supplied materials retain their separate provenance.

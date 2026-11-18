@@ -6,7 +6,7 @@ public class Garden189CameraTest {
  @Test public void nearWideOverviewRetainWorldCoordinatesAndBounds(){
   for(float aspect:new float[]{16f/9,2340f/1080,4f/3}){
    WorldCamera c=new WorldCamera();c.viewport(aspect);c.world(3264,2048,1001,0,false,1600,1000);
-   assertFalse(c.detail);assertEquals(400,c.viewWidth,.01);
+   assertFalse(c.detail);assertEquals(560,c.viewWidth,.01);
    float close=c.viewWidth;c.touchTarget(1660,1030);
    for(int i=0;i<6;i++){
     c.detailToggle();assertTrue(c.following);assertFalse(c.overview);

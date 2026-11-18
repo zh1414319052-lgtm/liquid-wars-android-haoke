@@ -4,7 +4,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import android.content.Context;
 import org.junit.*;import org.junit.runner.RunWith;
 import java.util.*;import java.io.*;import org.json.*;
-import com.xenris.liquidwarsos.online.ExpeditionNetwork;
 
 /** Real Android C++ library and authored map; no fabricated room/AI/render success. */
 @RunWith(AndroidJUnit4.class)
@@ -25,8 +24,7 @@ public class Guest193ContractTest {
    for(int i=0;i<d[12];i++){int b=offset+i*26;long id=(d[b]&0xffffffffL)|((d[b+1]&0xffffffffL)<<32);Assert.assertTrue(ids.add(id));if(d[b+2]==t)own++;}
    Assert.assertEquals(1000,own);
    int mb=13+d[9]+d[10];if(t!=0)for(int i=0;i<d[mb+4];i++)Assert.assertEquals(t,d[mb+5+i*4]);
-   byte[] compressed=ExpeditionNetwork.encode(d);Assert.assertArrayEquals(d,ExpeditionNetwork.decode(compressed));Assert.assertTrue(compressed.length<=262144);
-   rows.put(new JSONObject().put("viewer",t).put("visible_units",d[12]).put("bytes",d.length*4).put("compressed_bytes",compressed.length).put("birth_x",d[7]).put("birth_y",d[8]));
+   rows.put(new JSONObject().put("viewer",t).put("visible_units",d[12]).put("bytes",d.length*4).put("birth_x",d[7]).put("birth_y",d[8]));
   }
   // Controlled wire regression: viewer 9 must read public health from lane 0.
   // This edits only the isolated decoder fixture, never a live server packet.

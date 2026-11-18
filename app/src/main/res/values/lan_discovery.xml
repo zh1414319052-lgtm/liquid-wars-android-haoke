@@ -9,6 +9,7 @@
     <string name="lan_rooms_found">%1$d room(s) found — tap to join</string>
     <string name="lan_room_address">%1$s · Tap to join</string>
     <string name="lan_invalid_ip">Enter a valid IPv4 address, such as 192.168.1.10</string>
+    <string name="lan_ip_outside_network">Enter an address on the same local network.</string>
     <string name="lan_host_failed">Could not open a room. Return and try creating it again.</string>
     <string name="lan_host_status">Room: %1$s · %2$d/6 players\nOther phones on this Wi-Fi can tap this room to join. Manual IP: %3$s</string>
 </resources>

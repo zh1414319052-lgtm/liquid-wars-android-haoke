@@ -41,7 +41,7 @@ package com.xenris.liquidwarsos;
 public final class TeamPalette {{
     private TeamPalette() {{}}
     private static final int[] COLORS={{{java_colors}}};
-    public static int color(int team) {{return COLORS[team>=0&&team<6?team:0];}}
+    public static int color(int team) {{if(GardenSession.expeditionSeats>0||GardenSession.active)return ExpeditionPalette.color(team);return COLORS[team>=0&&team<6?team:0];}}
 }}
 '''
     (ROOT/'app/src/main/java/com/xenris/liquidwarsos/TeamPalette.java').write_text(java,encoding='utf8')

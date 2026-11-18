@@ -28,9 +28,8 @@
         android:isGame="true"
         android:label="${appLabel}">
         <activity android:name=".activities.GodotGardenActivity" android:process=":garden3d" android:exported="false" android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|screenLayout|density|uiMode" android:theme="@style/Theme.LiqurdWars" />
-        <activity android:name=".activities.ExpeditionLobbyActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden" android:theme="@style/Theme.LiqurdWars" />
-        <activity android:name=".activities.OnlineLobbyActivity" android:exported="false" android:configChanges="orientation|keyboardHidden" android:screenOrientation="landscape" android:theme="@style/Theme.LiqurdWars" />
         <activity android:name=".activities.ModelSettingsActivity" android:exported="false" android:screenOrientation="landscape" android:theme="@style/Theme.LiqurdWars" />
+        <activity android:name=".activities.GameSupportActivity" android:exported="false" android:screenOrientation="landscape" android:theme="@style/Theme.LiqurdWars" />
 
         <activity
             android:name=".activities.MainMenuActivity"

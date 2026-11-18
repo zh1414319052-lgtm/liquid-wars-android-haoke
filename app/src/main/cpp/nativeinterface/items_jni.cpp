@@ -18,6 +18,15 @@ extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_itemSnapshot(J
 extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_totalParticles(JNIEnv*,jclass){
     std::lock_guard<std::mutex> guard(nativeStateMutex);return state?int(state->dots.size()):0;
 }
+extern "C" jboolean Java_com_xenris_liquidwarsos_NativeInterface_blackHoleActive(JNIEnv*,jclass){
+    std::lock_guard<std::mutex> guard(nativeStateMutex);return state&&state->items->blackHoleActive();
+}
+extern "C" jintArray Java_com_xenris_liquidwarsos_NativeInterface_audioSnapshot(JNIEnv* env,jclass,jint viewer,jboolean all){
+    std::vector<int> cached;if(garden3d::hudSnapshot(5,cached))return cached.empty()?nullptr:ints(env,cached);
+    std::lock_guard<std::mutex> guard(nativeStateMutex);
+    if(!state||viewer<0||viewer>=state->teamCount)return nullptr;
+    return ints(env,state->items->audioSnapshot(*state,viewer,all));
+}
 extern "C" jint Java_com_xenris_liquidwarsos_NativeInterface_terrainRevision(JNIEnv*,jclass){
     std::lock_guard<std::mutex> guard(nativeStateMutex);return state?state->map->revision():0;
 }

@@ -46,7 +46,10 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
     private MyGLSurfaceView myGLSurfaceView = null;
     private volatile boolean running;
     private int itemEpoch;
-    private int gameStep = -1;
+    private volatile int gameStep = -1;
+    private final com.xenris.liquidwarsos.net.ClassicStepBuffer inbox = new com.xenris.liquidwarsos.net.ClassicStepBuffer(StaticBits.STEP_GAME);
+    private long lastAck,lastStats;
+    private int statsStep;
     private short[] xs = new short[5];
     private short[] ys = new short[5];
     private Context context;
@@ -70,7 +73,6 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
         getWindow().addFlags(fullscreen | keepOn);
 
         setContentView(R.layout.game);
-        if(com.xenris.liquidwarsos.online.OnlineSession.active!=null)com.xenris.liquidwarsos.online.OnlineSession.active.attach(this);
         com.xenris.liquidwarsos.GameWindow.apply(this);
         myGLSurfaceView = (MyGLSurfaceView)findViewById(R.id.mySurfaceView);
         myGLSurfaceView.setSurfaceCallbacks(this);
@@ -86,9 +88,8 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
         intro.bind(StaticBits.team,false,starts);
         if(!java.util.Arrays.equals(StaticBits.alliances,com.xenris.liquidwarsos.AllianceRules.solo())){android.widget.TextView rules=findViewById(R.id.model_status);rules.setVisibility(android.view.View.VISIBLE);rules.setText(com.xenris.liquidwarsos.AllianceRules.label(StaticBits.alliances));}
 
-        StaticBits.client.setCallbacks(this);
-
         running = true;
+        StaticBits.client.setCallbacks(this);
         new Thread(this).start();
     }
 
@@ -125,13 +126,16 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
         lostGame = false;
         StaticBits.client.send(StaticBits.CLIENT_READY, 0);
         while(running) {
-            StaticBits.client.send(StaticBits.CLIENT_CURRENT_GAMESTEP, gameStep);
-            synchronized (nativeStateLock) {
-                checkForWinner();
-                checkIfLost();
+            long now=android.os.SystemClock.elapsedRealtime();
+            if(now-lastAck>=50){StaticBits.client.send(StaticBits.CLIENT_CURRENT_GAMESTEP,gameStep);lastAck=now;}
+            try{int[] message=inbox.poll(25);if(message!=null)applyServerMessage(message);}catch(InterruptedException e){Thread.currentThread().interrupt();running=false;}
+            synchronized(nativeStateLock){if(running){checkForWinner();checkIfLost();}}
+            if(now-lastStats>=5000){
+                if(lastStats!=0)android.util.Log.i("LWLanPerf","client steps="+(gameStep-statsStep)+" wallMs="+(now-lastStats)+" pending="+inbox.pendingSteps()+" simMs="+NativeInterface.playTimeMillis());
+                lastStats=now;statsStep=gameStep;
             }
-            try { Thread.sleep(50); } catch (InterruptedException ie) { }
         }
+        inbox.close();
         if (!StaticBits.gameWasDisconnected && StaticBits.client != null)
             StaticBits.client.send(StaticBits.CLIENT_EXIT, 0);
         runOnUiThread(() -> {
@@ -159,6 +163,12 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
 
     private void checkForWinner() {
         if (gameFinished) return;
+        if (NativeInterface.totalParticles() == 0) {
+            gameFinished = true;
+            showResult(com.xenris.liquidwarsos.BattleText.t("全场粒子已消失 · 平局", "All particles lost · Draw"), false);
+            return;
+        }
+        if (NativeInterface.blackHoleActive()) return;
         for (int i = 0; i < 6; i++) {
             if (com.xenris.liquidwarsos.OperationMode.wins(i)) {
                 gameFinished = true;
@@ -238,6 +248,15 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
 
     @Override
     public void onServerMessageReceived(int argc, int[] args) {
+        if(!running||args.length<2)return;
+        if(args[0]==StaticBits.STEP_GAME&&args.length!=63){StaticBits.gameWasDisconnected=true;running=false;ToastOnUiThread("战斗数据格式不兼容，请更新双方版本");return;}
+        if(!inbox.offer(args)){
+            StaticBits.gameWasDisconnected=true;running=false;
+            ToastOnUiThread("设备同步积压过多，请返回房间重新加入");
+        }
+    }
+
+    private void applyServerMessage(int[] args) {
         synchronized (nativeStateLock) {
             if (!running) return;
             if(args[0] == StaticBits.STEP_GAME) {
@@ -314,9 +333,10 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
     private void syncRewind(){int[] d=NativeInterface.itemSnapshot();if(d==null||d.length<209||d[146]==itemEpoch)return;itemEpoch=d[146];lostGame=false;short[] b=NativeInterface.initialPositions();synchronized(xs){java.util.Arrays.fill(xs,(short)-1);java.util.Arrays.fill(ys,(short)-1);xs[0]=b[StaticBits.team*2];ys[0]=b[StaticBits.team*2+1];}sendPlayerData();runOnUiThread(()->{com.xenris.liquidwarsos.ItemOverlay v=findViewById(R.id.item_overlay);if(v!=null)v.resetControl();if(dialog!=null){dialog.dismiss();dialog=null;}});}
 
     private void stepGame(int speed) {
+        int tickMicros=com.xenris.liquidwarsos.net.ClassicStepBuffer.tickMicros(StaticBits.GAME_SPEED,inbox.pendingSteps());
         if(com.xenris.liquidwarsos.MatchIntro.warming(gameStep+1)){
             intro.showMillis(com.xenris.liquidwarsos.MatchIntro.remaining(gameStep+1));
-            if(speed==StaticBits.REGULATED_STEP)for(int i=0;i<10;i++){long before=System.nanoTime();Util.regulateSpeed(before,StaticBits.GAME_SPEED);}
+            if(speed==StaticBits.REGULATED_STEP)for(int i=0;i<10;i++){long before=System.nanoTime();Util.regulateSpeed(before,tickMicros);}
             gameStep++;return;
         }
         intro.showMillis(0);
@@ -324,7 +344,7 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
             long previousTime = System.nanoTime();
             NativeInterface.stepDots();
             if(speed == StaticBits.REGULATED_STEP)
-                Util.regulateSpeed(previousTime, StaticBits.GAME_SPEED);
+                Util.regulateSpeed(previousTime, tickMicros);
         }
         gameStep++;
         syncRewind();

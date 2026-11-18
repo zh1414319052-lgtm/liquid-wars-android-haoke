@@ -39,7 +39,32 @@ std::vector<GLfloat> quadPositions, quadUVs;
 std::vector<GLubyte> quadColours;
 std::vector<GLushort> quadIndices;
 std::vector<GLubyte> quadTeams;
+std::vector<GLfloat> gravityLines;
+std::vector<GLubyte> gravityColours;
 size_t capacity = 0;
+
+// One batched short strand per visible affected particle. Never reveals hidden armies.
+void drawGravity(){
+    if(!state->items->blackHoleActive())return;
+    gravityLines.clear();gravityColours.clear();
+    gravityLines.reserve(state->dots.size()*4);gravityColours.reserve(state->dots.size()*8);
+    const float cx=state->map->width*.5f,cy=state->map->height*.5f;
+    const int age=state->items->elapsed-state->items->holeStart;
+    const float intensity=.65f+.35f*std::clamp((age-Items::BLACK_HOLE_WARNING_MS)/float(Items::BLACK_HOLE_RAMP_MS),0.f,1.f);
+    for(auto d:state->dots){
+        if(!state->items->pulling(d->team)||(!drawSpectator&&state->items->concealedFrom(*state,state->me,d->team)))continue;
+        float dx=cx-d->x,dy=cy-d->y,dist=std::sqrt(dx*dx+dy*dy);if(dist<.01f)continue;
+        float len=std::min(dist,2.2f+(uint32_t(d->visualId*2654435761u)%17)*.09f);
+        float a=intensity*(state->items->active(d->team,Items::INVISIBLE)?.45f:1.f);
+        gravityLines.insert(gravityLines.end(),{float(d->x),float(d->y),d->x+dx/dist*len,d->y+dy/dist*len});
+        gravityColours.insert(gravityColours.end(),{196,175,235,GLubyte(72*a),196,175,235,GLubyte(8*a)});
+    }
+    if(gravityLines.empty())return;
+    glDisable(GL_TEXTURE_2D);glEnableClientState(GL_VERTEX_ARRAY);glEnableClientState(GL_COLOR_ARRAY);
+    glLineWidth(1.f);glVertexPointer(2,GL_FLOAT,0,gravityLines.data());glColorPointer(4,GL_UNSIGNED_BYTE,0,gravityColours.data());
+    glDrawArrays(GL_LINES,0,GLsizei(gravityLines.size()/2));
+    glDisableClientState(GL_VERTEX_ARRAY);glDisableClientState(GL_COLOR_ARRAY);
+}
 
 void allocateBatch(size_t n) {
     if (capacity >= n) return;
@@ -186,6 +211,7 @@ void onDrawFrame() {
 
     glTranslatef(.5f, .5f, 0); // Particle center matches its authority pixel center.
 
+    drawGravity();
     drawParticles();
 
     const GLfloat line[] = { 0, 0, 0

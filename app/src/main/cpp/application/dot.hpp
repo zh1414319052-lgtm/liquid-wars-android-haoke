@@ -34,6 +34,7 @@ class Dot {
         unsigned char squad=0; // Stable tactical membership; captured units join main force.
         uint16_t expeditionDamage=0; // Fractional thousandths, new mode only.
         uint16_t expeditionSpeed=0; // Movement cadence, never simulation clock.
+        int16_t pullX=0,pullY=0; // Fractions of a cell, at 1/256 resolution.
         int freezeUntil=0,freezeImmuneUntil=0; // Local area effect, per real unit.
         Dot(unsigned short x, unsigned short y, unsigned char team);
         float getRed();

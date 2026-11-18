@@ -9,8 +9,9 @@ class State;class Dot;
 // New-mode rules live beside the original simulation, never in Godot/Java.
 class Expedition {
 public:
- enum Item {FREEZE,CLEANSE,ITEMS};
- static constexpr int COIN_KIND=2,AUTO_BASE=3;
+ enum Item {FREEZE,CLEANSE,BLACK_HOLE,ITEMS};
+ static constexpr int COIN_KIND=2,AUTO_BASE=3,BLACK_HOLE_LOOT=23;
+ static constexpr int activeSlotForLoot(int kind){return kind==BLACK_HOLE_LOOT?BLACK_HOLE:kind>=0&&kind<COIN_KIND?kind:-1;}
  enum Result {OK,EMPTY,COOLDOWN,INVALID,OUT_OF_RANGE,BLOCKED,NO_SPACE,NO_COINS,MAX_LEVEL,FINISHED,STALE};
  static constexpr int PROTOCOL=193,HOME_RADIUS=expedition_balance::HomeRadius,SIGHT=expedition_balance::SightRadius,MAX_LEVELS=3;
  struct Seat {
@@ -20,7 +21,7 @@ public:
 
   std::array<int,3> frozen{},immune{},devourUntil{},devourBudget{};
  };
- struct Loot {int id=0,kind=0,x=0,y=0,born=0,hp=1200,eater=-1;std::array<int,MAX_TEAMS> damage{};}; // 0 freeze,1 cleanse,2 coin,3..22 automatic
+ struct Loot {int id=0,kind=0,x=0,y=0,born=0,hp=1200,eater=-1;std::array<int,MAX_TEAMS> damage{};}; // 0 freeze,1 cleanse,2 coin,3..22 automatic,23 black hole
  struct Obstacle {int id=0,x=0,y=0,radius=5,hp=120,wardUntil=0,owner=-1;bool removed=false;};
  struct Zone {int owner=0,x=0,y=0,until=0;};
  struct Chill {int owner=0,x=0,y=0,at=0;};

@@ -15,3 +15,12 @@
 No private signing identity, credentials, player data or paid API service is required to build the source. Existing optional model-provider code is retained but is not used by the offline AI or this test campaign.
 
 1.90 QA使用Godot Engine 4.7.2，MIT许可，Android依赖固定为`org.godotengine:godot:4.7.2.stable`。引擎许可证、第三方版权列表和对应Android接口源码jar位于`third_party/godot-4.7.2/`；APK内含`assets/licenses/Godot-MIT.txt`。来源：https://github.com/godotengine/godot/tree/4.7.2-stable 。Godot的MIT许可不改变本项目原有GPL-3.0-or-later许可。此次未引入外部付费模型、贴图或字体；HUD继续使用已归档SIL OFL1.1的Noto Sans SC。
+
+
+## 1.95 QA ground material
+Aerial Grass Rock by Rob Tuytel / Poly Haven, CC0 1.0; commercial use and redistribution allowed. https://polyhaven.com/a/aerial_grass_rock and https://polyhaven.com/license . Source maps and provenance: art/source/surface-1.95; runtime albedo and OpenGL normal map: app/godot/assets/meadow-*.jpg.
+
+## 2.05–2.07 黑洞及音效
+黑洞像素源稿、标识、选稿及生成脚本在 `art/source/black-hole-2.05`。原创「暗涡」与其他音效设计在 `art/source/audio-2.06`。2.07吞噬音轨由用户提供MP4提取，原件、转换方式和来源说明在 `art/source/audio-2.07`；第三方权利来源未独立核实，不宣称该音频本身为GPL授权。本轮仅向提供者交付本地安装包与对应源码，未公开上传。
+
+2.12：用户音轨已从运行资源移除，不进入APK。历史audio-2.07原件仅本地维护，不随本版公开资源包分发，也不是构建依赖。主菜单设计及本地首次说明沿用Noto Sans SC（SIL OFL 1.1）；赞赏码是作者提供的公开游戏支持入口，保留其原始归属，不将码内头像重新声明为GPL素材。

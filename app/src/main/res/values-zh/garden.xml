@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="garden_trial">3D 远征 · 十倍新大陆</string>
+    <string name="garden_trial">3D模式，仍在优化中</string>
     <string name="garden_unavailable">3D 场景未能载入，可以继续使用原来的 2D 模式。</string>
 </resources>
