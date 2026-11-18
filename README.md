@@ -12,7 +12,7 @@ Android **2.13 / versionCode 86**，GPL-3.0-or-later。沿用正式包名和发�
 
 正式APK：674027379字节；SHA-256 `0120d6ab83b90d97c23ebc2d9a0367f9f3dd6814c68df9d0938d48af709e906f`。包名 `com.xenris.liquidwarsos.haoke`，证书SHA-256 `4ca5a614020e7b450a504fbf2fec33242ad071d25443604a3b8dae7c0801aede`。
 
-**直接覆盖安装原正式版，不要先卸载或清除数据。** 独立QA包与正式版数据隔离，不会自动迁移。清除数据、卸载或换设备不属于覆盖保留范围。安装包由作者上传原网盘入口，**2.13客户端更新通知未发布，等待作者上传后另行授权**。源码公开不表示网盘文件已更新。
+**直接覆盖安装原正式版，不要先卸载或清除数据。** 独立QA包与正式版数据隔离，不会自动迁移。清除数据、卸载或换设备不属于覆盖保留范围。作者已确认将2.13安装包上传原网盘入口，**2.13客户端更新通知于2026-11-18正式发布**（stable revision3，code86）。原下载入口保留；自动化流程未下载核验远端网盘文件。
 
 本版68项release JVM测试、R8、lintVital和成品检查通过。MuMu1完成2.12→2.13正式覆盖升级；已有偏好文件哈希一致。再保存非默认摇杆大小/灵敏度/位置，同版本覆盖和冷启动后保持一致，并在3D界面看到相同值。真实2D/3D启动和设置入口通过。上一阶段3项QA设备交互测试另有记录；本轮未做实体手机或双设备局域网/蓝牙验收。
 
@@ -24,6 +24,6 @@ Version 2.13 (86) keeps the original simulation, visual assets, camera and parti
 
 The official identity and certificate remain unchanged. Install over the existing official app without uninstalling or clearing data. Separate QA installations do not share settings. Release build, R8, lintVital, 68 JVM tests and MuMu1 upgrade checks passed; a customized pad layout survived reinstallation and cold start. No physical-device or Wi-Fi/Bluetooth peer testing was performed in this release pass. See the release evidence for limits.
 
-Public matchmaking and accounts remain removed. Classic local Wi-Fi/Bluetooth and 3D local AI remain. Client notification is withheld until the author uploads the APK and explicitly requests notification. The existing cloud-drive destinations are unchanged.
+Public matchmaking and accounts remain removed. Classic local Wi-Fi/Bluetooth and 3D local AI remain. After the author confirmed the APK upload and authorized publication, the 2.13 client notification was published on 2026-11-18 (stable revision 3, code 86). Existing cloud-drive destinations are unchanged; the remote APK was not downloaded or verified by automation.
 
 Copyright (C) 2013 Henry Shepperd and contributors; [upstream](https://github.com/xenris/liquid-wars-android). Original GPL notices remain. Noto Sans SC: SIL OFL 1.1. Godot: MIT. User-supplied materials retain their separate provenance.
