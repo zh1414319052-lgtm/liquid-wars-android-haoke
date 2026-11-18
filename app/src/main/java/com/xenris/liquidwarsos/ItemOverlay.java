@@ -15,6 +15,7 @@ public final class ItemOverlay extends View {
  private final float dp;private final boolean zh;private final Typeface font;
  private int[] data;private boolean attached,guideTouch,frameTouch,audioTouch,aiming,cardTouch,mapTouch;private int lastNonce=-1;
  private float left,top,sw,sh;
+ final JoystickCursor followCursor=new JoystickCursor();
  private boolean targetReady;private float targetX,targetY;private int observedEpoch=-1;
  private final short[] visibleX=empty(),visibleY=empty();
  private int[] minimap;private long lastSight;private boolean miniTeleport;private int miniNonce,miniPointer=-1,lastRejectSerial=-1;private MiniMapLayout gestureMini;
@@ -57,8 +58,23 @@ public final class ItemOverlay extends View {
  private void send(short[] x,short[] y){MyGLSurfaceView v=surface();if(v!=null)v.controls(x,y);}
  private short[] empty(){short[] x=new short[5];Arrays.fill(x,(short)-1);return x;}
  public void releasePointerGesture(){MyGLSurfaceView v=surface();if(v!=null)v.camera.endTouch();}
- public void resetControl(){releasePointerGesture();surface().camera.clearTarget();lastSight=0;aiming=false;miniTouch=false;miniPointer=-1;targetReady=false;Arrays.fill(visibleX,(short)-1);Arrays.fill(visibleY,(short)-1);invalidate();}
- public void noteTargets(short[] x,short[] y){if(x[0]<0||y[0]<0){resetControl();return;}targetReady=true;targetX=x[0];targetY=y[0];System.arraycopy(x,0,visibleX,0,5);System.arraycopy(y,0,visibleY,0,5);surface().camera.touchTarget(targetX,targetY);invalidate();}
+ public void resetControl(){followCursor.clear();releasePointerGesture();surface().camera.clearTarget();lastSight=0;aiming=false;miniTouch=false;miniPointer=-1;targetReady=false;Arrays.fill(visibleX,(short)-1);Arrays.fill(visibleY,(short)-1);invalidate();}
+ public void noteTargets(short[] x,short[] y){if(x[0]<0||y[0]<0){resetControl();return;}followCursor.bounds(surface().camera.width,surface().camera.height);followCursor.target(x[0],y[0]);targetReady=true;targetX=x[0];targetY=y[0];System.arraycopy(x,0,visibleX,0,5);System.arraycopy(y,0,visibleY,0,5);surface().camera.touchTarget(targetX,targetY);invalidate();}
+ void keepPrimaryTarget(){Arrays.fill(visibleX,1,5,(short)-1);Arrays.fill(visibleY,1,5,(short)-1);}
+ void noteJoystickTarget(int x,int y){
+  // Shared with noteTargets; do not round the cursor's sub-cell accumulator here.
+  keepPrimaryTarget();visibleX[0]=(short)x;visibleY[0]=(short)y;targetReady=true;targetX=x;targetY=y;
+  surface().camera.touchTarget(x,y);invalidate();
+ }
+ void drawFollowTargets(Canvas c){
+  if(spectator())return;MyGLSurfaceView v=surface();
+  c.save();c.clipRect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
+  for(int k=0;k<5;k++)if(visibleX[k]>=0&&visibleY[k]>=0){
+   float x=v.getLeft()+v.camera.screenX(visibleX[k],v.getWidth()),y=v.getTop()+v.camera.screenY(visibleY[k],v.getHeight());
+   p.setShader(null);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(.9f*dp);p.setColor(0x8097caba);c.drawCircle(x,y,3.5f*dp,p);
+   p.setStyle(Paint.Style.FILL);p.setColor((TeamPalette.color(StaticBits.team)&0xffffff)|0x70000000);c.drawCircle(x,y,1.1f*dp,p);
+  }c.restore();
+ }
  @Override public void onWindowFocusChanged(boolean focus){super.onWindowFocusChanged(focus);if(!focus)releasePointerGesture();}
  private void followArmy(){
   if(data==null||data.length<209)return;int at=147+StaticBits.team*10;
@@ -74,7 +90,7 @@ public final class ItemOverlay extends View {
  @Override protected void onDraw(Canvas c){super.onDraw(c);if(GardenSession.expeditionSeats>0)return;if(data==null||data.length<209)return;View surface=surface();if(surface==null)return;left=surface.getLeft();top=surface.getTop();sw=surface.getWidth();sh=surface.getHeight();View intro=((View)getParent()).findViewById(R.id.match_intro);if(intro!=null&&intro.getVisibility()==VISIBLE)return;
   WorldCamera cam=surface().camera;fx.viewer=StaticBits.team;fx.all=spectator();fx.worldWidth=cam.width;fx.worldHeight=cam.height;fx.space(left-cam.left/cam.viewWidth*sw,top+(cam.bottom+cam.viewHeight-cam.height)/cam.viewHeight*sh,sw*cam.width/cam.viewWidth,sh*cam.height/cam.viewHeight,dp,visualTime);fx.viewportLeft=left;fx.viewportTop=top;fx.viewportWidth=sw;fx.viewportHeight=sh;c.save();c.clipRect(left,top,left+sw,top+sh);fx.draw(c,data);blackHole.draw(c,cam,left,top,sw,sh,dp,visualTime,slots.holeStart,slots.holeUntil,slots.holeAbsorbed,slots.lastHoleAbsorb);
   for(int k=0;k<com.xenris.liquidwarsos.cloud.SnapshotItems.slots(data);k++){int at=com.xenris.liquidwarsos.cloud.SnapshotItems.offset(data,k),kind=data[at];if(kind<0||kind>=icons.length)continue;float x=xx(data[at+1]),y=yy(data[at+2]);int hp=com.xenris.liquidwarsos.cloud.SnapshotItems.hp(data,k),maxHp=com.xenris.liquidwarsos.cloud.SnapshotItems.maxHp(data,k),body=pickupRadius(hp);float rx=body*sw/cam.viewWidth,ry=body*sh/cam.viewHeight,radius=Math.min(rx,ry);if(x<left-radius||x>left+sw+radius||y<top-radius||y>top+sh+radius)continue;if(kind!=BlackHoleVisual.CLASSIC_PICKUP)fx.pickup(c,kind,x,y,radius);icon(c,kind,x,y,Math.max(dp,radius-dp));fx.devour(c,kind,x,y,rx,ry,hp,maxHp,com.xenris.liquidwarsos.cloud.SnapshotItems.leader(data,k),com.xenris.liquidwarsos.cloud.SnapshotItems.devouring(data,k),data);drawHealth(c,k,x,y-radius-9*dp);}
-  if(!spectator()){for(int k=0;k<5;k++)if(visibleX[k]>=0&&visibleY[k]>=0){float x=xx(visibleX[k]),y=yy(visibleY[k]);p.setShader(null);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(.9f*dp);p.setColor(0x8097caba);c.drawCircle(x,y,3.5f*dp,p);p.setStyle(Paint.Style.FILL);p.setColor((TeamPalette.color(StaticBits.team)&0xffffff)|0x70000000);c.drawCircle(x,y,1.1f*dp,p);}}
+
   c.restore();if(!cam.large()){card(c,8*dp,8*dp,138*dp,27*dp);text(c,(surface().garden3D()?"3D · "+data[13+StaticBits.team]+(zh?"颗":" units"):(com.xenris.liquidwarsos.cloud.SnapshotItems.count(data)>0?(zh?"本波还剩 ":"Items left ")+com.xenris.liquidwarsos.cloud.SnapshotItems.count(data)+(zh?"件":""):(data[2]==0?(zh?"首波道具 ":"First items ")+Math.max(0,(data[1]-data[0]+999)/1000)+"s":(zh?"下一波即将出现":"Next wave ready")))+" · "+data[3]),77*dp,26*dp,10,0xffdce6e1);card(c,getWidth()-76*dp,8*dp,68*dp,27*dp);text(c,surface().garden3D()?(zh?"玩法说明":"PLAY GUIDE"):(zh?"道具图鉴":"ITEM GUIDE"),getWidth()-42*dp,26*dp,10,0xffede2c7);
   }
   if(!cam.large()&&teleportReady())drawNavigation(c,cam);

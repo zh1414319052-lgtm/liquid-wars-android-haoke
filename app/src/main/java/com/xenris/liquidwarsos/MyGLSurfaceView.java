@@ -100,7 +100,7 @@ public class MyGLSurfaceView extends android.widget.FrameLayout {
     private void updatePacer(){boolean active=attached&&resumed&&surfaceReady&&hasWindowFocus()&&getWindowVisibility()==VISIBLE;if(active)pacer.start();else pacer.stop();if(audio!=null)audio.foreground(active);}
     @Override protected void onWindowVisibilityChanged(int visibility){super.onWindowVisibilityChanged(visibility);if(pacer!=null)updatePacer();}
     public void onResume(){if(garden3D())NativeInterface.gardenPauseVisual(false);if(classic!=null)classic.onResume();resumed=true;worldBound=false;framePending.set(false);refreshRate();updatePacer();}
-    public void onPause(){resumed=false;audio.foreground(false);camera.endTouch();camera.resetSmoothing();pacer.stop();if(garden3D())NativeInterface.gardenPauseVisual(true);DisplayFrameRate.release(this);if(classic!=null)classic.onPause();framePending.set(false);}
+    public void onPause(){if(getParent() instanceof android.view.View){JoystickOverlay stick=((android.view.View)getParent()).findViewById(R.id.joystick_overlay);if(stick!=null)stick.cancelForModal();}resumed=false;audio.foreground(false);camera.endTouch();camera.resetSmoothing();pacer.stop();if(garden3D())NativeInterface.gardenPauseVisual(true);DisplayFrameRate.release(this);if(classic!=null)classic.onPause();framePending.set(false);}
     @Override protected void onAttachedToWindow(){super.onAttachedToWindow();attached=true;((DisplayManager)getContext().getSystemService(Context.DISPLAY_SERVICE)).registerDisplayListener(displayListener,new Handler(Looper.getMainLooper()));updatePacer();}
     @Override protected void onDetachedFromWindow(){attached=false;pacer.stop();audio.release();((DisplayManager)getContext().getSystemService(Context.DISPLAY_SERVICE)).unregisterDisplayListener(displayListener);super.onDetachedFromWindow();}
     @Override
@@ -115,6 +115,8 @@ public class MyGLSurfaceView extends android.widget.FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        TacticalOverlay tactical=getParent() instanceof android.view.View?((android.view.View)getParent()).findViewById(R.id.tactical_overlay):null;
+        if(tactical!=null&&tactical.joystickEnabled()){camera.endTouch();return true;}
         if(surfaceCallbacks != null)
             surfaceCallbacks.onTouch(event);
 

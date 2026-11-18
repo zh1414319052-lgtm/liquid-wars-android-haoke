@@ -221,6 +221,7 @@ public class GameClientActivity extends LocalizedActivity implements Client.Clie
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){com.xenris.liquidwarsos.JoystickOverlay stick=findViewById(R.id.joystick_overlay);if(stick!=null&&stick.back())return true;}
         if((keyCode == KeyEvent.KEYCODE_BACK) && !gameFinished) {
             DialogInterface.OnClickListener clicker = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {

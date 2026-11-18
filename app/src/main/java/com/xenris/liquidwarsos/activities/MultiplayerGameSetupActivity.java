@@ -66,6 +66,7 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
     private TextView nametv;
     private int myID = 0;
     private boolean roomVisible;
+    private boolean settingsRestored;
     private volatile boolean startingMatch;
     private boolean bluetoothRoom;
     private boolean offerVisibility;
@@ -81,8 +82,11 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.multi_game_setup);
         StaticBits.init();
+        StaticBits.publicName=com.xenris.liquidwarsos.SetupPreferences.store(this).getString("room.name",StaticBits.publicName);
         refreshMapImage();
         initSpinners();
+        com.xenris.liquidwarsos.SetupPreferences.restore(this,false);
+        settingsRestored=true;
         initButtons();
         com.xenris.liquidwarsos.OperationMode.bind(this,true,()->{if(roomServer!=null)roomServer.sendToAll(StaticBits.SET_OPERATIONS_MODE,StaticBits.operationsMode);});
         com.xenris.liquidwarsos.ui.DifficultyPicker.bind(this, true, this::difficultyChanged);
@@ -203,6 +207,7 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
                     String name = LanRoom.cleanName(nameEditText.getText().toString());
                     if((name.length() > 0) && (!baseRoomName().equals(name))) {
                         StaticBits.publicName = name;
+                        com.xenris.liquidwarsos.SetupPreferences.store(MultiplayerGameSetupActivity.this).edit().putString("room.name",name).apply();
                         ServerFinder.stopSharing();
                         updateRoomAdvertisement();
                         byte[] nameBytes = roomName().getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -326,19 +331,18 @@ public class MultiplayerGameSetupActivity extends LocalizedActivity implements O
         if(spinnerId == R.id.map_spinner) {
             StaticBits.map = com.xenris.liquidwarsos.MapCatalog.mapIdForSelection(pos);
             int m = mapSpinner.getSelectedItemPosition();
-            roomServer.sendToAll(StaticBits.SET_MAP, pos);
+            if(roomServer!=null)roomServer.sendToAll(StaticBits.SET_MAP, pos);
             refreshMapImage();
         } else if(spinnerId == R.id.timeout_spinner) {
             StaticBits.timeLimit = Util.intToTime(pos);
             int t = timeoutSpinner.getSelectedItemPosition();
-            roomServer.sendToAll(StaticBits.SET_TIME_LIMIT, pos);
+            if(roomServer!=null)roomServer.sendToAll(StaticBits.SET_TIME_LIMIT, pos);
         } else if(spinnerId == R.id.teamsize_spinner) {
-            if(view != null) {
-                StaticBits.dotsPerTeam = Integer.parseInt(((TextView)view).getText() + "");
-            }
-            roomServer.sendToAll(StaticBits.SET_TEAM_SIZE, StaticBits.dotsPerTeam);
-        roomServer.sendToAll(StaticBits.SET_OPERATIONS_MODE,StaticBits.operationsMode);
+            StaticBits.dotsPerTeam = Integer.parseInt(String.valueOf(parent.getItemAtPosition(pos)));
+            if(roomServer!=null){roomServer.sendToAll(StaticBits.SET_TEAM_SIZE, StaticBits.dotsPerTeam);
+        roomServer.sendToAll(StaticBits.SET_OPERATIONS_MODE,StaticBits.operationsMode);}
         }
+        if(settingsRestored)com.xenris.liquidwarsos.SetupPreferences.remember(this,spinnerId);
     }
 
     @Override

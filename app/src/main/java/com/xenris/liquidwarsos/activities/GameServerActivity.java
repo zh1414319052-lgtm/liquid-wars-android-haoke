@@ -381,13 +381,14 @@ public class GameServerActivity extends LocalizedActivity implements Server.Serv
         synchronized (xs) {
             int team = clientIdToPlayerNumber(0);
             if (team >= 0) {
-                orders.clear(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
+                orders.clearMovement(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
             }
         }
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){com.xenris.liquidwarsos.JoystickOverlay stick=findViewById(R.id.joystick_overlay);if(stick!=null&&stick.back())return true;}
         if((keyCode == KeyEvent.KEYCODE_BACK) && !gameFinished) {
             DialogInterface.OnClickListener clicker = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {

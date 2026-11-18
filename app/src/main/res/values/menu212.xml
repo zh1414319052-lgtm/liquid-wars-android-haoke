@@ -15,7 +15,7 @@
     <string name="notes_close">Close</string>
     <string name="notes_first_only">Shown once for this version. Reopen from “What’s new”.</string>
     <string name="notes_changes">This update</string>
-    <string name="notes_changes_body">• A redesigned, aligned main menu with grouped game modes.\n• Support the game from the menu; contributions support development and a possible future server budget. Public online play is currently unavailable.\n• Particle combat sounds are removed. Black hole and item sounds remain.</string>
+    <string name="notes_changes_body">• Both larger sticks control the same follow point. Map touches do not command in stick mode.\n• Use Settings beside Help to resize, reposition and adjust stick sensitivity, then save or restore defaults.\n• Settings persist across matches, restarts and in-place app updates; existing game rules are unchanged.</string>
     <string name="notes_tips">Item tips · classic and 3D</string>
     <string name="notes_freeze">Freeze — tap to freeze every enemy for 10 seconds. No target selection needed.</string>
     <string name="notes_cleanse">Cleanse — works even while frozen. Immediately unfreezes your army and removes black hole attraction.</string>

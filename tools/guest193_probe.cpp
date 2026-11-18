@@ -14,6 +14,11 @@ extern "C" JNIEXPORT void JNICALL Java_com_xenris_liquidwarsos_Audio206ProbeTest
 extern "C" JNIEXPORT void JNICALL Java_com_xenris_liquidwarsos_Classic193VisualTest_fixture(JNIEnv*,jclass,jint mode){
  std::lock_guard<std::mutex> guard(nativeStateMutex);if(!state||state->expedition)return;auto& s=*state;auto& i=*s.items;
  if(mode==0){i.stock[0]={2,2};i.ready[0]={0,0};i.nextWave=INT32_MAX;for(int t=0;t<6;t++){i.until[t].fill(0);i.immunity[t]=0;s.alliances[t]=t;}}
+ else if(mode==4){
+  // Isolated UI scenario: prevent AI eliminating a seat while layout is edited.
+  // Only the instrumentation APK links this fixture; shipped game is unchanged.
+  for(int t=0;t<s.teamCount;t++)i.until[t][Items::INVINCIBLE]=i.elapsed+120000;
+ }
  else if(mode==1){i.thaw(s,1,0);i.freezeEnemies(s,1,Items::FREEZE_MS);}
  else if(mode==3){
   Dot* attacker=nullptr;Dot* defender=nullptr;

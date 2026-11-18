@@ -43,6 +43,7 @@ import java.io.IOException;
 
 public class SinglePlayerGameSetupActivity extends LocalizedActivity implements OnItemSelectedListener, OnLongClickListener {
     private boolean startingMatch;
+    private boolean settingsRestored;
     private boolean largeMode(){return getIntent().getBooleanExtra("largeMode",false);}
 
     private Spinner teamSpinner;
@@ -59,6 +60,8 @@ public class SinglePlayerGameSetupActivity extends LocalizedActivity implements 
         if(largeMode()){StaticBits.map=50;((TextView)findViewById(R.id.setup_title)).setText(R.string.large_map_mode);((TextView)findViewById(R.id.setup_hint)).setText(R.string.large_map_hint);((TextView)findViewById(R.id.map_count_hint)).setText(R.string.large_map_hint);}
         refreshMapImage();
         initSpinners();
+        com.xenris.liquidwarsos.SetupPreferences.restore(this,largeMode());
+        settingsRestored=true;
         initButtons();
         com.xenris.liquidwarsos.OperationMode.bind(this,true,null);
         com.xenris.liquidwarsos.ui.DifficultyPicker.bind(this, false, null);
@@ -190,10 +193,9 @@ public class SinglePlayerGameSetupActivity extends LocalizedActivity implements 
             else if(pos == 6)
                 StaticBits.timeLimit = 60*60*24*23;
         } else if(spinnerId == R.id.teamsize_spinner) {
-            if(view != null) {
-                StaticBits.dotsPerTeam = Integer.parseInt(((TextView)view).getText() + "");
-            }
+            StaticBits.dotsPerTeam = Integer.parseInt(String.valueOf(parent.getItemAtPosition(pos)));
         }
+        if(settingsRestored)com.xenris.liquidwarsos.SetupPreferences.remember(this,spinnerId);
     }
 
     @Override

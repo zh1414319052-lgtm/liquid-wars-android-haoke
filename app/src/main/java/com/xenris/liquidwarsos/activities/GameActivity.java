@@ -372,7 +372,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
         if (spectator || !running || gameFinished) return;
         synchronized (xs) {
             int team = StaticBits.team;
-            orders.clear(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
+            orders.clearMovement(team);TouchTargets.update(event, myGLSurfaceView.getWidth(), myGLSurfaceView.getHeight(), xs[team], ys[team],myGLSurfaceView.camera);((com.xenris.liquidwarsos.ItemOverlay)findViewById(R.id.item_overlay)).noteTargets(xs[team],ys[team]);
         }
     }
 
@@ -388,6 +388,7 @@ public class GameActivity extends LocalizedActivity implements Runnable, MyGLSur
 
     /** Shared pause/leave action, including embedded renderers that consume keys. */
     public void requestLeaveMatch() {
+        com.xenris.liquidwarsos.JoystickOverlay stick=findViewById(R.id.joystick_overlay);if(stick!=null&&stick.back())return;
             com.xenris.liquidwarsos.ExpeditionOverlay expeditionUi=findViewById(R.id.expedition_overlay);
             if(expeditionUi!=null&&expeditionUi.back())return;
             if(gameFinished||lostGame){finish();return;}

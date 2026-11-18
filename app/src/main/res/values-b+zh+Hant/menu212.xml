@@ -11,7 +11,7 @@
     <string name="notes_close">关闭</string>
     <string name="notes_first_only">本版本首次启动时显示，可从主菜单“更新说明”再次查看。</string>
     <string name="notes_changes">本次调整</string>
-    <string name="notes_changes_body">• 重新设计主菜单，模式分组、按钮与底栏统一对齐。\n• 新增“支持游戏”入口，赞赏用于持续开发及未来服务器预算；目前尚未开通公网联机。\n• 取消粒子互相吞噬的声音，保留黑洞和道具音效。</string>
+    <string name="notes_changes_body">• 左右加大摇杆共用原跟随触点，摇杆模式下地图点击不再指挥粒子。\n• 帮助右侧「设置」可调节摇杆大小与灵敏度、拖动位置，支持保存、取消与恢复默认。\n• 大小、位置与灵敏度跨对局和覆盖升级保存，现有玩法保持不变。</string>
     <string name="notes_tips">道具使用技巧 · 经典与3D通用</string>
     <string name="notes_freeze">时间冻结：点击后冻结所有敌方行动10秒，无需指定目标。</string>
     <string name="notes_cleanse">净化：被冻住也能使用，立即解除自己的冻结，并解除黑洞引力。建议留一个应急。</string>

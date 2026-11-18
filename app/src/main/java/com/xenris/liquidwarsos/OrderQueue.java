@@ -13,10 +13,12 @@ public final class OrderQueue {
    if(y[0]/4==OrderProtocol.FOLLOW&&last!=null&&last[1][0]==y[0]&&last[1][1]==y[1])pending[team].removeLast();
    if(pending[team].size()>=512)return false;pending[team].add(new short[][]{x.clone(),y.clone()});
   }
-  else{pending[team].clear();System.arraycopy(x,0,liveX[team],0,5);System.arraycopy(y,0,liveY[team],0,5);}return true;
+  else{clearMovement(team);System.arraycopy(x,0,liveX[team],0,5);System.arraycopy(y,0,liveY[team],0,5);}return true;
  }
  public void apply(short[][] x,short[][] y){for(int t=0;t<pending.length;t++)if(!pending[t].isEmpty()){short[][] p=pending[t].remove();System.arraycopy(p[0],0,x[t],0,5);System.arraycopy(p[1],0,y[t],0,5);}}
  public void clear(){for(ArrayDeque<short[][]> p:pending)p.clear();}
  public void clear(int team){if(team>=0&&team<pending.length)pending[team].clear();}
+ /** A new follow position supersedes routes, never a queued item activation. */
+ public void clearMovement(int team){if(team>=0&&team<pending.length)pending[team].removeIf(p->p[1][0]/4!=OrderProtocol.ACTIVE);}
  public int size(int t){return pending[t].size();}
 }

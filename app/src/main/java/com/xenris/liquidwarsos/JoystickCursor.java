@@ -12,8 +12,12 @@ public final class JoystickCursor {
  public void clear(){release();ready=false;}
  public boolean ready(){return ready;}public float x(){return x;}public float y(){return y;}
  public boolean advance(float dt){
+  return advance(dt,1f);
+ }
+ public boolean advance(float dt,float sensitivity){
   float n=(float)Math.hypot(ax,ay);if(!ready||!held||!Float.isFinite(dt)||!Float.isFinite(n)||dt<=0||n<=DEAD_ZONE)return false;
-  float strength=(Math.min(1,n)-DEAD_ZONE)/(1-DEAD_ZONE),travel=SPEED*Math.min(.05f,dt)*strength*strength;
+  float gain=Float.isFinite(sensitivity)?Math.max(.5f,Math.min(2f,sensitivity)):1f;
+  float strength=(Math.min(1,n)-DEAD_ZONE)/(1-DEAD_ZONE),travel=SPEED*gain*Math.min(.05f,dt)*strength*strength;
   float oldX=x,oldY=y;x=clamp(x+ax/n*travel,maxX);y=clamp(y+ay/n*travel,maxY);return oldX!=x||oldY!=y;
  }
 }

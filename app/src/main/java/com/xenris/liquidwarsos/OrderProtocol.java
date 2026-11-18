@@ -3,7 +3,7 @@ package com.xenris.liquidwarsos;
 import java.util.*;
 /** Pure input codec, bounded world-space polyline reduction; no simulation writes. */
 public final class OrderProtocol {
- public static final int BEGIN=1,APPEND=2,COMMIT=3,STOP=4,SPLIT=5,MERGE=6,FOLLOW=7,ALL=3,MAX_POINTS=24;
+ public static final int BEGIN=1,APPEND=2,COMMIT=3,STOP=4,SPLIT=5,MERGE=6,FOLLOW=7,ACTIVE=8,ALL=3,MAX_POINTS=24;
  private int serial;
  public short[][] packet(int op,int group,int epoch,List<int[]> points,int from){
   short[] x=new short[5],y=new short[5];Arrays.fill(x,(short)-1);Arrays.fill(y,(short)-1);

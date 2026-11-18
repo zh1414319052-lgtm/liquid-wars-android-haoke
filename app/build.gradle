@@ -24,8 +24,8 @@ android {
         manifestPlaceholders = [appLabel: project.hasProperty('gardenQa186') ? '@string/qa_app_name' : '@string/app_name']
         minSdk 26
         targetSdk 34
-        versionName "2.12"
-        versionCode 85
+        versionName "2.13"
+        versionCode 86
         resValue "string", "ui_version", versionName
         resourceConfigurations += ["en", "zh", "b+zh+Hant"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -65,6 +65,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     testOptions { unitTests.includeAndroidResources = true }
+    if (project.hasProperty('joystick213Probe')) {
+        sourceSets.androidTest.jniLibs.srcDir 'src/androidTest/guest193Jni'
+    }
     packagingOptions {
         resources {
             excludes += ['META-INF/DEPENDENCIES.txt', 'META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/MANIFEST.MF', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/ASL2.0']
